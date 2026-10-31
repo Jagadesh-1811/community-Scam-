@@ -134,6 +134,27 @@ def calculate_message_score(state: CheckState) -> Tuple[int, str, Dict[str, int]
     elif scores.get("sextortion", 0) >= 3 and raw_score < 75:
         raw_score = 75
         floors.append("sextortion_pattern")
+    elif scores.get("upi-refund-qr", 0) >= 3 and raw_score < 65:
+        raw_score = 65
+        floors.append("upi_refund_pattern")
+    elif scores.get("loan-app-harassment", 0) >= 3 and raw_score < 65:
+        raw_score = 65
+        floors.append("loan_harassment_pattern")
+    elif scores.get("otp-call", 0) >= 3 and raw_score < 65:
+        raw_score = 65
+        floors.append("otp_phishing_pattern")
+    elif scores.get("courier-customs", 0) >= 3 and raw_score < 68:
+        raw_score = 68
+        floors.append("courier_customs_pattern")
+    elif scores.get("lottery-prize", 0) >= 3 and raw_score < 62:
+        raw_score = 62
+        floors.append("lottery_prize_pattern")
+    elif scores.get("investment-group", 0) >= 3 and raw_score < 62:
+        raw_score = 62
+        floors.append("investment_fraud_pattern")
+    elif scores.get("fake-customer-care", 0) >= 3 and raw_score < 62:
+        raw_score = 62
+        floors.append("fake_customer_care_pattern")
 
     # Floor C: any KNOWN_SCAM identifier: score >= 61
     if has_known_scam:

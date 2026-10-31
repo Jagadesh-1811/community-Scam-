@@ -28,35 +28,43 @@ CORE_SIGNATURES = {
     ],
     "upi-refund-qr": [
         "scan qr", "qr code", "upi collect", "olx payment", "enter upi pin", "army officer buying",
-        "advance payment qr", "refund approved", "receive payment qr"
+        "advance payment qr", "refund approved", "receive payment qr", "refund pending",
+        "refund amount", "scan to receive", "scan and receive", "pending refund"
     ],
     "loan-app-harassment": [
         "instant loan", "loan sanction", "pre-approved loan", "loan repayment", "morphed photo",
-        "loan app", "processing fee loan", "repay overdue loan", "contacts call"
+        "loan app", "processing fee loan", "repay overdue loan", "contacts call",
+        "processing fee", "pre approved", "loan approved", "loan offer"
     ],
     "courier-customs": [
         "fedex", "dhl", "customs clearance", "parcel detained", "contraband seized", "airport customs",
-        "taiwan parcel", "customs penalty", "package hold"
+        "taiwan parcel", "customs penalty", "package hold", "customs department", "parcel seized",
+        "parcel held", "delivery detained"
     ],
     "sextortion": [
         "video call recording", "leak video", "compromised video", "blackmail", "facebook relatives",
-        "nude video", "whatsapp video recording", "viral video"
+        "nude video", "whatsapp video recording", "viral video", "leak to contacts",
+        "recording leaked", "pay or video"
     ],
     "lottery-prize": [
         "lottery winner", "kbc lucky draw", "won 25 lakh", "claim prize", "car winner",
-        "lucky draw", "congratulations you won", "cash prize awarded"
+        "lucky draw", "congratulations you won", "cash prize awarded", "lottery prize",
+        "prize winner", "won prize", "prize claim", "lucky winner", "prize money"
     ],
     "fake-customer-care": [
         "customer care number", "helpline number", "toll free support", "refund desk",
-        "support helpline", "reach customer care", "toll-free"
+        "support helpline", "reach customer care", "toll-free", "customer helpline",
+        "service number", "support number", "call our helpline"
     ],
     "otp-call": [
         "tell me the otp", "share one time password", "read out the 6 digit code",
-        "verification code received", "share otp", "confirm your otp"
+        "verification code received", "share otp", "confirm your otp", "otp received",
+        "send otp", "provide otp", "one time password", "6 digit otp"
     ],
     "investment-group": [
         "stock tips", "guaranteed profit", "crypto investment", "institutional trading",
-        "forex signals", "daily profit", "whatsapp trading group", "vip investment"
+        "forex signals", "daily profit", "whatsapp trading group", "vip investment",
+        "500 percent", "guaranteed return", "500% profit", "trading signal", "high return investment"
     ]
 }
 
