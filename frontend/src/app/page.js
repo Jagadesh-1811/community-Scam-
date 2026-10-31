@@ -17,7 +17,6 @@ import {
 import LookupModal from "./components/LookupModal";
 import ReportModal from "./components/ReportModal";
 import DisputeModal from "./components/DisputeModal";
-import AdminQueueModal from "./components/AdminQueueModal";
 import PWAInstallBanner from "./components/PWAInstallBanner";
 
 const ScamMap = dynamic(() => import("./components/ScamMap"), {
@@ -41,10 +40,8 @@ export default function DashboardPage() {
   const [isLookupOpen, setIsLookupOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isDisputeOpen, setIsDisputeOpen] = useState(false);
-  const [isAdminQueueOpen, setIsAdminQueueOpen] = useState(false);
   const [disputeInitialData, setDisputeInitialData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [backendOnline, setBackendOnline] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState("");
 
   // Minimal and Maximal view states
@@ -58,10 +55,8 @@ export default function DashboardPage() {
       if (mapRes.ok) {
         const mapData = await mapRes.json();
         setClusters(mapData.clusters || []);
-        setBackendOnline(true);
       }
     } catch (err) {
-      setBackendOnline(false);
       setClusters([]);
     } finally {
       setLastRefreshed(new Date().toLocaleTimeString());
@@ -71,12 +66,6 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchData();
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("admin") === "true") {
-        setIsAdminQueueOpen(true);
-      }
-    }
   }, []);
 
   const totalReports = clusters.reduce((acc, c) => acc + (c.report_count || 0), 0);
@@ -410,14 +399,6 @@ export default function DashboardPage() {
           });
         }}
         onSuccess={() => {
-          fetchData();
-        }}
-      />
-      <AdminQueueModal
-        isOpen={isAdminQueueOpen}
-        onClose={() => setIsAdminQueueOpen(false)}
-        apiBaseUrl={API_BASE_URL}
-        onDisputeDecided={() => {
           fetchData();
         }}
       />

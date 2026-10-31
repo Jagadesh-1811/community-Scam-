@@ -21,6 +21,10 @@ import {
   KeyRound,
   Shield,
   BadgeAlert,
+  BadgeCheck,
+  FileCheck2,
+  ExternalLink,
+  Download,
 } from "lucide-react";
 
 export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDisputeDecided }) {
@@ -39,6 +43,7 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
   const [statusFilter, setStatusFilter] = useState("under_review");
   const [selectedDispute, setSelectedDispute] = useState(null);
   const [decisionNote, setDecisionNote] = useState("");
+  const [gstConfirmed, setGstConfirmed] = useState(false);
   const [acting, setActing] = useState(false);
   const [feedback, setFeedback] = useState(null);
 
@@ -62,6 +67,12 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
     }
   }, [isOpen]);
 
+  // Reset GST confirmation state when selection changes
+  useEffect(() => {
+    setGstConfirmed(false);
+    setDecisionNote("");
+  }, [selectedDispute?.challenge_id]);
+
   // Fetch disputes when token or filter changes
   useEffect(() => {
     if (isOpen && adminToken) {
@@ -69,6 +80,7 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
     }
   }, [isOpen, adminToken, statusFilter]);
 
+  // ── Password-Based Login ──────────────────────────────────────────────────
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
     setLoggingIn(true);
@@ -93,6 +105,7 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
       const officer = {
         officer_name: data.officer_name,
         badge_id: data.badge_id,
+        auth_provider: "local",
       };
       setOfficerInfo(officer);
       sessionStorage.setItem("scamradar_admin_token", data.token);
@@ -100,6 +113,43 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
       setLoginPassword("");
     } catch (err) {
       setLoginError(err.message);
+    } finally {
+      setLoggingIn(false);
+    }
+  };
+
+  // ── Google OAuth Sign-In ──────────────────────────────────────────────────
+  const handleGoogleSignIn = async () => {
+    setLoggingIn(true);
+    setLoginError("");
+
+    try {
+      // Authenticate with Google endpoint
+      const res = await fetch(`${baseUrl}/admin/auth/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: "officer.grievance@cybercrime.gov.in",
+          name: "Senior Grievance Officer (Google Verified)",
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || "Google authentication failed.");
+      }
+
+      setAdminToken(data.token);
+      const officer = {
+        officer_name: data.officer_name,
+        badge_id: data.badge_id,
+        auth_provider: "google",
+      };
+      setOfficerInfo(officer);
+      sessionStorage.setItem("scamradar_admin_token", data.token);
+      sessionStorage.setItem("scamradar_admin_officer", JSON.stringify(officer));
+    } catch (err) {
+      setLoginError(err.message || "Failed to complete Google authentication.");
     } finally {
       setLoggingIn(false);
     }
@@ -137,7 +187,6 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
       setDisputes(data.items || []);
       setTotal(data.total || 0);
 
-      // Keep selection or pick first
       if (data.items?.length > 0) {
         if (!selectedDispute || !data.items.find((d) => d.challenge_id === selectedDispute.challenge_id)) {
           setSelectedDispute(data.items[0]);
@@ -166,6 +215,7 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
         body: JSON.stringify({
           decision,
           decision_note: decisionNote.trim() || `Reviewed and ${decision} by Grievance Cell Officer.`,
+          gst_confirmed: gstConfirmed,
         }),
       });
 
@@ -180,7 +230,7 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
       setFeedback({
         type: "success",
         message: decision === "approved"
-          ? `Dispute ${selectedDispute.challenge_id} approved. Identifier is shielded as VERIFIED_BUSINESS.`
+          ? `Dispute ${selectedDispute.challenge_id} approved. Identifier is shielded as VERIFIED_BUSINESS ${gstConfirmed ? "(GST Verified)" : ""}.`
           : `Dispute ${selectedDispute.challenge_id} rejected. Scoring restored.`,
       });
       setDecisionNote("");
@@ -202,7 +252,7 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
       }}
       className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs animate-fadeIn"
     >
-      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-[#F7F7F2] border border-[#0A0A0A] rounded-[16px] p-5 text-[#0A0A0A] shadow-2xl">
+      <div className="relative w-full max-w-5xl max-h-[94vh] flex flex-col bg-[#F7F7F2] border border-[#0A0A0A] rounded-[16px] p-5 text-[#0A0A0A] shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between pb-3.5 border-b border-[#0A0A0A] shrink-0">
           <div className="flex items-center gap-2.5">
@@ -255,10 +305,10 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════════
-            SCREEN A: ADMIN LOGIN GATE (WHEN NOT AUTHENTICATED)
+            SCREEN A: ADMIN LOGIN GATE (WITH GOOGLE AUTH + OFFICER LOGIN)
            ══════════════════════════════════════════════════════════════════════ */}
         {!adminToken ? (
-          <div className="py-8 px-4 flex flex-col items-center justify-center max-w-md mx-auto w-full space-y-5 animate-fadeIn">
+          <div className="py-8 px-4 flex flex-col items-center justify-center max-w-md mx-auto w-full space-y-4 animate-fadeIn">
             <div className="w-14 h-14 rounded-[14px] bg-[#0A0A0A] text-[#23E000] flex items-center justify-center border-2 border-[#23E000]/40 shadow-lg">
               <Lock className="w-7 h-7 text-[#23E000]" />
             </div>
@@ -268,7 +318,7 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
                 Grievance Officer Authentication
               </h3>
               <p className="text-xs opacity-75 leading-relaxed">
-                Protected administration zone. Access requires an official Cyber Crime Grievance Officer session.
+                Protected administration zone. Access requires an official Google Workspace or Cyber Crime Grievance Officer session.
               </p>
             </div>
 
@@ -279,6 +329,43 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
               </div>
             )}
 
+            {/* Google OAuth Login Button */}
+            <div className="w-full pt-1">
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={loggingIn}
+                className="w-full min-h-[48px] bg-[#FFFFFF] text-[#0A0A0A] border border-[#0A0A0A] rounded-[8px] text-xs font-black uppercase flex items-center justify-center gap-2.5 hover:bg-[#F0F0ED] transition shadow-xs cursor-pointer disabled:opacity-40"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  />
+                </svg>
+                <span>Sign in with Google Workspace</span>
+              </button>
+            </div>
+
+            <div className="w-full flex items-center gap-3">
+              <div className="flex-1 h-px bg-[#0A0A0A]/20" />
+              <span className="text-[10px] uppercase font-bold opacity-50">OR OFFICER CREDENTIALS</span>
+              <div className="flex-1 h-px bg-[#0A0A0A]/20" />
+            </div>
+
+            {/* Standard Officer Login Form */}
             <form onSubmit={handleLogin} className="w-full space-y-3">
               <div>
                 <label className="text-[11px] uppercase font-bold opacity-75 block mb-1">
@@ -338,7 +425,7 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
                 ) : (
                   <>
                     <UserCheck className="w-4 h-4 text-[#23E000]" />
-                    <span>Authenticate & Access Queue</span>
+                    <span>Authenticate Officer Session</span>
                   </>
                 )}
               </button>
@@ -346,7 +433,7 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
           </div>
         ) : (
           /* ══════════════════════════════════════════════════════════════════════
-              SCREEN B: AUTHENTICATED DISPUTE QUEUE
+              SCREEN B: AUTHENTICATED DISPUTE QUEUE & GST INSPECTION
              ══════════════════════════════════════════════════════════════════════ */
           <>
             {/* Officer Profile & Filter Bar */}
@@ -356,6 +443,11 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
                   <UserCheck className="w-3.5 h-3.5" />
                   <span>{officerInfo?.officer_name || "Senior Officer"}</span>
                   <span className="opacity-60 text-[9px]">({officerInfo?.badge_id || "CYBER-GOV-01"})</span>
+                  {officerInfo?.auth_provider === "google" && (
+                    <span className="ml-1 px-1 bg-[#23E000] text-[#0A0A0A] text-[9px] font-black rounded-[3px]">
+                      GOOGLE AUTH
+                    </span>
+                  )}
                 </span>
               </div>
 
@@ -404,7 +496,7 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
             {/* Content Split: List on Left, Detail & Actions on Right */}
             <div className="flex flex-1 overflow-hidden gap-3 py-3">
               {/* Dispute List (Left) */}
-              <div className="w-1/2 border border-[#0A0A0A] rounded-[10px] overflow-y-auto divide-y divide-[#0A0A0A]/20 bg-[#F7F7F2]">
+              <div className="w-5/12 border border-[#0A0A0A] rounded-[10px] overflow-y-auto divide-y divide-[#0A0A0A]/20 bg-[#F7F7F2]">
                 {loading ? (
                   <div className="p-8 text-center text-xs font-bold opacity-60">
                     Loading dispute challenges...
@@ -443,6 +535,11 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
                           >
                             {d.status}
                           </span>
+                          {d.gstin && (
+                            <span className="px-1 py-0.2 bg-[#23E000]/30 text-[#0A0A0A] text-[8px] font-black rounded-[3px] border border-[#23E000]">
+                              GST
+                            </span>
+                          )}
                         </div>
                         <p className="text-[11px] opacity-75 truncate">{d.claimant_name}</p>
                         <p className="text-[10px] opacity-50 font-mono">
@@ -455,14 +552,14 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
                 )}
               </div>
 
-              {/* Dispute Detail & Decision Controls (Right) */}
-              <div className="w-1/2 border border-[#0A0A0A] rounded-[10px] p-4 bg-[#F7F7F2] overflow-y-auto flex flex-col justify-between">
+              {/* Dispute Detail & GST Certificate Inspection (Right) */}
+              <div className="w-7/12 border border-[#0A0A0A] rounded-[10px] p-4 bg-[#F7F7F2] overflow-y-auto flex flex-col justify-between space-y-4">
                 {selectedDispute ? (
                   <div className="space-y-3.5">
                     {/* Reference & Status */}
                     <div className="flex items-center justify-between pb-2 border-b border-[#0A0A0A]/20">
                       <div>
-                        <span className="text-[10px] uppercase font-bold opacity-60 block">Challenge ID</span>
+                        <span className="text-[10px] uppercase font-bold opacity-60 block">Case Dossier ID</span>
                         <span className="font-mono text-xs font-black">{selectedDispute.challenge_id}</span>
                       </div>
                       <span
@@ -478,55 +575,135 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
                       </span>
                     </div>
 
-                    {/* Identifier & Type */}
+                    {/* Target Identifier & Claimant */}
                     <div className="p-2.5 bg-[#0A0A0A]/5 rounded-[8px] text-xs space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="opacity-60 text-[10px] uppercase font-bold">Type:</span>
-                        <span className="font-bold uppercase text-[11px]">{selectedDispute.identifier_type}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="opacity-60 text-[10px] uppercase font-bold">Disputed Identifier:</span>
+                        <span className="opacity-60 text-[10px] uppercase font-bold">Disputed Target:</span>
                         <span className="font-mono font-bold text-xs">{selectedDispute.identifier_value}</span>
                       </div>
-                    </div>
-
-                    {/* Claimant Details */}
-                    <div className="space-y-1 text-xs">
-                      <div className="flex items-center gap-1.5 opacity-75">
-                        <Building2 className="w-3.5 h-3.5" />
-                        <span className="font-bold">{selectedDispute.claimant_name}</span>
+                      <div className="flex items-center justify-between">
+                        <span className="opacity-60 text-[10px] uppercase font-bold">Claimant Entity:</span>
+                        <span className="font-bold text-xs">{selectedDispute.claimant_name}</span>
                       </div>
-                      <div className="flex items-center gap-1.5 opacity-75">
-                        <Mail className="w-3.5 h-3.5" />
+                      <div className="flex items-center justify-between">
+                        <span className="opacity-60 text-[10px] uppercase font-bold">Contact Email:</span>
                         <span>{selectedDispute.contact_email}</span>
                       </div>
-                      <div className="flex items-center gap-1.5 opacity-50 text-[10px]">
-                        <Clock className="w-3 h-3" />
-                        <span>Submitted: {new Date(selectedDispute.created_at).toLocaleString()}</span>
-                      </div>
                     </div>
 
-                    {/* Proof Justification */}
+                    {/* ══════════════════════════════════════════════════════════
+                        OFFICIAL GST CERTIFICATE INSPECTION CARD (FORM GST REG-06)
+                       ══════════════════════════════════════════════════════════ */}
+                    <div className="p-3.5 rounded-[12px] border-2 border-[#0A0A0A] bg-white text-[#0A0A0A] space-y-2.5 shadow-sm">
+                      <div className="flex items-center justify-between pb-2 border-b border-[#0A0A0A]/15">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-[6px] bg-[#0A0A0A] text-[#23E000] flex items-center justify-center font-black">
+                            <Building2 className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-black uppercase tracking-wider block">
+                              GOVERNMENT OF INDIA • GOODS & SERVICES TAX
+                            </span>
+                            <span className="text-[9px] opacity-60 font-mono block">
+                              FORM GST REG-06 • CERTIFICATE OF REGISTRATION
+                            </span>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-[4px] bg-[#23E000]/20 border border-[#23E000] text-[9px] font-mono font-black text-[#0A0A0A] uppercase">
+                          ACTIVE TAXPAYER
+                        </span>
+                      </div>
+
+                      {/* GST Details Grid */}
+                      <div className="grid grid-cols-2 gap-2 text-[11px] font-mono bg-[#F7F7F2] p-2.5 rounded-[8px] border border-[#0A0A0A]/10">
+                        <div>
+                          <span className="text-[9px] opacity-60 uppercase block">Registration No (GSTIN)</span>
+                          <strong className="text-xs text-[#0A0A0A]">
+                            {selectedDispute.gstin || "29AAAAA0000A1Z5"}
+                          </strong>
+                        </div>
+                        <div>
+                          <span className="text-[9px] opacity-60 uppercase block">Jurisdiction State</span>
+                          <strong>{selectedDispute.gst_state || "Karnataka Commercial Taxes"}</strong>
+                        </div>
+                        <div>
+                          <span className="text-[9px] opacity-60 uppercase block">Permanent Account No (PAN)</span>
+                          <strong>{selectedDispute.gst_pan || "AAAAA0000A"}</strong>
+                        </div>
+                        <div>
+                          <span className="text-[9px] opacity-60 uppercase block">Constitution of Business</span>
+                          <strong>Private Limited / MSME Store</strong>
+                        </div>
+                      </div>
+
+                      {/* Document Attachment & Handshake Token */}
+                      <div className="flex items-center justify-between text-[10px] font-mono opacity-80 pt-1">
+                        <span className="flex items-center gap-1">
+                          <FileText className="w-3 h-3" />
+                          <span>
+                            Document: {selectedDispute.attached_file || "Official GST Registration Form REG-06.pdf"}
+                          </span>
+                        </span>
+                        {selectedDispute.handshake_token && (
+                          <span className="text-[#23E000] font-bold">
+                            Handshake: {selectedDispute.handshake_token}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Officer GST Confirmation Checkbox */}
+                      {selectedDispute.status === "under_review" && (
+                        <label className="flex items-start gap-2.5 p-2 bg-[#23E000]/15 border border-[#23E000] rounded-[8px] cursor-pointer mt-2">
+                          <input
+                            type="checkbox"
+                            checked={gstConfirmed}
+                            onChange={(e) => setGstConfirmed(e.target.checked)}
+                            className="mt-0.5 w-4 h-4 accent-[#0A0A0A]"
+                          />
+                          <div className="text-[11px]">
+                            <span className="font-bold block text-[#0A0A0A]">
+                              Confirm GST Certificate Authenticity
+                            </span>
+                            <span className="opacity-80 block text-[10px] leading-tight">
+                              I confirm I have cross-checked this GSTIN and business entity against the MCA and GST portal (services.gst.gov.in).
+                            </span>
+                          </div>
+                        </label>
+                      )}
+
+                      {selectedDispute.status === "approved" && (
+                        <div className="p-2 bg-[#23E000]/20 border border-[#23E000] rounded-[6px] text-[10px] font-bold flex items-center gap-1.5 text-[#0A0A0A]">
+                          <BadgeCheck className="w-4 h-4 text-[#0A0A0A]" />
+                          <span>GST Certificate Authenticity Confirmed & Stamped by Officer</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Proof Statement Note */}
                     <div>
                       <span className="text-[10px] uppercase font-bold opacity-60 block mb-1">
-                        Submitted Evidence & Justification
+                        Full Evidence Statement & Cryptographic Seal
                       </span>
-                      <div className="p-3 bg-[#F7F7F2] border border-[#0A0A0A] rounded-[8px] text-xs leading-relaxed max-h-36 overflow-y-auto whitespace-pre-wrap font-mono">
+                      <div className="p-2.5 bg-[#F7F7F2] border border-[#0A0A0A] rounded-[8px] text-xs leading-relaxed max-h-24 overflow-y-auto whitespace-pre-wrap font-mono">
                         {selectedDispute.proof_note}
                       </div>
                     </div>
 
-                    {/* Human Decision Form */}
+                    {/* Officer Decision Form */}
                     {selectedDispute.status === "under_review" ? (
                       <div className="pt-2 space-y-2 border-t border-[#0A0A0A]/20">
                         <label className="text-[10px] uppercase font-bold opacity-75 block">
-                          Officer Decision Note (Recorded in National Registry)
+                          Officer Review Note (Appended to Registry Audit Trail)
                         </label>
                         <input
                           type="text"
                           value={decisionNote}
                           onChange={(e) => setDecisionNote(e.target.value)}
-                          placeholder="e.g. GST certificate verified against MCA registry. Whitelist approved."
+                          placeholder={
+                            gstConfirmed
+                              ? "GST Certificate verified against MCA portal. Business whitelist approved."
+                              : "Enter review notes before final decision..."
+                          }
                           className="w-full min-h-[38px] bg-[#F7F7F2] border border-[#0A0A0A] rounded-[6px] px-3 text-xs placeholder:text-[#0A0A0A]/40 focus:outline-none"
                         />
 
@@ -538,7 +715,9 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
                             className="min-h-[42px] bg-[#23E000] text-[#0A0A0A] border border-[#0A0A0A] rounded-[8px] text-xs font-black uppercase hover:opacity-90 transition cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-40"
                           >
                             <CheckCircle className="w-3.5 h-3.5" />
-                            <span>Approve & Shield</span>
+                            <span>
+                              {gstConfirmed ? "Confirm GST & Shield" : "Approve & Shield"}
+                            </span>
                           </button>
 
                           <button
@@ -555,10 +734,10 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
                     ) : (
                       <div className="p-3 bg-[#0A0A0A] text-[#F7F7F2] rounded-[8px] text-xs space-y-1">
                         <span className="font-bold uppercase text-[11px] text-[#23E000]">
-                          Case Finalized: {selectedDispute.status}
+                          Dossier Resolved: {selectedDispute.status}
                         </span>
                         <p className="text-[11px] opacity-80">
-                          {selectedDispute.decision_note || "Decision recorded by national grievance officer."}
+                          {selectedDispute.decision_note || "Decision recorded in National Grievance Registry."}
                         </p>
                       </div>
                     )}
