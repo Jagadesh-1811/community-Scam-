@@ -1,0 +1,55 @@
+{
+  "scam_type": "courier-customs",
+  "en": [
+    {"term": "fedex parcel detained", "weight": 3},
+    {"term": "customs clearance penalty", "weight": 3},
+    {"term": "parcel seized at customs", "weight": 3},
+    {"term": "illegal contraband found in parcel", "weight": 3},
+    {"term": "parcel from taiwan or abroad", "weight": 2},
+    {"term": "drugs found in shipment", "weight": 3},
+    {"term": "dhl international package hold", "weight": 2},
+    {"term": "pay customs tax to release", "weight": 3},
+    {"term": "consignment holding charges", "weight": 2},
+    {"term": "fake gift parcel from uk", "weight": 3},
+    {"term": "customs duty transfer", "weight": 3},
+    {"term": "airport customs fine", "weight": 3},
+    {"term": "parcel tracking number blocked", "weight": 2},
+    {"term": "foreign currency inside package", "weight": 3},
+    {"term": "customs officer inspection fee", "weight": 2},
+    {"term": "mumbai airport cargo hold", "weight": 2},
+    {"term": "pay release fee or face arrest", "weight": 3},
+    {"term": "courier legal action notice", "weight": 2},
+    {"term": "undelivered package customs notice", "weight": 2},
+    {"term": "suspicious package under your aadhaar", "weight": 3},
+    {"term": "speed post customs charge", "weight": 2}
+  ],
+  "hi": [
+    {"term": "पार्सल सीमा शुल्क में फंसा", "weight": 3},
+    {"term": "कस्टम ड्यूटी जमा करें", "weight": 3},
+    {"term": "पार्सल में नशीली दवाएं मिली", "weight": 3},
+    {"term": "फेडेक्स पार्सल पकड़ा गया", "weight": 3},
+    {"term": "एयरपोर्ट कस्टम चार्ज", "weight": 2}
+  ],
+  "hinglish": [
+    {"term": "fedex parcel pakda gaya", "weight": 3},
+    {"term": "customs me parcel ruka hai", "weight": 3},
+    {"term": "parcel me drugs mile hai", "weight": 3},
+    {"term": "customs duty pay karo release ke liye", "weight": 3},
+    {"term": "airport customs charge", "weight": 2}
+  ],
+  "te": [
+    {"term": "కస్టమ్స్‌లో పార్శిల్ ఆగింది", "weight": 3},
+    {"term": "కస్టమ్స్ డ్యూటీ కట్టండి", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "ta": [
+    {"term": "சுங்கத்துறையில் பார்சல் சிக்கியது", "weight": 3},
+    {"term": "சுங்க வரி செலுத்தவும்", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "kn": [
+    {"term": "ಕಸ್ಟಮ್ಸ್‌ನಲ್ಲಿ ಪಾರ್ಸೆಲ್ ಸಿಲುಕಿದೆ", "weight": 3},
+    {"term": "ಕಸ್ಟಮ್ಸ್ ತೆರಿಗೆ ಪಾವತಿಸಿ", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ]
+}

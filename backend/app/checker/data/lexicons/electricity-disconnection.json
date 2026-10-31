@@ -1,0 +1,55 @@
+{
+  "scam_type": "electricity-disconnection",
+  "en": [
+    {"term": "electricity bill unpaid", "weight": 3},
+    {"term": "power will be disconnected tonight", "weight": 3},
+    {"term": "electricity disconnected at 9:30 pm", "weight": 3},
+    {"term": "call electricity officer immediately", "weight": 3},
+    {"term": "previous month bill not updated", "weight": 3},
+    {"term": "power cut notice", "weight": 3},
+    {"term": "contact electricity executive", "weight": 2},
+    {"term": "bescom power disconnection alert", "weight": 3},
+    {"term": "mahavitaran light cut notice", "weight": 3},
+    {"term": "download electricity bill apk", "weight": 3},
+    {"term": "install quicksupport to update bill", "weight": 3},
+    {"term": "pay 10 rupees token bill verification", "weight": 3},
+    {"term": "urgent power cut warning", "weight": 2},
+    {"term": "electricity supply terminate tonight", "weight": 3},
+    {"term": "subdivision officer electricity board", "weight": 2},
+    {"term": "consumer number pending disconnection", "weight": 2},
+    {"term": "electricity meter blocked", "weight": 2},
+    {"term": "power reconnection penalty", "weight": 2},
+    {"term": "bijli vibhag official message", "weight": 2},
+    {"term": "smart meter update mandatory", "weight": 2},
+    {"term": "call our electrical officer on this number", "weight": 3}
+  ],
+  "hi": [
+    {"term": "बिजली का बिल अपडेट नहीं हुआ", "weight": 3},
+    {"term": "आज रात 9:30 बजे बिजली काट दी जाएगी", "weight": 3},
+    {"term": "तुरंत बिजली अधिकारी से संपर्क करें", "weight": 3},
+    {"term": "पावर कट नोटिस", "weight": 3},
+    {"term": "बिजली विभाग सूचना", "weight": 2}
+  ],
+  "hinglish": [
+    {"term": "bijli ka bill update nahi hua", "weight": 3},
+    {"term": "aaj raat power cut ho jayegi", "weight": 3},
+    {"term": "light kat jayegi 9:30 baje", "weight": 3},
+    {"term": "officer ko turant call karo", "weight": 3},
+    {"term": "bescom electricity warning", "weight": 3}
+  ],
+  "te": [
+    {"term": "కరెంట్ బిల్లు చెల్లించలేదు", "weight": 3},
+    {"term": "ఈ రాత్రికే విద్యుత్ సరఫరా నిలిపివేయబడుతుంది", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "ta": [
+    {"term": "மின் கட்டணம் செலுத்தப்படவில்லை", "weight": 3},
+    {"term": "இன்றிரவு மின்சாரம் துண்டிக்கப்படும்", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "kn": [
+    {"term": "ವಿದ್ಯುತ್ ಬಿಲ್ ಪಾವತಿಸಿಲ್ಲ", "weight": 3},
+    {"term": "ಇಂದೇ ವಿದ್ಯುತ್ ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲಾಗುವುದು", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ]
+}

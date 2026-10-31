@@ -1,0 +1,55 @@
+{
+  "scam_type": "otp-call",
+  "en": [
+    {"term": "share the otp received", "weight": 3},
+    {"term": "read out the 6 digit verification code", "weight": 3},
+    {"term": "card verification code required", "weight": 3},
+    {"term": "bank manager calling for otp", "weight": 3},
+    {"term": "credit card reward points redemption otp", "weight": 3},
+    {"term": "tell otp to cancel debit transaction", "weight": 3},
+    {"term": "card limit increase verification code", "weight": 3},
+    {"term": "sim card upgrade otp", "weight": 3},
+    {"term": "aadhaar authentication code share", "weight": 3},
+    {"term": "one time password verification", "weight": 2},
+    {"term": "read sms code on phone", "weight": 3},
+    {"term": "automated voice asking for otp", "weight": 3},
+    {"term": "press 1 and enter otp", "weight": 3},
+    {"term": "security verification pin required", "weight": 2},
+    {"term": "block fraudulent charge share otp", "weight": 3},
+    {"term": "otp will reverse the deduction", "weight": 3},
+    {"term": "confirm transaction with otp", "weight": 2},
+    {"term": "expired card renewal otp", "weight": 2},
+    {"term": "rbi verification one time code", "weight": 3},
+    {"term": "telephone banking otp prompt", "weight": 2},
+    {"term": "do not cut call speak the otp", "weight": 3}
+  ],
+  "hi": [
+    {"term": "ओटीपी बताएं", "weight": 3},
+    {"term": "6 अंकों का कोड बताएं", "weight": 3},
+    {"term": "बैंक अधिकारी ओटीपी मांग रहा है", "weight": 3},
+    {"term": "कार्ड ब्लॉक रोकने के लिए ओटीपी", "weight": 3},
+    {"term": "रिवार्ड पॉइंट्स रिडीम ओटीपी", "weight": 2}
+  ],
+  "hinglish": [
+    {"term": "otp bata do sir", "weight": 3},
+    {"term": "phone par 6 digit code aaya hoga", "weight": 3},
+    {"term": "card verify karne ke liye otp chahiye", "weight": 3},
+    {"term": "transaction cancel karne otp batao", "weight": 3},
+    {"term": "bank manager hu otp share karo", "weight": 3}
+  ],
+  "te": [
+    {"term": "ఓటీపీ చెప్పండి", "weight": 3},
+    {"term": "6 అంకెల కోడ్ చెప్పండి", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "ta": [
+    {"term": "ஓடிபி சொல்லவும்", "weight": 3},
+    {"term": "6 இலக்க குறியீட்டை கூறவும்", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "kn": [
+    {"term": "ಒಟಿಪಿ ಹೇಳಿ", "weight": 3},
+    {"term": "6 ಅಂಕಿಯ ಕೋಡ್ ತಿಳಿಸಿ", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ]
+}

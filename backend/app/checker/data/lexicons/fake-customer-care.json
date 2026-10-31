@@ -1,0 +1,55 @@
+{
+  "scam_type": "fake-customer-care",
+  "en": [
+    {"term": "customer care toll free number", "weight": 2},
+    {"term": "helpline support agent calling", "weight": 2},
+    {"term": "google search customer care number", "weight": 2},
+    {"term": "airtel customer service refund", "weight": 2},
+    {"term": "swiggy zomato refund support", "weight": 2},
+    {"term": "amazon refund customer helpline", "weight": 2},
+    {"term": "install anydesk to fix issue", "weight": 3},
+    {"term": "install teamviewer remote support", "weight": 3},
+    {"term": "install rustdesk screen share", "weight": 3},
+    {"term": "technical support representative", "weight": 2},
+    {"term": "bank customer service executive", "weight": 2},
+    {"term": "failed transaction support number", "weight": 2},
+    {"term": "atm card blockage support", "weight": 2},
+    {"term": "fastag recharge complaint helpline", "weight": 2},
+    {"term": "irctc ticket cancellation helpline", "weight": 2},
+    {"term": "epfo withdrawal customer support", "weight": 2},
+    {"term": "courier complaint executive number", "weight": 2},
+    {"term": "grant permission in screen share app", "weight": 3},
+    {"term": "share 9 digit anydesk code", "weight": 3},
+    {"term": "unauthorized customer care listing", "weight": 2},
+    {"term": "customer support whatsapp number", "weight": 2}
+  ],
+  "hi": [
+    {"term": "कस्टमर केयर हेल्पलाइन नंबर", "weight": 2},
+    {"term": "एनीडेस्क ऐप डाउनलोड करें", "weight": 3},
+    {"term": "स्क्रीन शेयर कोड बताएं", "weight": 3},
+    {"term": "रिफंड के लिए कस्टमर केयर", "weight": 2},
+    {"term": "बैंक सपोर्ट टीम", "weight": 2}
+  ],
+  "hinglish": [
+    {"term": "customer care number par call karo", "weight": 2},
+    {"term": "anydesk install karo problem solve karne", "weight": 3},
+    {"term": "teamviewer code share karo", "weight": 3},
+    {"term": "refund helpline support", "weight": 2},
+    {"term": "customer care executive bol raha hu", "weight": 2}
+  ],
+  "te": [
+    {"term": "కస్టమర్ కేర్ నంబర్", "weight": 2},
+    {"term": "ఎనీడెస్క్ యాప్ ఇన్‌స్టాల్ చేయండి", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "ta": [
+    {"term": "வாடிக்கையாளர் சேவை எண்", "weight": 2},
+    {"term": "AnyDesk செயலியை நிறுவவும்", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "kn": [
+    {"term": "ಗ್ರಾಹಕ ಸೇವಾ ಸಂಖ್ಯೆ", "weight": 2},
+    {"term": "AnyDesk ಆ್ಯಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ]
+}

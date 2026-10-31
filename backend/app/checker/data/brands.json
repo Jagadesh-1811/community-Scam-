@@ -1,0 +1,121 @@
+[
+  {
+    "name": "State Bank of India",
+    "aliases": ["sbi", "state bank", "yono"],
+    "domain": "onlinesbi.sbi",
+    "official_domains": ["onlinesbi.sbi", "sbi.co.in", "sbiyono.sbi"],
+    "category": "bank"
+  },
+  {
+    "name": "HDFC Bank",
+    "aliases": ["hdfc", "hdfc bank"],
+    "domain": "hdfcbank.com",
+    "official_domains": ["hdfcbank.com"],
+    "category": "bank"
+  },
+  {
+    "name": "ICICI Bank",
+    "aliases": ["icici", "icici bank", "imobile"],
+    "domain": "icicibank.com",
+    "official_domains": ["icicibank.com"],
+    "category": "bank"
+  },
+  {
+    "name": "Axis Bank",
+    "aliases": ["axis", "axis bank"],
+    "domain": "axisbank.com",
+    "official_domains": ["axisbank.com"],
+    "category": "bank"
+  },
+  {
+    "name": "Kotak Mahindra Bank",
+    "aliases": ["kotak", "kotak 811"],
+    "domain": "kotak.com",
+    "official_domains": ["kotak.com"],
+    "category": "bank"
+  },
+  {
+    "name": "Paytm",
+    "aliases": ["paytm"],
+    "domain": "paytm.com",
+    "official_domains": ["paytm.com"],
+    "category": "fintech"
+  },
+  {
+    "name": "PhonePe",
+    "aliases": ["phonepe"],
+    "domain": "phonepe.com",
+    "official_domains": ["phonepe.com"],
+    "category": "fintech"
+  },
+  {
+    "name": "Google Pay",
+    "aliases": ["gpay", "google pay"],
+    "domain": "pay.google.com",
+    "official_domains": ["google.com", "pay.google.com"],
+    "category": "fintech"
+  },
+  {
+    "name": "TRAI",
+    "aliases": ["trai", "telecom regulatory authority"],
+    "domain": "trai.gov.in",
+    "official_domains": ["trai.gov.in"],
+    "category": "government"
+  },
+  {
+    "name": "Cyber Crime Portal",
+    "aliases": ["cyber crime", "cybercrime", "national cyber crime reporting portal", "1930"],
+    "domain": "cybercrime.gov.in",
+    "official_domains": ["cybercrime.gov.in"],
+    "category": "government"
+  },
+  {
+    "name": "CBI",
+    "aliases": ["cbi", "central bureau of investigation"],
+    "domain": "cbi.gov.in",
+    "official_domains": ["cbi.gov.in"],
+    "category": "law_enforcement"
+  },
+  {
+    "name": "Police Department",
+    "aliases": ["mumbai police", "delhi police", "bangalore police", "karnataka police", "crime branch"],
+    "domain": "gov.in",
+    "official_domains": ["mumbaipolice.gov.in", "delhipolice.gov.in", "ksp.karnataka.gov.in"],
+    "category": "law_enforcement"
+  },
+  {
+    "name": "FedEx",
+    "aliases": ["fedex", "fedex express", "fedex courier"],
+    "domain": "fedex.com",
+    "official_domains": ["fedex.com"],
+    "category": "courier"
+  },
+  {
+    "name": "India Post",
+    "aliases": ["india post", "speed post", "postal department"],
+    "domain": "indiapost.gov.in",
+    "official_domains": ["indiapost.gov.in"],
+    "category": "courier"
+  },
+  {
+    "name": "Electricity Board",
+    "aliases": ["bescom", "mahavitaran", "tneb", "tata power", "uppcl", "dhbvn"],
+    "domain": "bescom.karnataka.gov.in",
+    "official_domains": ["bescom.karnataka.gov.in", "mahadiscom.in"],
+    "category": "utility"
+  },
+  {
+    "name": "Bharti Airtel",
+    "aliases": ["airtel", "airtel payment"],
+    "domain": "airtel.in",
+    "official_domains": ["airtel.in"],
+    "category": "telecom"
+  },
+  {
+    "name": "Reliance Jio",
+    "aliases": ["jio", "reliance jio"],
+    "domain": "jio.com",
+    "official_domains": ["jio.com"],
+    "category": "telecom"
+  }
+]

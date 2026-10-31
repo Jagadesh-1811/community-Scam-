@@ -1,0 +1,55 @@
+{
+  "scam_type": "lottery-prize",
+  "en": [
+    {"term": "kbc lucky draw winner", "weight": 3},
+    {"term": "won 25 lakh lottery", "weight": 3},
+    {"term": "whatsapp lucky draw winner", "weight": 3},
+    {"term": "car prize winner claim", "weight": 3},
+    {"term": "congratulations selected lucky customer", "weight": 2},
+    {"term": "pay gst tax to claim prize", "weight": 3},
+    {"term": "prize processing charges", "weight": 3},
+    {"term": "kaun banega crorepati lottery", "weight": 3},
+    {"term": "tata safari lucky draw", "weight": 3},
+    {"term": "mobile number won cash reward", "weight": 2},
+    {"term": "call manager rana pratap singh", "weight": 3},
+    {"term": "cheque ready for dispatch", "weight": 2},
+    {"term": "winner certificate download", "weight": 2},
+    {"term": "claim award within 24 hours", "weight": 2},
+    {"term": "international sweepstakes winner", "weight": 3},
+    {"term": "govt approved lucky winner", "weight": 2},
+    {"term": "send bank details for cash prize", "weight": 3},
+    {"term": "delhi head office lottery", "weight": 2},
+    {"term": "free iphone 15 pro won", "weight": 3},
+    {"term": "claim bumper prize now", "weight": 2},
+    {"term": "lottery file clearance fee", "weight": 3}
+  ],
+  "hi": [
+    {"term": "केबीसी लकी ड्रॉ विजेता", "weight": 3},
+    {"term": "25 लाख की लॉटरी लगी", "weight": 3},
+    {"term": "व्हाट्सएप लकी ड्रॉ", "weight": 3},
+    {"term": "इनाम पाने के लिए टैक्स जमा करें", "weight": 3},
+    {"term": "कार विजेता", "weight": 2}
+  ],
+  "hinglish": [
+    {"term": "kbc 25 lakh lottery lagi hai", "weight": 3},
+    {"term": "lucky draw me number aaya hai", "weight": 3},
+    {"term": "prize lene ke liye tax bharna hoga", "weight": 3},
+    {"term": "car jeet gaye ho", "weight": 2},
+    {"term": "congratulations aap winner ho", "weight": 2}
+  ],
+  "te": [
+    {"term": "లాటరీ తగిలింది", "weight": 3},
+    {"term": "25 లక్షల బహుమతి", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "ta": [
+    {"term": "லாட்டரி விழுந்தது", "weight": 3},
+    {"term": "25 லட்சம் பரிசு", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "kn": [
+    {"term": "ಲಾಟರಿ ಗೆದ್ದಿದ್ದೀರಿ", "weight": 3},
+    {"term": "25 ಲಕ್ಷ ಬಹುಮಾನ", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ]
+}

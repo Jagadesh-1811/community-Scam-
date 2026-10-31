@@ -1,0 +1,55 @@
+{
+  "scam_type": "loan-app-harassment",
+  "en": [
+    {"term": "instant 7 day loan approved", "weight": 3},
+    {"term": "send morphed photos to contacts", "weight": 3},
+    {"term": "defaulter contact list blackmail", "weight": 3},
+    {"term": "chinese loan app threat", "weight": 3},
+    {"term": "repay loan in 2 hours or face humiliation", "weight": 3},
+    {"term": "recovery agent calling family", "weight": 2},
+    {"term": "instant loan without cibil check", "weight": 2},
+    {"term": "loan processing fee upfront", "weight": 2},
+    {"term": "whatsapp contact list viral threat", "weight": 3},
+    {"term": "fake legal notice recovery loan", "weight": 2},
+    {"term": "access granted to gallery and contacts", "weight": 3},
+    {"term": "high interest loan extortion", "weight": 2},
+    {"term": "call all your relatives defaulter", "weight": 3},
+    {"term": "pay penalty charges for loan extension", "weight": 2},
+    {"term": "quick cash credit 50000 instant", "weight": 2},
+    {"term": "recovery agent coming to home", "weight": 2},
+    {"term": "share pan card for instant cash", "weight": 2},
+    {"term": "cyber extortion loan app", "weight": 3},
+    {"term": "abuse messages sent to contacts", "weight": 3},
+    {"term": "microloan blackmail syndicate", "weight": 3},
+    {"term": "repay 10000 against 3000 loan", "weight": 3}
+  ],
+  "hi": [
+    {"term": "7 दिन का तत्काल लोन", "weight": 3},
+    {"term": "संपर्कों को अश्लील फोटो भेजने की धमकी", "weight": 3},
+    {"term": "लोन रिकवरी ब्लैकमेल", "weight": 3},
+    {"term": "बिना सिबिल स्कोर लोन", "weight": 2},
+    {"term": "परिवार को फोन करेंगे", "weight": 3}
+  ],
+  "hinglish": [
+    {"term": "7 day loan app", "weight": 3},
+    {"term": "contacts ko photo viral kar denge", "weight": 3},
+    {"term": "loan wapas kar nahi toh badnaam karenge", "weight": 3},
+    {"term": "recovery agent ghar aayega", "weight": 2},
+    {"term": "gallery photo share karne ki threat", "weight": 3}
+  ],
+  "te": [
+    {"term": "తక్షణ రుణం", "weight": 3},
+    {"term": "కాంటాక్ట్స్‌కి ఫోటోలు పంపుతామని బెదిరింపు", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "ta": [
+    {"term": "உடனடி கடன்", "weight": 3},
+    {"term": "தொடர்புகளுக்கு புகைப்படம் அனுப்புவதாக மிரட்டல்", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "kn": [
+    {"term": "ತ್ವರಿತ ಸಾಲ", "weight": 3},
+    {"term": "ಸಂಪರ್ಕಗಳಿಗೆ ಫೋಟೋ ಕಳುಹಿಸುವ ಬೆದರಿಕೆ", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ]
+}

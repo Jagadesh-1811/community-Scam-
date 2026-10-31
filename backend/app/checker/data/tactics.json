@@ -1,0 +1,90 @@
+{
+  "urgency": {
+    "points": 6,
+    "keywords": {
+      "en": ["immediately", "urgent", "urgently", "within 24 hours", "expires today", "act now", "last chance", "before midnight", "time is running out", "instant", "right now"],
+      "hi": ["तुरंत", "तत्काल", "जल्दी", "24 घंटे में", "आज ही", "समय समाप्त", "अंतिम अवसर"],
+      "hinglish": ["turant", "jaldi", "abhi ke abhi", "aaj hi", "last date", "urgent hai", "fatafat"],
+      "te": ["వెంటనే", "తక్షణమే", "ఈ రోజే", "సమయం లేదు"],
+      "ta": ["உடனடியாக", "விரைவாக", "இன்றே", "நேரமில்லை"],
+      "kn": ["ತಕ್ಷಣ", "ಈಗಲೇ", "ಇಂದೇ", "ಬೇಗ"]
+    }
+  },
+  "threat": {
+    "points": 8,
+    "keywords": {
+      "en": ["arrest", "police warrant", "jail", "power cut", "disconnected", "block your account", "court notice", "fir registered", "legal action", "penalty", "frozen", "suspended"],
+      "hi": ["गिरफ्तार", "वारंट", "जेल", "बिजली कटेगी", "खाता ब्लॉक", "कानूनी कार्रवाई", "सजा", "एफआईआर"],
+      "hinglish": ["arrest warrant", "jail bhejenge", "account block", "light cut hogi", "line cut", "police aayegi", "court notice"],
+      "te": ["అరెస్ట్", "జైలు", "ఖాతా బ్లాక్", "కరెంట్ కట్", "కోర్టు నోటీసు"],
+      "ta": ["கைது", "சிறை", "கணக்கு முடக்கப்பட்டது", "மின்சாரம் துண்டிக்கப்படும்", "நீதிமன்ற அறிவிப்பு"],
+      "kn": ["ಬಂಧನ", "ಜೈಲು", "ಖಾತೆ ಬ್ಲಾಕ್", "ವಿದ್ಯುತ್ ಕಡಿತ", "ನ್ಯಾಯಾಲಯದ ನೋಟಿಸ್"]
+    }
+  },
+  "authority": {
+    "points": 6,
+    "keywords": {
+      "en": ["cbi officer", "cyber crime branch", "mumbai police", "customs department", "income tax officer", "rbi official", "supreme court", "inspector", "sub-inspector"],
+      "hi": ["सीबीआई अधिकारी", "साइबर क्राइम", "मुंबई पुलिस", "कस्टम विभाग", "आयकर अधिकारी", "आरबीआई"],
+      "hinglish": ["cbi officer", "cyber crime se bol raha hu", "mumbai police", "customs officer", "income tax department", "crime branch"],
+      "te": ["సీబీఐ అధికారి", "సైబర్ క్రైమ్", "పోలీస్ ఇన్స్పెక్టర్", "కస్టమ్స్ డిపార్ట్మెంట్"],
+      "ta": ["சிபிஐ அதிகாரி", "சைபர் க்ரைம்", "காவல்துறை ஆய்வாளர்", "சுங்கத்துறை"],
+      "kn": ["ಸಿಬಿಐ ಅಧಿಕಾರಿ", "ಸೈಬರ್ ಕ್ರೈಮ್", "ಪೊಲೀಸ್ ಇನ್ಸ್‌ಪೆಕ್ಟರ್", "ಕಸ್ಟಮ್ಸ್ ಅಧಿಕಾರಿ"]
+    }
+  },
+  "reward": {
+    "points": 5,
+    "keywords": {
+      "en": ["lottery winner", "won cash prize", "lakh rupees", "lucky draw", "guaranteed profit", "double money", "free gift", "congratulations you won"],
+      "hi": ["लॉटरी जीते", "नकद पुरस्कार", "लाख रुपये", "लकी ड्रा", "गारंटीकृत मुनाफा", "मुफ्त उपहार"],
+      "hinglish": ["lottery jeeta", "cash prize", "lakh rupaye", "lucky draw", "guaranteed return", "free gift mila"],
+      "te": ["లాటరీ గెలిచారు", "నగదు బహుమతి", "లక్కీ డ్రా", "డబుల్ డబ్బు"],
+      "ta": ["லாட்டரி வென்றீர்கள்", "பரிசு தொகை", "லக்கி டிரா", "இரட்டிப்பு பணம்"],
+      "kn": ["ಲಾಟರಿ ಗೆದ್ದಿದ್ದೀರಿ", "ನಗದು ಬಹುಮಾನ", "ಲಕ್ಕಿ ಡ್ರಾ", "ಡಬಲ್ ಹಣ"]
+    }
+  },
+  "credential_request": {
+    "points": 10,
+    "keywords": {
+      "en": ["share otp", "enter otp", "send password", "netbanking password", "cvv number", "card pin", "atm pin", "secret code", "verify credentials"],
+      "hi": ["ओटीपी शेयर करें", "पासवर्ड दर्ज करें", "सीवीवी", "पिन नंबर", "गोपनीय कोड"],
+      "hinglish": ["otp batao", "otp send karo", "password enter karo", "pin share karo", "cvv number"],
+      "te": ["ఓటీపీ చెప్పండి", "పాస్‌వర్డ్ నమోదు చేయండి", "పిన్ నంబర్"],
+      "ta": ["ஓடிபி பகிரவும்", "கடவுச்சொல் உள்ளிடவும்", "பின் எண்"],
+      "kn": ["ಒಟಿಪಿ ಹಂಚಿಕೊಳ್ಳಿ", "ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ", "ಪಿನ್ ಸಂಖ್ಯೆ"]
+    }
+  },
+  "payment_request": {
+    "points": 6,
+    "keywords": {
+      "en": ["pay fee", "deposit fine", "transfer amount", "customs duty", "processing charge", "registration fee", "send payment", "clear penalty"],
+      "hi": ["शुल्क का भुगतान", "जुर्माना जमा करें", "प्रोसेसिंग फीस", "कस्टम ड्यूटी", "पैसे भेजें"],
+      "hinglish": ["fee pay karo", "fine bharna hoga", "charges send karo", "customs duty jama karo", "processing fee lagega"],
+      "te": ["ఫీజు చెల్లించండి", "జరిమానా కట్టండి", "డబ్బులు పంపండి"],
+      "ta": ["கட்டணம் செலுத்தவும்", "அபராதம் செலுத்தவும்", "பணம் அனுப்பவும்"],
+      "kn": ["ಶುಲ್ಕ ಪಾವತಿಸಿ", "ದಂಡ ಪಾವತಿಸಿ", "ಹಣ ಕಳುಹಿಸಿ"]
+    }
+  },
+  "secrecy": {
+    "points": 5,
+    "keywords": {
+      "en": ["do not tell anyone", "keep confidential", "secret investigation", "do not disconnect call", "stay on video call", "top secret", "maintain silence"],
+      "hi": ["किसी को न बताएं", "गोपनीय रखें", "गुप्त जांच", "कॉल न काटें", "कैमरे पर रहें"],
+      "hinglish": ["kisi ko mat batana", "secret investigation hai", "call disconnect mat karna", "camera par raho"],
+      "te": ["ఎవరికీ చెప్పవద్దు", "రహస్యంగా ఉంచండి", "కాల్ కట్ చేయవద్దు"],
+      "ta": ["யாரிடமும் சொல்லாதே", "ரகசியமாக வைக்கவும்", "அழைப்பை துண்டிக்காதே"],
+      "kn": ["ಯಾರಿಗೂ ಹೇಳಬೇಡಿ", "ರಹಸ್ಯವಾಗಿಡಿ", "ಕರೆ ಕಡಿತಗೊಳಿಸಬೇಡಿ"]
+    }
+  },
+  "click_request": {
+    "points": 4,
+    "keywords": {
+      "en": ["click here", "tap link", "download apk", "open link", "visit link", "install app", "click the below url"],
+      "hi": ["यहां क्लिक करें", "लिंक खोलें", "एपीके डाउनलोड करें", "ऐप इंस्टॉल करें"],
+      "hinglish": ["click karo", "link open karo", "apk download karo", "is link par jao"],
+      "te": ["ఇక్కడ క్లిక్ చేయండి", "లింక్ తెరవండి", "యాప్ డౌన్‌లోడ్ చేయండి"],
+      "ta": ["இங்கே கிளிக் செய்யவும்", "இணைப்பை திறக்கவும்", "செயலியை பதிவிறக்கவும்"],
+      "kn": ["ಇಲ್ಲಿ ಕ್ಲಿಕ್ ಮಾಡಿ", "ಲಿಂಕ್ ತೆರೆಯಿರಿ", "ಆ್ಯಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ"]
+    }
+  }
+}

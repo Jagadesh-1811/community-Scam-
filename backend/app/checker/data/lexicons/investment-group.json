@@ -1,0 +1,55 @@
+{
+  "scam_type": "investment-group",
+  "en": [
+    {"term": "whatsapp investment group", "weight": 3},
+    {"term": "telegram trading channel", "weight": 3},
+    {"term": "guaranteed 500% profit", "weight": 3},
+    {"term": "institutional stock tips", "weight": 2},
+    {"term": "vip trading group", "weight": 3},
+    {"term": "crypto pump signals", "weight": 2},
+    {"term": "daily 10% return", "weight": 3},
+    {"term": "forex investment plan", "weight": 2},
+    {"term": "earn from home trading", "weight": 2},
+    {"term": "ipo allotment guaranteed", "weight": 3},
+    {"term": "fake trading app platform", "weight": 2},
+    {"term": "deposit more to withdraw", "weight": 3},
+    {"term": "professor trading tips", "weight": 3},
+    {"term": "elite investors club", "weight": 2},
+    {"term": "binary options signals", "weight": 2},
+    {"term": "share market secret formula", "weight": 2},
+    {"term": "risk-free high return", "weight": 3},
+    {"term": "portfolio management group", "weight": 2},
+    {"term": "double your capital in 7 days", "weight": 3},
+    {"term": "admin investment guidance", "weight": 2},
+    {"term": "crypto mining contract", "weight": 2}
+  ],
+  "hi": [
+    {"term": "व्हाट्सएप निवेश समूह", "weight": 3},
+    {"term": "टेलीग्राम ट्रेडिंग चैनल", "weight": 3},
+    {"term": "गारंटीकृत दैनिक मुनाफा", "weight": 3},
+    {"term": "शेयर बाजार गुप्त टिप्स", "weight": 2},
+    {"term": "पैसा दोगुना करें", "weight": 3}
+  ],
+  "hinglish": [
+    {"term": "whatsapp investment group", "weight": 3},
+    {"term": "telegram trading group", "weight": 3},
+    {"term": "guaranteed profit milega", "weight": 3},
+    {"term": "paise double ho jayenge", "weight": 3},
+    {"term": "trading tips group join karo", "weight": 2}
+  ],
+  "te": [
+    {"term": "ట్రేడింగ్ గ్రూప్", "weight": 3},
+    {"term": "డబుల్ లాభం", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "ta": [
+    {"term": "வர்த்தக குழு", "weight": 3},
+    {"term": "இரட்டிப்பு லாபம்", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "kn": [
+    {"term": "ಟ್ರೇಡಿಂಗ್ ಗ್ರೂಪ್", "weight": 3},
+    {"term": "ಡಬಲ್ ಲಾಭ", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ]
+}

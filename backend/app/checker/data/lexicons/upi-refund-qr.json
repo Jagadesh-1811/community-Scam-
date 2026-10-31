@@ -1,0 +1,55 @@
+{
+  "scam_type": "upi-refund-qr",
+  "en": [
+    {"term": "scan qr code to receive", "weight": 3},
+    {"term": "scan qr to get refund", "weight": 3},
+    {"term": "upi refund request", "weight": 3},
+    {"term": "cashback credited scan", "weight": 3},
+    {"term": "olx buyer qr code", "weight": 3},
+    {"term": "enter upi pin to receive", "weight": 3},
+    {"term": "accept payment request upi", "weight": 2},
+    {"term": "upi collect request", "weight": 2},
+    {"term": "paytm cashback scratch card", "weight": 2},
+    {"term": "phonepe reward scan", "weight": 2},
+    {"term": "google pay voucher scan", "weight": 2},
+    {"term": "instant refund credit", "weight": 2},
+    {"term": "qr code payment incoming", "weight": 2},
+    {"term": "scan to claim money", "weight": 3},
+    {"term": "payment gateway refund", "weight": 2},
+    {"term": "scan barcode to receive cash", "weight": 3},
+    {"term": "merchant qr refund link", "weight": 2},
+    {"term": "approve request in upi app", "weight": 2},
+    {"term": "pin required for crediting", "weight": 3},
+    {"term": "money will be transferred after pin", "weight": 3},
+    {"term": "failed transaction refund qr", "weight": 2}
+  ],
+  "hi": [
+    {"term": "पैसे पाने के लिए क्यूआर स्कैन करें", "weight": 3},
+    {"term": "रिफंड के लिए क्यूआर कोड", "weight": 3},
+    {"term": "यूपीआई पिन डालें पैसे मिलेंगे", "weight": 3},
+    {"term": "कैशबैक प्राप्त करें", "weight": 2},
+    {"term": "ओएलएक्स पेमेंट क्यूआर", "weight": 3}
+  ],
+  "hinglish": [
+    {"term": "qr scan karo paise milenge", "weight": 3},
+    {"term": "refund lene ke liye qr scan karo", "weight": 3},
+    {"term": "upi pin dalo amount credit hoga", "weight": 3},
+    {"term": "cashback claim karo", "weight": 2},
+    {"term": "olx buyer payment qr", "weight": 3}
+  ],
+  "te": [
+    {"term": "డబ్బులు రావడానికి క్యూఆర్ స్కాన్ చేయండి", "weight": 3},
+    {"term": "యూపీఐ పిన్ నమోదు చేయండి", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "ta": [
+    {"term": "பணம் பெற க்யூஆர் ஸ்கேன் செய்யவும்", "weight": 3},
+    {"term": "யூபிஐ பின் உள்ளிடவும்", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "kn": [
+    {"term": "ಹಣ ಪಡೆಯಲು ಕ್ಯೂಆರ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ", "weight": 3},
+    {"term": "ಯುಪಿಐ ಪಿನ್ ನಮೂದಿಸಿ", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ]
+}

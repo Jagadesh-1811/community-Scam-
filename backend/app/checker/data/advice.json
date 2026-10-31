@@ -1,0 +1,94 @@
+{
+  "digital-arrest": {
+    "advice": [
+      "Indian law enforcement agencies (Police, CBI, ED, Customs) never conduct arrests or interrogations over Skype, WhatsApp, or video calls.",
+      "Immediately disconnect the video call. Do not transfer any funds or show your bank accounts.",
+      "Call the National Cyber Crime Helpline at 1930 or file an immediate complaint at cybercrime.gov.in."
+    ]
+  },
+  "fake-kyc-link": {
+    "advice": [
+      "Banks and telecom operators never send links asking to update KYC, PAN, or SIM details via SMS.",
+      "Do not click the link or download any APK file (e.g. AnyDesk, QuickSupport, SBI_KYC.apk).",
+      "If you already entered banking details, immediately contact your bank customer care to freeze your netbanking and card."
+    ]
+  },
+  "upi-refund-qr": {
+    "advice": [
+      "Remember: You NEVER need to enter your UPI PIN or scan a QR code to RECEIVE money.",
+      "Scanning a QR code or entering your UPI PIN always deducts money from your account.",
+      "Report the scammer's UPI ID and phone number in your UPI app (Google Pay, PhonePe, Paytm, BHIM)."
+    ]
+  },
+  "investment-group": {
+    "advice": [
+      "No legitimate stock, crypto, or institutional investment scheme guarantees 200% to 500% returns.",
+      "Exit the Telegram or WhatsApp investment group immediately. Do not transfer funds to personal or unverified UPI accounts.",
+      "Report the group admins and fraudulent trading websites to cybercrime.gov.in."
+    ]
+  },
+  "courier-customs": {
+    "advice": [
+      "Customs and courier companies (FedEx, DHL, India Post) never demand fines or clearance fees into personal UPI or bank accounts.",
+      "Do not believe claims that a parcel with illegal contraband or passports was shipped under your name.",
+      "Verify directly with the official courier customer care using their official website."
+    ]
+  },
+  "job-offer": {
+    "advice": [
+      "Legitimate employers never ask you to pay a deposit, registration fee, or buy cryptocurrency to receive daily task wages.",
+      "Do not send money or complete 'paid tasks' (YouTube likes, hotel reviews, Google maps rating).",
+      "Block the sender and report the group on Telegram/WhatsApp."
+    ]
+  },
+  "lottery-prize": {
+    "advice": [
+      "You cannot win a lottery or lucky draw you never bought a ticket for (e.g. KBC, Kaun Banega Crorepati).",
+      "Never pay 'processing fees', 'GST', or 'clearance charges' to claim a prize.",
+      "Block the sender number and delete the message."
+    ]
+  },
+  "loan-app-harassment": {
+    "advice": [
+      "Illegal instant loan apps access your contact list and blackmail your family and colleagues.",
+      "Do not pay extorted amounts. File an immediate complaint on cybercrime.gov.in with screenshots of threats.",
+      "File a police complaint at your local cyber cell and inform your close contacts about the blackmail scheme."
+    ]
+  },
+  "electricity-disconnection": {
+    "advice": [
+      "State electricity boards (BESCOM, TNEB, MSEDCL, UPPCL) never send disconnection threats from personal 10-digit mobile numbers.",
+      "Do not call the phone number mentioned in the SMS or pay via third-party payment links.",
+      "Check your bill status only on the official electricity utility portal or mobile app."
+    ]
+  },
+  "fake-customer-care": {
+    "advice": [
+      "Scammers post fake customer care numbers on Google search, Google Maps, and social media.",
+      "Customer support executives never ask you to install remote control apps like AnyDesk or TeamViewer.",
+      "Always obtain customer care telephone numbers directly from the official back of your credit/debit card or verified official website."
+    ]
+  },
+  "otp-call": {
+    "advice": [
+      "Bank employees never call you asking for OTPs, CVV, Netbanking passwords, or Card PINs.",
+      "Never share OTP with anyone, even if the caller claims your card is blocked or points are expiring.",
+      "If you accidentally shared an OTP, call your bank immediately to block all transactions."
+    ]
+  },
+  "sextortion": {
+    "advice": [
+      "Do not panic and DO NOT pay any extortion money. Paying once leads to endless demands.",
+      "Block the blackmailer immediately across all platforms (WhatsApp, Skype, Instagram).",
+      "File an immediate report on cybercrime.gov.in and report intimate imagery to StopNCII.org."
+    ]
+  },
+  "other": {
+    "advice": [
+      "Be cautious of unsolicited messages urging immediate action or offering unexpected financial rewards.",
+      "Never share passwords, OTPs, or click suspicious links received from unknown senders.",
+      "For cyber fraud emergencies, dial 1930 immediately or visit cybercrime.gov.in."
+    ]
+  }
+}
+

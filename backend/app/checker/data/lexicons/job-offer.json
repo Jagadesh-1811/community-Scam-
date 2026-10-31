@@ -1,0 +1,55 @@
+{
+  "scam_type": "job-offer",
+  "en": [
+    {"term": "part time job from home", "weight": 3},
+    {"term": "youtube video like job", "weight": 3},
+    {"term": "telegram task job", "weight": 3},
+    {"term": "daily salary 5000", "weight": 3},
+    {"term": "google maps review job", "weight": 3},
+    {"term": "hotel rating review job", "weight": 3},
+    {"term": "data entry typing job deposit", "weight": 2},
+    {"term": "work from home earn 3000 daily", "weight": 3},
+    {"term": "prepaid task deposit money", "weight": 3},
+    {"term": "screenshot submission task", "weight": 2},
+    {"term": "hr recruiter job offer whatsapp", "weight": 2},
+    {"term": "no experience needed high pay", "weight": 2},
+    {"term": "freelance task merchant account", "weight": 2},
+    {"term": "amazon product review task", "weight": 2},
+    {"term": "crypto task salary transfer", "weight": 2},
+    {"term": "join our part-time team today", "weight": 2},
+    {"term": "simple tasks earn thousands", "weight": 3},
+    {"term": "registration fee for job kit", "weight": 3},
+    {"term": "complete 3 tasks to withdraw money", "weight": 3},
+    {"term": "vip task upgrade fee", "weight": 3},
+    {"term": "receptionist part time job", "weight": 2}
+  ],
+  "hi": [
+    {"term": "घर बैठे पार्ट टाइम जॉब", "weight": 3},
+    {"term": "यूट्यूब लाइक करके कमाएं", "weight": 3},
+    {"term": "प्रतिदिन 5000 रुपये कमाएं", "weight": 3},
+    {"term": "टास्क पूरा करें पैसे मिलेंगे", "weight": 3},
+    {"term": "गूगल रिव्यू जॉब", "weight": 2}
+  ],
+  "hinglish": [
+    {"term": "part time work from home", "weight": 3},
+    {"term": "youtube video like karke paise kamao", "weight": 3},
+    {"term": "daily 5000 salary", "weight": 3},
+    {"term": "task complete karo withdrawal milega", "weight": 3},
+    {"term": "telegram task group join karo", "weight": 2}
+  ],
+  "te": [
+    {"term": "పార్ట్ టైమ్ జాబ్", "weight": 3},
+    {"term": "రోజూ 5000 సంపాదించండి", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "ta": [
+    {"term": "பகுதி நேர வேலை", "weight": 3},
+    {"term": "தினசரி 5000 சம்பாதிக்கலாம்", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "kn": [
+    {"term": "ಅರೆಕಾಲಿಕ ಉದ್ಯೋಗ", "weight": 3},
+    {"term": "ದಿನಕ್ಕೆ 5000 ಸಂಪಾದಿಸಿ", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ]
+}

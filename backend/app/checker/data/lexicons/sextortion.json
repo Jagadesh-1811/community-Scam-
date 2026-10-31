@@ -1,0 +1,55 @@
+{
+  "scam_type": "sextortion",
+  "en": [
+    {"term": "whatsapp video call recording nude", "weight": 3},
+    {"term": "recorded your intimate video", "weight": 3},
+    {"term": "youtube upload blackmail video", "weight": 3},
+    {"term": "delhi police crime branch sextortion", "weight": 3},
+    {"term": "delete nude video pay money", "weight": 3},
+    {"term": "send intimate video to friends", "weight": 3},
+    {"term": "facebook friends list send video", "weight": 3},
+    {"term": "viral video threat on social media", "weight": 3},
+    {"term": "youtube manager calling to delete video", "weight": 3},
+    {"term": "cyber cell officer demanding compromise", "weight": 3},
+    {"term": "screen recording of private video call", "weight": 3},
+    {"term": "pay 30000 to remove video from server", "weight": 3},
+    {"term": "fake girl video call extortion", "weight": 3},
+    {"term": "nude clip blackmail threat", "weight": 3},
+    {"term": "inspector calling about viral clip", "weight": 3},
+    {"term": "pay or face defamation and suicide note", "weight": 3},
+    {"term": "video will be posted on twitter and insta", "weight": 3},
+    {"term": "intimate screen grab compromise fee", "weight": 3},
+    {"term": "cyber extortion private photos", "weight": 3},
+    {"term": "morph private video clips", "weight": 3},
+    {"term": "pay immediately to delete permanent clip", "weight": 3}
+  ],
+  "hi": [
+    {"term": "वीडियो कॉल रिकॉर्डिंग ब्लैकमेल", "weight": 3},
+    {"term": "न्यूड वीडियो वायरल करने की धमकी", "weight": 3},
+    {"term": "यूट्यूब पर वीडियो डाल देंगे", "weight": 3},
+    {"term": "दोस्तों को वीडियो भेजेंगे", "weight": 3},
+    {"term": "डिलीट करने के लिए पैसे दो", "weight": 3}
+  ],
+  "hinglish": [
+    {"term": "video call record kar liya hai", "weight": 3},
+    {"term": "nude video viral kar dunga", "weight": 3},
+    {"term": "youtube par upload kar denge", "weight": 3},
+    {"term": "paise do video delete kar denge", "weight": 3},
+    {"term": "police call aayegi compromise kar lo", "weight": 3}
+  ],
+  "te": [
+    {"term": "వీడియో వైరల్ చేస్తామని బ్లాక్‌మెయిల్", "weight": 3},
+    {"term": "డబ్బులు ఇవ్వకపోతే వీడియో పోస్ట్ చేస్తాం", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "ta": [
+    {"term": "வீடியோவை வெளியிடுவதாக மிரட்டல்", "weight": 3},
+    {"term": "பணம் தராவிட்டால் வீடியோ பகிரப்படும்", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "kn": [
+    {"term": "ವೀಡಿಯೊ ವೈರಲ್ ಮಾಡುವ ಬೆದರಿಕೆ", "weight": 3},
+    {"term": "ಹಣ ನೀಡದಿದ್ದರೆ ವೀಡಿಯೊ ಹಂಚಿಕೆ", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "scam_type": "fake-kyc-link",
+  "en": [
+    {"term": "kyc update", "weight": 3},
+    {"term": "pan kyc verification", "weight": 3},
+    {"term": "aadhaar kyc", "weight": 3},
+    {"term": "sim block warning", "weight": 2},
+    {"term": "update your kyc immediately", "weight": 3},
+    {"term": "bank account suspended kyc", "weight": 3},
+    {"term": "debit card blocked kyc", "weight": 3},
+    {"term": "click here to complete kyc", "weight": 3},
+    {"term": "yono sbi kyc update", "weight": 3},
+    {"term": "netbanking kyc expire", "weight": 3},
+    {"term": "rbi kyc guideline", "weight": 2},
+    {"term": "verify pan card details", "weight": 2},
+    {"term": "submit kyc form", "weight": 2},
+    {"term": "download kyc apk", "weight": 3},
+    {"term": "document re-verification", "weight": 2},
+    {"term": "unverified kyc status", "weight": 2},
+    {"term": "kyc mandate pending", "weight": 2},
+    {"term": "link pan with bank", "weight": 2},
+    {"term": "account deactivation notice", "weight": 2},
+    {"term": "kyc link expired today", "weight": 3},
+    {"term": "mandatory e-kyc", "weight": 2}
+  ],
+  "hi": [
+    {"term": "केवाईसी अपडेट", "weight": 3},
+    {"term": "पैन कार्ड सत्यापन", "weight": 3},
+    {"term": "खाता ब्लॉक हो जाएगा", "weight": 3},
+    {"term": "केवाईसी पूरा करें", "weight": 3},
+    {"term": "सिम कार्ड बंद", "weight": 2},
+    {"term": "केवाईसी लिंक पर क्लिक करें", "weight": 3},
+    {"term": "आधार लिंक करें", "weight": 2}
+  ],
+  "hinglish": [
+    {"term": "kyc update karo", "weight": 3},
+    {"term": "pan link nahi hai", "weight": 3},
+    {"term": "account block ho jayega", "weight": 3},
+    {"term": "link par click karke kyc karo", "weight": 3},
+    {"term": "sim deactivate ho jayegi", "weight": 2},
+    {"term": "yono block ho gaya", "weight": 3},
+    {"term": "e-kyc pending hai", "weight": 2}
+  ],
+  "te": [
+    {"term": "కేవైసీ అప్‌డేట్", "weight": 3},
+    {"term": "ఖాతా బ్లాక్ అవుతుంది", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "ta": [
+    {"term": "கேஒய்சி புதுப்பிப்பு", "weight": 3},
+    {"term": "கணக்கு முடக்கப்படும்", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "kn": [
+    {"term": "ಕೆವೈಸಿ ಅಪ್‌ಡೇಟ್", "weight": 3},
+    {"term": "ಖಾತೆ ಬ್ಲಾಕ್ ಆಗಲಿದೆ", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ]
+}

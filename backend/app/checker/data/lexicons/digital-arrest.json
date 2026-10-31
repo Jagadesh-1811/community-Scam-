@@ -1,0 +1,68 @@
+{
+  "scam_type": "digital-arrest",
+  "en": [
+    {"term": "digital arrest", "weight": 3},
+    {"term": "virtual arrest", "weight": 3},
+    {"term": "arrest warrant", "weight": 3},
+    {"term": "cbi officer", "weight": 2},
+    {"term": "mumbai cyber crime", "weight": 2},
+    {"term": "delhi police branch", "weight": 2},
+    {"term": "money laundering case", "weight": 3},
+    {"term": "stay on video call", "weight": 3},
+    {"term": "keep skype call on", "weight": 3},
+    {"term": "camera on surveillance", "weight": 3},
+    {"term": "aadhaar linked to crime", "weight": 3},
+    {"term": "supreme court order", "weight": 2},
+    {"term": "do not disconnect the call", "weight": 3},
+    {"term": "illegal transaction found", "weight": 2},
+    {"term": "bank freeze warning", "weight": 2},
+    {"term": "narcotics bureau", "weight": 2},
+    {"term": "enforcement directorate", "weight": 2},
+    {"term": "confidential inquiry", "weight": 2},
+    {"term": "show your surroundings", "weight": 3},
+    {"term": "immediate custody", "weight": 3},
+    {"term": "non-bailable warrant", "weight": 3}
+  ],
+  "hi": [
+    {"term": "डिजिटल अरेस्ट", "weight": 3},
+    {"term": "गिरफ्तारी वारंट", "weight": 3},
+    {"term": "सीबीआई अधिकारी", "weight": 2},
+    {"term": "साइबर क्राइम मुंबई", "weight": 2},
+    {"term": "मनी लॉन्ड्रिंग", "weight": 3},
+    {"term": "वीडियो कॉल चालू रखें", "weight": 3},
+    {"term": "कैमरा बंद मत करना", "weight": 3},
+    {"term": "आधार अपराध से जुड़ा", "weight": 3},
+    {"term": "कोर्ट का आदेश", "weight": 2},
+    {"term": "कॉल डिस्कनेक्ट मत करो", "weight": 3}
+  ],
+  "hinglish": [
+    {"term": "digital arrest", "weight": 3},
+    {"term": "arrest warrant nikla hai", "weight": 3},
+    {"term": "cbi officer bol raha hu", "weight": 2},
+    {"term": "video call disconnect mat karna", "weight": 3},
+    {"term": "skype par aao", "weight": 3},
+    {"term": "aadhaar crime me link hai", "weight": 3},
+    {"term": "jail bhej denge", "weight": 3},
+    {"term": "police station se call hai", "weight": 2},
+    {"term": "surveillance par ho", "weight": 2},
+    {"term": "court order aaya hai", "weight": 2}
+  ],
+  "te": [
+    {"term": "డిజిటల్ అరెస్ట్", "weight": 3},
+    {"term": "అరెస్ట్ వారెంట్", "weight": 3},
+    {"term": "వీడియో కాల్ కట్ చేయవద్దు", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "ta": [
+    {"term": "டிஜிட்டல் கைது", "weight": 3},
+    {"term": "கைது வாரண்ட்", "weight": 3},
+    {"term": "வீடியோ அழைப்பை துண்டிக்காதே", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ],
+  "kn": [
+    {"term": "ಡಿಜಿಟಲ್ ಬಂಧನ", "weight": 3},
+    {"term": "ಬಂಧನ ವಾರಂಟ್", "weight": 3},
+    {"term": "ವೀಡಿಯೊ ಕರೆ ಕಡಿತಗೊಳಿಸಬೇಡಿ", "weight": 3},
+    {"term": "TODO: native review", "weight": 1}
+  ]
+}
