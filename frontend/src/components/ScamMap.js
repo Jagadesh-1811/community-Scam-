@@ -65,7 +65,7 @@ export default function ScamMap({ clusters, selectedArea, onSelectArea, isSideba
 
     markersLayer.clearLayers();
 
-    clusters.forEach((c) => {
+    (clusters || []).forEach((c) => {
       if (!c.lat || !c.lng) return;
 
       const isCrit = c.severity === "CRIT";

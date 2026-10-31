@@ -1,36 +1,171 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400;1,6..72,500&family=Orbitron:wght@600;700;800;900&display=swap');
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+@theme {
+  --font-futuristic: var(--font-orbitron), 'Orbitron', system-ui, sans-serif;
+  --font-mono-data: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  --font-serif-filler: var(--font-newsreader), 'Times New Roman', 'Newsreader', Times, Georgia, serif;
+}
+
 :root {
-  --background: #F7F7F2;
-  --foreground: #0A0A0A;
-  --black: #0A0A0A;
-  --green: #23E000;
-  --red: #E5201B;
+  /* Strict 4-color palette */
+  --bg-soft-white: #F7F7F2;
+  --text-black: #0A0A0A;
+  --state-green: #23E000;
+  --state-red: #E5201B;
+
+  /* Typography tokens */
+  --font-futuristic: var(--font-orbitron), 'Orbitron', system-ui, sans-serif;
+  --font-mono-data: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  --font-serif-filler: var(--font-newsreader), 'Times New Roman', 'Newsreader', Times, Georgia, serif;
 }
 
 body {
-  background: #F7F7F2;
-  color: #0A0A0A;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--bg-soft-white);
+  color: var(--text-black);
+  font-family: var(--font-mono-data);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
   margin: 0;
   padding: 0;
-  overflow: hidden;
 }
 
-/* Hide scrollbars across all browsers while keeping smooth scrollable content */
-* {
-  scrollbar-width: none !important; /* Firefox */
-  -ms-overflow-style: none !important; /* IE and Edge */
+/* Default Heading Styling: Orbitron font style for all titles and headers */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-orbitron), 'Orbitron', system-ui, -apple-system, sans-serif !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 800;
 }
 
-*::-webkit-scrollbar {
-  display: none !important; /* Chrome, Safari, Opera */
-  width: 0 !important;
-  height: 0 !important;
+/* Typography Utility Classes */
+.font-futuristic,
+.font-orbitron {
+  font-family: var(--font-orbitron), 'Orbitron', system-ui, -apple-system, sans-serif !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-/* Flat Leaflet theme */
+.font-mono-data {
+  font-family: var(--font-mono-data);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.font-serif-filler {
+  font-family: var(--font-serif-filler);
+  font-style: italic;
+  letter-spacing: 0.01em;
+}
+
+/* Flat Design System Tokens */
+.border-flat {
+  border: 1px solid var(--text-black);
+}
+
+.rounded-flat {
+  border-radius: 12px;
+}
+
+.tap-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* WCAG AA Strict Contrast States */
+.badge-safe {
+  background-color: var(--state-green);
+  color: var(--text-black);
+  /* Strict WCAG AA: Black text on green, never green on white */
+  font-weight: 700;
+  border: 1px solid var(--text-black);
+}
+
+.badge-danger {
+  background-color: var(--state-red);
+  color: var(--bg-soft-white);
+  font-weight: 700;
+  border: 1px solid var(--text-black);
+}
+
+.bg-danger-tint {
+  background-color: rgba(229, 32, 27, 0.1);
+}
+
+.bg-safe-tint {
+  background-color: rgba(35, 224, 0, 0.1);
+}
+
+.bg-black-tint {
+  background-color: rgba(10, 10, 10, 0.05);
+}
+
+/* Rotating Earth & Radar Keyframes */
+@keyframes rotateEarth {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes reverseRotate {
+  from {
+    transform: rotate(360deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes radarSweep {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-rotate-earth {
+  animation: rotateEarth 45s linear infinite;
+  will-change: transform;
+}
+
+.animate-reverse-rotate {
+  animation: reverseRotate 30s linear infinite;
+}
+
+.animate-radar-sweep {
+  animation: radarSweep 5s linear infinite;
+  transform-origin: center;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-soft-white);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-black);
+  border-radius: 4px;
+}
+
+/* Leaflet Flat Theme */
 .leaflet-container {
   width: 100%;
   height: 100%;

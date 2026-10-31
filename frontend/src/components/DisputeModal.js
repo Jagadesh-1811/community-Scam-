@@ -386,4 +386,3 @@ export default function DisputeModal({ isOpen, onClose, initialData, apiBaseUrl 
     </div>
   );
 }
-
