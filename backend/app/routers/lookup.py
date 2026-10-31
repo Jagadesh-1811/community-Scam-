@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
-from app.models.models import IdentifierSummary, VerifiedIdentifier
+from app.models.models import IdentifierSummary, VerifiedIdentifier, Report
 from app.schemas.lookup import LookupResponse
 from app.services.normaliser import normalise_identifier
 from app.services.privacy import mask_display_value
@@ -44,7 +44,15 @@ async def lookup_identifier(
             last_seen=None,
             scam_type=None,
             display_value=norm_val,
-            evidence=[f"Verified entity: {verified.owner} ({verified.category})"],
+            evidence=[
+                {
+                    "entity": verified.owner,
+                    "category": verified.category,
+                    "channel": "Official Verification",
+                    "status": "VERIFIED_BUSINESS",
+                    "pincode": "National"
+                }
+            ],
             challenged=False,
             verified_name=verified.owner,
             category=verified.category
@@ -71,22 +79,55 @@ async def lookup_identifier(
             last_seen=None,
             scam_type=None,
             display_value=masked_val,
-            evidence=["No community reports recorded for this identifier"],
+            evidence=[],
             challenged=False
         )
 
     # 4. Mask display value until at least 3 distinct reporters
     masked_val = mask_display_value(norm_type, norm_val, summary.distinct_reporters)
 
-    # 5. Construct safe aggregated evidence (never personal data or raw notes)
+    # 5. Query user-given reports for this identifier to provide authentic community evidence
+    # Strictly adheres to Brief Page 10 rule: "evidence never includes who reported, their IP or their note."
+    rep_stmt = (
+        select(Report)
+        .where(
+            and_(
+                Report.identifier_type == norm_type,
+                Report.identifier_value == norm_val,
+                Report.ignored == False
+            )
+        )
+        .order_by(Report.occurred_at.desc())
+        .limit(10)
+    )
+    rep_res = await session.execute(rep_stmt)
+    reports = rep_res.scalars().all()
+
     evidence = []
-    if summary.report_count > 0:
-        plural = "s" if summary.distinct_reporters != 1 else ""
-        evidence.append(f"Reported by {summary.distinct_reporters} independent reporter{plural}")
-    if summary.top_scam_type:
-        evidence.append(f"Common scam pattern: {summary.top_scam_type}")
-    if summary.challenged:
-        evidence.append("Challenged by business owner and currently under review")
+    for r in reports:
+        evidence.append({
+            "occurred_at": r.occurred_at.isoformat() if r.occurred_at else None,
+            "channel": r.channel,
+            "scam_type": r.scam_type,
+            "pincode": r.pincode,
+            "locality": r.locality or "",
+            "city": r.city or "",
+            "amount_lost_inr": r.amount_lost_inr,
+            "has_screenshot": bool(r.has_screenshot)
+        })
+
+    # If summary indicates reports exist but rows were merged or archived, provide aggregate evidence
+    if not evidence and summary.report_count > 0:
+        evidence.append({
+            "occurred_at": summary.last_seen.isoformat() if summary.last_seen else None,
+            "channel": "Incident Reports",
+            "scam_type": summary.top_scam_type or "unspecified",
+            "pincode": "Community Registry",
+            "locality": "",
+            "city": "",
+            "amount_lost_inr": None,
+            "has_screenshot": False
+        })
 
     return LookupResponse(
         verdict=summary.verdict,

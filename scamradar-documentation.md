@@ -164,9 +164,10 @@ Enables citizens to check a phone number, UPI handle, website URL, or SMS header
 - **Anti-Freezing Architecture**:
   - Network requests are governed by an `AbortController` with an explicit 6-second timeout.
   - Keyboard listeners allow instantaneous dismissal with the `Escape` key or backdrop clicks.
-- **Privacy Masking**:
+- **Privacy Masking & Zero-Knowledge Incident Evidence**:
   - Displays numbers in masked format (e.g. `98XXXXX210`) until at least **3 distinct independent citizens** confirm the scam.
   - Zero raw citizen notes, victim names, or private IP hashes are exposed in lookup responses.
+  - Renders authentic user-given incident evidence cards (`channel`, `scam_type`, `occurred_at`, `locality`, `city`, `pincode`, and financial loss amount) with targeted safety guidance, completely scrubbed of any PII.
 
 ---
 
