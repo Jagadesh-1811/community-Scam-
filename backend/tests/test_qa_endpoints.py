@@ -228,4 +228,21 @@ async def test_qa_admin_login_and_protection(qa_client: AsyncClient):
     assert auth_res.status_code == 200
     assert "items" in auth_res.json()
 
+    # 11. QA for Google Workspace Admin Authentication
+    google_res = await qa_client.post("/admin/auth/google", json={
+        "email": "officer.grievance@cybercrime.gov.in",
+        "name": "Senior Grievance Officer (Google Verified)"
+    })
+    assert google_res.status_code == 200
+    g_data = google_res.json()
+    assert g_data["ok"] is True
+    assert "token" in g_data
+    assert g_data["badge_id"].startswith("GOV-GGL-")
+
+    # Access protected route with Google token
+    g_headers = {"Authorization": f"Bearer {g_data['token']}"}
+    g_auth_res = await qa_client.get("/admin/disputes", headers=g_headers)
+    assert g_auth_res.status_code == 200
+    assert "items" in g_auth_res.json()
+
 

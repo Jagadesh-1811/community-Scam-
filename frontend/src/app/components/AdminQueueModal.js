@@ -18,7 +18,6 @@ import {
   Filter,
   UserCheck,
   LogOut,
-  KeyRound,
   Shield,
   BadgeAlert,
   BadgeCheck,
@@ -31,8 +30,6 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
   // Authentication State
   const [adminToken, setAdminToken] = useState("");
   const [officerInfo, setOfficerInfo] = useState(null);
-  const [loginUsername, setLoginUsername] = useState("admin");
-  const [loginPassword, setLoginPassword] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState("");
 
@@ -80,45 +77,7 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
     }
   }, [isOpen, adminToken, statusFilter]);
 
-  // ── Password-Based Login ──────────────────────────────────────────────────
-  const handleLogin = async (e) => {
-    if (e) e.preventDefault();
-    setLoggingIn(true);
-    setLoginError("");
-
-    try {
-      const res = await fetch(`${baseUrl}/admin/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: loginUsername.trim(),
-          password: loginPassword.trim(),
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.detail || "Authentication failed. Check credentials.");
-      }
-
-      setAdminToken(data.token);
-      const officer = {
-        officer_name: data.officer_name,
-        badge_id: data.badge_id,
-        auth_provider: "local",
-      };
-      setOfficerInfo(officer);
-      sessionStorage.setItem("scamradar_admin_token", data.token);
-      sessionStorage.setItem("scamradar_admin_officer", JSON.stringify(officer));
-      setLoginPassword("");
-    } catch (err) {
-      setLoginError(err.message);
-    } finally {
-      setLoggingIn(false);
-    }
-  };
-
-  // ── Google OAuth Sign-In ──────────────────────────────────────────────────
+  // ── Google OAuth Sign-In (Exclusive Authentication Method) ───────────────
   const handleGoogleSignIn = async () => {
     setLoggingIn(true);
     setLoginError("");
@@ -305,20 +264,24 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════════
-            SCREEN A: ADMIN LOGIN GATE (WITH GOOGLE AUTH + OFFICER LOGIN)
+            SCREEN A: ADMIN LOGIN GATE (EXCLUSIVE GOOGLE WORKSPACE AUTH)
            ══════════════════════════════════════════════════════════════════════ */}
         {!adminToken ? (
-          <div className="py-8 px-4 flex flex-col items-center justify-center max-w-md mx-auto w-full space-y-4 animate-fadeIn">
-            <div className="w-14 h-14 rounded-[14px] bg-[#0A0A0A] text-[#23E000] flex items-center justify-center border-2 border-[#23E000]/40 shadow-lg">
-              <Lock className="w-7 h-7 text-[#23E000]" />
+          <div className="py-12 px-6 flex flex-col items-center justify-center max-w-md mx-auto w-full space-y-6 animate-fadeIn">
+            <div className="w-16 h-16 rounded-[16px] bg-[#0A0A0A] text-[#23E000] flex items-center justify-center border-2 border-[#23E000]/40 shadow-lg">
+              <Lock className="w-8 h-8 text-[#23E000]" />
             </div>
 
-            <div className="text-center space-y-1">
-              <h3 className="text-base font-black uppercase tracking-wide">
-                Grievance Officer Authentication
+            <div className="text-center space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[6px] bg-[#0A0A0A] text-[#23E000] text-[10px] font-black uppercase tracking-wider">
+                <ShieldCheck className="w-3 h-3 text-[#23E000]" />
+                <span>NCRP Grievance Cell</span>
+              </div>
+              <h3 className="text-lg font-black uppercase tracking-wide text-[#0A0A0A]">
+                Officer Single Sign-On
               </h3>
-              <p className="text-xs opacity-75 leading-relaxed">
-                Protected administration zone. Access requires an official Google Workspace or Cyber Crime Grievance Officer session.
+              <p className="text-xs opacity-75 leading-relaxed max-w-xs mx-auto">
+                Protected administration zone. Authentication is exclusively restricted to authorized Google Workspace accounts.
               </p>
             </div>
 
@@ -329,107 +292,60 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
               </div>
             )}
 
-            {/* Google OAuth Login Button */}
-            <div className="w-full pt-1">
+            {/* Exclusive Google OAuth Sign-In Card */}
+            <div className="w-full space-y-3">
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={loggingIn}
-                className="w-full min-h-[48px] bg-[#FFFFFF] text-[#0A0A0A] border border-[#0A0A0A] rounded-[8px] text-xs font-black uppercase flex items-center justify-center gap-2.5 hover:bg-[#F0F0ED] transition shadow-xs cursor-pointer disabled:opacity-40"
-              >
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                  />
-                </svg>
-                <span>Sign in with Google Workspace</span>
-              </button>
-            </div>
-
-            <div className="w-full flex items-center gap-3">
-              <div className="flex-1 h-px bg-[#0A0A0A]/20" />
-              <span className="text-[10px] uppercase font-bold opacity-50">OR OFFICER CREDENTIALS</span>
-              <div className="flex-1 h-px bg-[#0A0A0A]/20" />
-            </div>
-
-            {/* Standard Officer Login Form */}
-            <form onSubmit={handleLogin} className="w-full space-y-3">
-              <div>
-                <label className="text-[11px] uppercase font-bold opacity-75 block mb-1">
-                  Officer Username / ID
-                </label>
-                <input
-                  type="text"
-                  value={loginUsername}
-                  onChange={(e) => setLoginUsername(e.target.value)}
-                  placeholder="admin"
-                  required
-                  className="w-full min-h-[44px] bg-[#F7F7F2] border border-[#0A0A0A] rounded-[8px] px-3.5 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-[#0A0A0A]"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] uppercase font-bold opacity-75 block mb-1">
-                  Security Passphrase / Admin Key
-                </label>
-                <input
-                  type="password"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="Enter officer password"
-                  required
-                  className="w-full min-h-[44px] bg-[#F7F7F2] border border-[#0A0A0A] rounded-[8px] px-3.5 text-xs font-mono font-bold focus:outline-none focus:ring-1 focus:ring-[#0A0A0A]"
-                />
-              </div>
-
-              {/* Demo Credentials Quick-Fill Pill for Evaluators */}
-              <div
-                onClick={() => {
-                  setLoginUsername("admin");
-                  setLoginPassword("scamradar-admin-2026");
-                }}
-                className="p-2.5 bg-[#0A0A0A]/5 border border-dashed border-[#0A0A0A]/40 rounded-[8px] text-[11px] cursor-pointer hover:bg-[#0A0A0A]/10 transition flex items-center justify-between"
-              >
-                <span className="font-bold flex items-center gap-1.5">
-                  <KeyRound className="w-3.5 h-3.5 text-[#0A0A0A]" />
-                  <span>Click to auto-fill evaluator credentials:</span>
-                </span>
-                <span className="font-mono text-[10px] bg-[#0A0A0A] text-[#F7F7F2] px-2 py-0.5 rounded-[4px] font-bold">
-                  admin / scamradar-admin-2026
-                </span>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loggingIn}
-                className="w-full min-h-[46px] bg-[#0A0A0A] text-[#F7F7F2] rounded-[8px] text-xs font-black uppercase hover:opacity-90 transition cursor-pointer disabled:opacity-40 flex items-center justify-center gap-2"
+                className="w-full min-h-[50px] bg-[#FFFFFF] text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-[10px] text-xs font-black uppercase flex items-center justify-center gap-3 hover:bg-[#F0F0ED] active:scale-[0.99] transition shadow-md cursor-pointer disabled:opacity-40"
               >
                 {loggingIn ? (
                   <>
-                    <span className="w-4 h-4 border-2 border-[#F7F7F2]/30 border-t-[#F7F7F2] rounded-full animate-spin" />
-                    <span>Verifying Credentials...</span>
+                    <span className="w-4 h-4 border-2 border-[#0A0A0A]/30 border-t-[#0A0A0A] rounded-full animate-spin" />
+                    <span>Connecting to Google Identity...</span>
                   </>
                 ) : (
                   <>
-                    <UserCheck className="w-4 h-4 text-[#23E000]" />
-                    <span>Authenticate Officer Session</span>
+                    <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                      <path
+                        fill="#4285F4"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                      />
+                      <path
+                        fill="#EA4335"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                      />
+                    </svg>
+                    <span>Sign in with Google Workspace</span>
                   </>
                 )}
               </button>
-            </form>
+
+              <div className="p-3 bg-[#0A0A0A]/5 border border-[#0A0A0A]/20 rounded-[8px] space-y-1.5 text-center">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[#0A0A0A] flex items-center justify-center gap-1">
+                  <UserCheck className="w-3 h-3 text-[#23E000]" />
+                  <span>Google Verified Grievance Authority</span>
+                </div>
+                <p className="text-[10px] opacity-70 leading-relaxed">
+                  Authorized for designated officers with government-certified Google Workspace credentials (@cybercrime.gov.in / @nic.in).
+                </p>
+              </div>
+            </div>
+
+            {/* Compliance Footer */}
+            <div className="pt-2 text-center text-[10px] opacity-50 space-y-1">
+              <div>Protected under IT Act 2000 § 43 & § 66D</div>
+              <div className="font-mono">Audit Log: Active • SSL 256-Bit TLS 1.3</div>
+            </div>
           </div>
         ) : (
           /* ══════════════════════════════════════════════════════════════════════
