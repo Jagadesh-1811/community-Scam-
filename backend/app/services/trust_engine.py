@@ -54,6 +54,18 @@ def calculate_shannon_entropy(items: List[str]) -> float:
     max_h = math.log2(n)
     return h / max_h if max_h > 0 else 0.0
 
+def to_naive_utc(dt):
+    if dt is None:
+        return datetime.utcnow()
+    if isinstance(dt, str):
+        try:
+            dt = datetime.fromisoformat(dt.replace("Z", "+00:00"))
+        except Exception:
+            return datetime.utcnow()
+    if hasattr(dt, "tzinfo") and dt.tzinfo is not None:
+        return dt.astimezone(timezone.utc).replace(tzinfo=None)
+    return dt
+
 class TrustEngine:
     async def get_or_create_reporter_weight(self, session: AsyncSession, reporter_hash: str) -> float:
         stmt = select(Reporter).where(Reporter.reporter_hash == reporter_hash)
@@ -98,8 +110,8 @@ class TrustEngine:
     ) -> Tuple[Report, IdentifierSummary, bool]:
         ident_type = report_data["identifier_type"]
         ident_val = report_data["identifier_value"]
-        occurred_at = report_data.get("occurred_at") or datetime.utcnow()
-        reported_at = report_data.get("reported_at") or datetime.utcnow()
+        occurred_at = to_naive_utc(report_data.get("occurred_at"))
+        reported_at = to_naive_utc(report_data.get("reported_at"))
 
         # Check if same reporter already reported this exact identifier
         existing_rep_stmt = select(Report).where(
@@ -114,8 +126,10 @@ class TrustEngine:
 
         merged = False
         if existing_report:
-            existing_report.occurred_at = max(existing_report.occurred_at, occurred_at)
-            existing_report.reported_at = max(existing_report.reported_at, reported_at)
+            ex_occ = to_naive_utc(existing_report.occurred_at)
+            ex_rep = to_naive_utc(existing_report.reported_at)
+            existing_report.occurred_at = max(ex_occ, occurred_at)
+            existing_report.reported_at = max(ex_rep, reported_at)
             existing_report.merged = True
             report_record = existing_report
             merged = True
@@ -203,7 +217,7 @@ class TrustEngine:
                     continue
 
                 # Rule 2: Same IP prefix within 24h
-                time_diff = abs((r1.occurred_at - r2.occurred_at).total_seconds())
+                time_diff = abs((to_naive_utc(r1.occurred_at) - to_naive_utc(r2.occurred_at)).total_seconds())
                 if r1.ip_hash == r2.ip_hash and time_diff <= 86400:
                     uf.union(r1.report_id, r2.report_id)
                     continue
@@ -242,10 +256,11 @@ class TrustEngine:
 
                 for m in active:
                     scam_types.append(m.scam_type)
-                    if first_seen is None or m.occurred_at < first_seen:
-                        first_seen = m.occurred_at
-                    if last_seen is None or m.occurred_at > last_seen:
-                        last_seen = m.occurred_at
+                    m_occ = to_naive_utc(m.occurred_at)
+                    if first_seen is None or m_occ < first_seen:
+                        first_seen = m_occ
+                    if last_seen is None or m_occ > last_seen:
+                        last_seen = m_occ
 
         effective_score = round(effective_score, 2)
         top_scam_type = Counter(scam_types).most_common(1)[0][0] if scam_types else (all_reports[0].scam_type if all_reports else None)

@@ -370,4 +370,3 @@ This report provides the full end-to-end test execution results for ScamRadar: l
 | **Backend Lead** | 01 Nov 2026 | **GO** |
 | **Frontend Lead** | 01 Nov 2026 | **GO** |
 | **Team Captain** | 01 Nov 2026 | **GO** |
-
