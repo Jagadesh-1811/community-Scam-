@@ -7,18 +7,57 @@ from rapidfuzz import fuzz
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "lexicons"))
 
 CORE_SIGNATURES = {
-    "job-offer": ["part time", "job offer", "work from home", "daily salary", "daily earning", "telegram task", "youtube like", "hotel review", "prepaid task", "vip task", "telegram group"],
-    "digital-arrest": ["digital arrest", "cbi", "cyber crime police", "mumbai police", "narcotics parcel", "illegal parcel", "skype call", "video interrogation", "arrest warrant", "customs officer"],
-    "electricity-disconnection": ["electricity bill", "power disconnect", "power cutoff", "electricity officer", "bescom", "tneb", "msedcl", "uppcl", "dhbvn", "update meter", "disconnection"],
-    "fake-kyc-link": ["kyc update", "pan card expired", "account blocked", "sbi kyc", "hdfc kyc", "yono", "netbanking password", "update pan", "kyc expired", "aadhaar link"],
-    "upi-refund-qr": ["scan qr to receive", "qr code refund", "upi collect", "olx payment", "enter upi pin to receive", "army officer buying", "advance payment qr"],
-    "loan-app-harassment": ["instant loan", "loan sanction", "pre-approved loan", "loan repayment", "morphed photo", "loan app", "processing fee loan"],
-    "courier-customs": ["fedex", "dhl", "customs clearance", "parcel detained", "contraband seized", "airport customs", "taiwan parcel"],
-    "sextortion": ["video call recording", "leak video", "compromised video", "blackmail", "facebook relatives", "nude video"],
-    "lottery-prize": ["lottery winner", "kbc lucky draw", "won 25 lakh", "claim prize", "car winner", "lucky draw"],
-    "fake-customer-care": ["customer care number", "helpline number", "toll free support", "refund desk", "support helpline"],
-    "otp-call": ["tell me the otp", "share one time password", "read out the 6 digit code", "verification code received", "share otp"],
-    "investment-group": ["stock tips vip", "guaranteed 500% profit", "crypto investment", "institutional trading", "forex signals", "daily profit"]
+    "job-offer": [
+        "part time", "job offer", "work from home", "daily salary", "daily earning", "telegram",
+        "youtube", "like video", "liking video", "hotel review", "prepaid task", "vip task",
+        "daily payout", "earn daily", "earning daily", "review task", "typing job", "data entry job"
+    ],
+    "digital-arrest": [
+        "digital arrest", "cbi", "cyber crime", "mumbai police", "delhi police", "narcotics",
+        "illegal parcel", "skype call", "video interrogation", "arrest warrant", "customs officer",
+        "police verification", "court notice", "money laundering"
+    ],
+    "electricity-disconnection": [
+        "electricity", "power disconnect", "power cutoff", "electricity bill", "unpaid bill",
+        "disconnected tonight", "bescom", "tneb", "msedcl", "uppcl", "dhbvn", "update meter",
+        "disconnection", "electricity officer"
+    ],
+    "fake-kyc-link": [
+        "kyc", "pan card", "account blocked", "sbi kyc", "hdfc kyc", "yono", "netbanking",
+        "update pan", "kyc expired", "aadhaar link", "sim block", "debit card blocked"
+    ],
+    "upi-refund-qr": [
+        "scan qr", "qr code", "upi collect", "olx payment", "enter upi pin", "army officer buying",
+        "advance payment qr", "refund approved", "receive payment qr"
+    ],
+    "loan-app-harassment": [
+        "instant loan", "loan sanction", "pre-approved loan", "loan repayment", "morphed photo",
+        "loan app", "processing fee loan", "repay overdue loan", "contacts call"
+    ],
+    "courier-customs": [
+        "fedex", "dhl", "customs clearance", "parcel detained", "contraband seized", "airport customs",
+        "taiwan parcel", "customs penalty", "package hold"
+    ],
+    "sextortion": [
+        "video call recording", "leak video", "compromised video", "blackmail", "facebook relatives",
+        "nude video", "whatsapp video recording", "viral video"
+    ],
+    "lottery-prize": [
+        "lottery winner", "kbc lucky draw", "won 25 lakh", "claim prize", "car winner",
+        "lucky draw", "congratulations you won", "cash prize awarded"
+    ],
+    "fake-customer-care": [
+        "customer care number", "helpline number", "toll free support", "refund desk",
+        "support helpline", "reach customer care", "toll-free"
+    ],
+    "otp-call": [
+        "tell me the otp", "share one time password", "read out the 6 digit code",
+        "verification code received", "share otp", "confirm your otp"
+    ],
+    "investment-group": [
+        "stock tips", "guaranteed profit", "crypto investment", "institutional trading",
+        "forex signals", "daily profit", "whatsapp trading group", "vip investment"
+    ]
 }
 
 class LexiconManager:
