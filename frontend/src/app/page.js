@@ -12,11 +12,14 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ShieldCheck,
+  Gavel,
 } from "lucide-react";
 
 import LookupModal from "./components/LookupModal";
 import ReportModal from "./components/ReportModal";
 import DisputeModal from "./components/DisputeModal";
+import AdminQueueModal from "./components/AdminQueueModal";
+import PWAInstallBanner from "./components/PWAInstallBanner";
 
 const ScamMap = dynamic(() => import("./components/ScamMap"), {
   ssr: false,
@@ -39,6 +42,7 @@ export default function DashboardPage() {
   const [isLookupOpen, setIsLookupOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isDisputeOpen, setIsDisputeOpen] = useState(false);
+  const [isAdminQueueOpen, setIsAdminQueueOpen] = useState(false);
   const [disputeInitialData, setDisputeInitialData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [backendOnline, setBackendOnline] = useState(false);
@@ -152,6 +156,15 @@ export default function DashboardPage() {
           >
             <ShieldCheck className="w-4 h-4 text-[#23E000]" />
             <span>Dispute Report</span>
+          </button>
+
+          <button
+            onClick={() => setIsAdminQueueOpen(true)}
+            title="Grievance Cell Officer Queue"
+            className="min-h-[44px] px-3.5 rounded-[12px] border border-[#0A0A0A] bg-[#F7F7F2] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] flex items-center gap-1.5 text-xs font-bold uppercase transition cursor-pointer"
+          >
+            <Gavel className="w-4 h-4 text-[#0A0A0A]" />
+            <span className="hidden lg:inline">Admin Queue</span>
           </button>
 
           <button
@@ -404,6 +417,15 @@ export default function DashboardPage() {
           fetchData();
         }}
       />
+      <AdminQueueModal
+        isOpen={isAdminQueueOpen}
+        onClose={() => setIsAdminQueueOpen(false)}
+        apiBaseUrl={API_BASE_URL}
+        onDisputeDecided={() => {
+          fetchData();
+        }}
+      />
+      <PWAInstallBanner />
     </div>
   );
 }
