@@ -20,6 +20,48 @@ import {
 } from "lucide-react";
 import { findAreaByInput, KNOWN_AREAS } from "../data/knownAreas";
 
+// Exact chevron paper plane arrowhead icon matching Image 2
+function SendArrowIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M4 2.5L22 12L4 21.5L7.8 14.5L14.5 12L7.8 9.5L4 2.5Z" />
+    </svg>
+  );
+}
+
+// Exact 7-bar vertical soundwave icon matching Image 3 with pulsating animation when listening
+function VoiceWaveIcon({ className = "w-5 h-5", isListening = false }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect x="2" y={isListening ? "5" : "7.5"} width="1.8" height={isListening ? "14" : "9"} rx="0.9" />
+      <rect x="5.2" y={isListening ? "2" : "3.5"} width="1.8" height={isListening ? "20" : "17"} rx="0.9" />
+      <rect x="8.4" y={isListening ? "4" : "5.5"} width="1.8" height={isListening ? "16" : "13"} rx="0.9" />
+      <rect x="11.6" y="1" width="1.8" height="22" rx="0.9" />
+      <rect x="14.8" y={isListening ? "4" : "5.5"} width="1.8" height={isListening ? "16" : "13"} rx="0.9" />
+      <rect x="18" y={isListening ? "2" : "3.5"} width="1.8" height={isListening ? "20" : "17"} rx="0.9" />
+      <rect x="21.2" y={isListening ? "5" : "7.5"} width="1.8" height={isListening ? "14" : "9"} rx="0.9" />
+    </svg>
+  );
+}
+
+const VOICE_LANGUAGES = [
+  { code: "te-IN", label: "Telugu", native: "తెలుగు", tag: "TEL" },
+  { code: "ta-IN", label: "Tamil", native: "தமிழ்", tag: "TA" },
+  { code: "kn-IN", label: "Kannada", native: "ಕನ್ನಡ", tag: "KA" },
+  { code: "hi-IN", label: "Hindi", native: "हिन्दी", tag: "HIN" },
+  { code: "en-IN", label: "English", native: "English", tag: "ENG" },
+];
+
 const INITIAL_MESSAGES = [
   {
     id: "m-1",
@@ -193,6 +235,94 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
   const [isExpanded, setIsExpanded] = useState(true);
   const [uiError, setUiError] = useState("");
   const [requestingGps, setRequestingGps] = useState(false);
+  const [selectedVoiceLang, setSelectedVoiceLang] = useState("te-IN");
+  const [isListening, setIsListening] = useState(false);
+  const [voiceNotice, setVoiceNotice] = useState("");
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+  const recognitionRef = useRef(null);
+
+  // Stop listening when modal closes
+  useEffect(() => {
+    if (!isOpen && isListening) {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {}
+      }
+      setIsListening(false);
+      setVoiceNotice("");
+    }
+  }, [isOpen, isListening]);
+
+  const toggleVoiceInput = () => {
+    if (isListening) {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {}
+      }
+      setIsListening(false);
+      setVoiceNotice("");
+      return;
+    }
+
+    const SpeechRecognition =
+      typeof window !== "undefined" &&
+      (window.SpeechRecognition || window.webkitSpeechRecognition);
+
+    if (!SpeechRecognition) {
+      setVoiceNotice("Speech Recognition not supported in this browser. Please use Chrome or Edge.");
+      setTimeout(() => setVoiceNotice(""), 4500);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = selectedVoiceLang;
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      const currentLang = VOICE_LANGUAGES.find((l) => l.code === selectedVoiceLang);
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        setVoiceNotice(`🎙️ Voice Agent listening in ${currentLang?.label} (${currentLang?.native}). Speak now...`);
+      };
+
+      recognition.onresult = (event) => {
+        let transcript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        if (transcript.trim()) {
+          setInput(transcript);
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.warn("Voice input error:", event.error);
+        if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+          setVoiceNotice("Microphone permission denied. Allow mic in browser settings.");
+        } else if (event.error !== "no-speech") {
+          setVoiceNotice(`Voice capture error: ${event.error}`);
+        }
+        setIsListening(false);
+        setTimeout(() => setVoiceNotice(""), 4000);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (err) {
+      console.error("SpeechRecognition start error:", err);
+      setIsListening(false);
+      setVoiceNotice("Could not access microphone.");
+      setTimeout(() => setVoiceNotice(""), 3500);
+    }
+  };
 
   const [reportData, setReportData] = useState({
     channel: "",
@@ -1169,36 +1299,123 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
 
         {/* Chat Input Bar */}
         {step !== "done" && (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleUserReply(input);
-            }}
-            className="pt-2 border-t border-[#0A0A0A] flex gap-2 shrink-0"
-          >
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              disabled={submitting}
-              placeholder={
-                step === "content"
-                  ? "Paste message text, claimed threat, or scammer number..."
-                  : step === "financial_loss"
-                  ? "Or type exact amount lost (e.g. ₹25,000 or ₹0)..."
-                  : "Type your reply or click a button above..."
-              }
-              className="flex-1 min-h-[46px] bg-[#F7F7F2] border border-[#0A0A0A] rounded-[8px] px-4 text-xs text-[#0A0A0A] placeholder:text-[#0A0A0A]/40 focus:outline-none focus:ring-1 focus:ring-[#0A0A0A]"
-            />
-            <button
-              type="submit"
-              disabled={submitting || !input.trim()}
-              className="min-h-[46px] px-5 bg-[#0A0A0A] text-[#F7F7F2] rounded-[8px] text-xs font-bold uppercase hover:opacity-90 transition cursor-pointer disabled:opacity-40 flex items-center justify-center gap-1.5 shrink-0"
+          <div className="pt-2 border-t border-[#0A0A0A] shrink-0 space-y-2">
+            {/* Active Voice Listening Banner / Notification */}
+            {voiceNotice && (
+              <div className="px-3 py-1.5 rounded-[8px] bg-[#0A0A0A] text-[#F7F7F2] text-[11px] flex items-center justify-between border border-[#23E000] animate-in fade-in">
+                <span className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${isListening ? "bg-[#23E000] animate-ping" : "bg-[#E5201B]"}`} />
+                  <span>{voiceNotice}</span>
+                </span>
+                {isListening && (
+                  <button
+                    type="button"
+                    onClick={toggleVoiceInput}
+                    className="text-[10px] bg-[#E5201B] hover:opacity-90 px-2 py-0.5 rounded font-bold cursor-pointer"
+                  >
+                    STOP
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Language Quick-Selector Bar */}
+            {isLangMenuOpen && (
+              <div className="p-2 bg-white rounded-[8px] border border-[#0A0A0A] shadow-lg flex flex-wrap items-center gap-1.5 text-xs animate-in fade-in">
+                <span className="text-[10px] font-bold uppercase opacity-60 mr-1">Voice Language:</span>
+                {VOICE_LANGUAGES.map((lang) => (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => {
+                      setSelectedVoiceLang(lang.code);
+                      setIsLangMenuOpen(false);
+                      if (isListening && recognitionRef.current) {
+                        try {
+                          recognitionRef.current.stop();
+                        } catch (e) {}
+                        setIsListening(false);
+                      }
+                    }}
+                    className={`px-2.5 py-1 rounded-[6px] text-xs font-bold border transition cursor-pointer flex items-center gap-1 ${
+                      selectedVoiceLang === lang.code
+                        ? "bg-[#0A0A0A] text-[#23E000] border-[#0A0A0A]"
+                        : "bg-[#F7F7F2] text-[#0A0A0A] border-[#0A0A0A]/20 hover:border-[#0A0A0A]"
+                    }`}
+                  >
+                    <span>{lang.native}</span>
+                    <span className="text-[10px] opacity-70">({lang.tag})</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (isListening) {
+                  toggleVoiceInput();
+                }
+                handleUserReply(input);
+              }}
+              className="flex gap-2 items-center"
             >
-              <Send className="w-3.5 h-3.5 text-[#23E000]" />
-              <span className="hidden sm:inline">Send</span>
-            </button>
-          </form>
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                disabled={submitting}
+                placeholder={
+                  step === "content"
+                    ? `Paste text or speak in ${VOICE_LANGUAGES.find((l) => l.code === selectedVoiceLang)?.label} (${VOICE_LANGUAGES.find((l) => l.code === selectedVoiceLang)?.native})...`
+                    : step === "financial_loss"
+                    ? "Or type exact amount lost (e.g. ₹25,000 or ₹0)..."
+                    : `Type reply or speak in ${VOICE_LANGUAGES.find((l) => l.code === selectedVoiceLang)?.label}...`
+                }
+                className="flex-1 min-h-[46px] bg-[#F7F7F2] border border-[#0A0A0A] rounded-[8px] px-4 text-xs text-[#0A0A0A] placeholder:text-[#0A0A0A]/40 focus:outline-none focus:ring-1 focus:ring-[#0A0A0A]"
+              />
+
+              {/* 3rd uploaded image icon: Multilingual Voice Input AI Agent Button */}
+              <div className="relative shrink-0 flex items-center">
+                <button
+                  type="button"
+                  onClick={toggleVoiceInput}
+                  disabled={submitting}
+                  title={`Voice Agent: Speak in ${VOICE_LANGUAGES.find((l) => l.code === selectedVoiceLang)?.label} (${VOICE_LANGUAGES.find((l) => l.code === selectedVoiceLang)?.native})`}
+                  className={`min-h-[46px] min-w-[46px] px-3 rounded-[8px] border border-[#0A0A0A] transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                    isListening
+                      ? "bg-[#23E000] text-[#0A0A0A] shadow-[0_0_12px_rgba(35,224,0,0.5)] border-[#23E000]"
+                      : "bg-[#F7F7F2] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2]"
+                  }`}
+                >
+                  <VoiceWaveIcon className="w-5 h-5" isListening={isListening} />
+                  <span className="text-[10px] font-bold uppercase font-mono">
+                    {VOICE_LANGUAGES.find((l) => l.code === selectedVoiceLang)?.tag}
+                  </span>
+                </button>
+
+                {/* Small Language Dropdown Toggle */}
+                <button
+                  type="button"
+                  onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                  title="Change voice recognition language (Telugu, Tamil, Kannada, Hindi, English)"
+                  className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#0A0A0A] text-[#F7F7F2] border border-white text-[9px] font-black flex items-center justify-center cursor-pointer shadow-sm hover:scale-110 transition-transform"
+                >
+                  ▾
+                </button>
+              </div>
+
+              {/* 2nd uploaded image icon: Send Arrow Button */}
+              <button
+                type="submit"
+                disabled={submitting || !input.trim()}
+                title="Send reply"
+                className="min-h-[46px] min-w-[46px] px-3.5 bg-[#0A0A0A] text-[#F7F7F2] rounded-[8px] hover:bg-[#23E000] hover:text-[#0A0A0A] transition cursor-pointer disabled:opacity-40 flex items-center justify-center shrink-0 border border-[#0A0A0A]"
+              >
+                <SendArrowIcon className="w-5 h-5" />
+              </button>
+            </form>
+          </div>
         )}
       </div>
     </div>
