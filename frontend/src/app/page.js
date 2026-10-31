@@ -12,7 +12,6 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ShieldCheck,
-  Gavel,
 } from "lucide-react";
 
 import LookupModal from "./components/LookupModal";
@@ -72,6 +71,12 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchData();
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("admin") === "true") {
+        setIsAdminQueueOpen(true);
+      }
+    }
   }, []);
 
   const totalReports = clusters.reduce((acc, c) => acc + (c.report_count || 0), 0);
@@ -156,15 +161,6 @@ export default function DashboardPage() {
           >
             <ShieldCheck className="w-4 h-4 text-[#23E000]" />
             <span>Dispute Report</span>
-          </button>
-
-          <button
-            onClick={() => setIsAdminQueueOpen(true)}
-            title="Grievance Cell Officer Queue"
-            className="min-h-[44px] px-3.5 rounded-[12px] border border-[#0A0A0A] bg-[#F7F7F2] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] flex items-center gap-1.5 text-xs font-bold uppercase transition cursor-pointer"
-          >
-            <Gavel className="w-4 h-4 text-[#0A0A0A]" />
-            <span className="hidden lg:inline">Admin Queue</span>
           </button>
 
           <button
