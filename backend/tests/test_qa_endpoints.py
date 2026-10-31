@@ -204,3 +204,28 @@ async def test_qa_admin_reset(qa_client: AsyncClient):
     assert res.status_code == 200
     assert res.json()["ok"] is True
 
+# 10. QA for Admin Route Protection & Officer Login
+@pytest.mark.asyncio
+async def test_qa_admin_login_and_protection(qa_client: AsyncClient):
+    # Unauthenticated call to /admin/disputes must be blocked with 401
+    unauth_res = await qa_client.get("/admin/disputes")
+    assert unauth_res.status_code == 401
+
+    # Bad login credentials must be blocked with 401
+    bad_login = await qa_client.post("/admin/login", json={"username": "admin", "password": "wrong_password"})
+    assert bad_login.status_code == 401
+
+    # Valid officer credentials must return 200 and token
+    login_res = await qa_client.post("/admin/login", json={"username": "admin", "password": "scamradar-admin-2026"})
+    assert login_res.status_code == 200
+    token_data = login_res.json()
+    assert token_data["ok"] is True
+    assert "token" in token_data
+
+    # Access protected route with Bearer token
+    headers = {"Authorization": f"Bearer {token_data['token']}"}
+    auth_res = await qa_client.get("/admin/disputes", headers=headers)
+    assert auth_res.status_code == 200
+    assert "items" in auth_res.json()
+
+

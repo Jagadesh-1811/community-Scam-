@@ -1,13 +1,16 @@
 """
-Admin Dispute Review Queue
-GET  /admin/disputes         — list all challenges with pagination
-GET  /admin/disputes/{id}    — get single challenge detail
-POST /admin/disputes/{id}/decide — approve or reject a dispute
+Admin Dispute Review Queue & Authentication
+POST /admin/login             — Authenticate grievance officer & issue bearer token
+GET  /admin/me                — Verify officer session & badge profile
+GET  /admin/disputes          — List challenges with pagination (Requires Auth)
+GET  /admin/disputes/{id}     — Get single challenge detail (Requires Auth)
+POST /admin/disputes/{id}/decide — Approve or reject a dispute (Requires Auth)
 """
+import os
 import uuid
 from datetime import datetime
-from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from typing import Optional, List, Dict
+from fastapi import APIRouter, Depends, HTTPException, Request, status, Query
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
@@ -15,10 +18,42 @@ from pydantic import BaseModel
 from app.database import get_db
 from app.models.models import Challenge, IdentifierSummary
 
-router = APIRouter(prefix="/admin", tags=["Admin — Dispute Queue"])
+router = APIRouter(prefix="/admin", tags=["Admin — Dispute Queue & Authentication"])
+
+
+# ── Configuration & Credentials ─────────────────────────────────────────────
+
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "scamradar-admin-2026")
+ADMIN_KEY = os.getenv("ADMIN_KEY", "scamradar-admin-2026")
+
+# In-memory session store: token -> officer details
+ACTIVE_SESSIONS: Dict[str, dict] = {
+    # Pre-seed default key for backend scripts / CI
+    ADMIN_KEY: {
+        "officer_name": "Senior Grievance Officer",
+        "badge_id": "CYBER-GOV-01",
+        "role": "Super Admin",
+        "created_at": datetime.utcnow().isoformat()
+    }
+}
 
 
 # ── Schemas ─────────────────────────────────────────────────────────────────
+
+class AdminLoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class AdminLoginResponse(BaseModel):
+    ok: bool
+    token: str
+    token_type: str = "bearer"
+    officer_name: str
+    badge_id: str
+    expires_in_hours: int = 12
+
 
 class ChallengeDetail(BaseModel):
     challenge_id: str
@@ -43,15 +78,51 @@ class ChallengeListResponse(BaseModel):
 class DecisionPayload(BaseModel):
     decision: str            # "approved" | "rejected"
     decision_note: Optional[str] = None
-    admin_key: str           # simple shared secret for hackathon demo
+    admin_key: Optional[str] = None
 
 
-# ── Config ───────────────────────────────────────────────────────────────────
+# ── Authentication Dependency ───────────────────────────────────────────────
 
-ADMIN_KEY = "scamradar-admin-2026"  # In production: from env var
+async def verify_admin_auth(request: Request) -> dict:
+    """
+    Route-level protection: Enforces valid bearer token or X-Admin-Token header.
+    Rejects unauthenticated requests with HTTP 401.
+    """
+    auth_header = request.headers.get("Authorization", "").strip()
+    token = None
+
+    if auth_header.startswith("Bearer "):
+        token = auth_header[7:].strip()
+    elif "X-Admin-Token" in request.headers:
+        token = request.headers.get("X-Admin-Token", "").strip()
+
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Admin authentication required. Please provide a valid Bearer token.",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    # Check active tokens or static admin key
+    if token in ACTIVE_SESSIONS:
+        return ACTIVE_SESSIONS[token]
+
+    if token == ADMIN_KEY or token == f"tok_{ADMIN_KEY}":
+        return {
+            "officer_name": "Senior Grievance Officer",
+            "badge_id": "CYBER-GOV-01",
+            "role": "Super Admin",
+            "created_at": datetime.utcnow().isoformat()
+        }
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or expired admin credentials.",
+        headers={"WWW-Authenticate": "Bearer"}
+    )
 
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
+# ── Helper ──────────────────────────────────────────────────────────────────
 
 def _to_detail(c: Challenge) -> ChallengeDetail:
     return ChallengeDetail(
@@ -68,7 +139,49 @@ def _to_detail(c: Challenge) -> ChallengeDetail:
     )
 
 
-# ── Routes ───────────────────────────────────────────────────────────────────
+# ── Auth Endpoints ──────────────────────────────────────────────────────────
+
+@router.post("/login", response_model=AdminLoginResponse)
+async def admin_login(payload: AdminLoginRequest):
+    """
+    Authenticate a grievance officer and return a session token.
+    """
+    valid_usernames = (ADMIN_USERNAME.lower(), "officer", "officer@cybercrime.gov.in", "admin")
+    if payload.username.lower() in valid_usernames and payload.password == ADMIN_PASSWORD:
+        token = f"sr_admin_{uuid.uuid4().hex}"
+        officer = {
+            "officer_name": "Senior Grievance Officer",
+            "badge_id": "CYBER-GOV-01",
+            "role": "Super Admin",
+            "created_at": datetime.utcnow().isoformat()
+        }
+        ACTIVE_SESSIONS[token] = officer
+        return AdminLoginResponse(
+            ok=True,
+            token=token,
+            officer_name=officer["officer_name"],
+            badge_id=officer["badge_id"],
+            expires_in_hours=12
+        )
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid officer username or password."
+    )
+
+
+@router.get("/me")
+async def get_admin_profile(officer: dict = Depends(verify_admin_auth)):
+    """
+    Verify current session token and return officer badge profile.
+    """
+    return {
+        "authenticated": True,
+        **officer
+    }
+
+
+# ── Protected Queue Endpoints ───────────────────────────────────────────────
 
 @router.get("/disputes", response_model=ChallengeListResponse)
 async def list_disputes(
@@ -76,11 +189,12 @@ async def list_disputes(
                                           description="Filter by status: under_review | approved | rejected"),
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
+    officer: dict = Depends(verify_admin_auth),
     session: AsyncSession = Depends(get_db),
 ):
     """
-    List all dispute challenges with optional status filter and pagination.
-    Sorted by newest first.
+    List dispute challenges with optional status filter and pagination.
+    Protected route: requires valid officer Bearer token.
     """
     actual_status = status_filter if isinstance(status_filter, str) else None
     actual_page = page if isinstance(page, int) else 1
@@ -113,9 +227,13 @@ async def list_disputes(
 @router.get("/disputes/{challenge_id}", response_model=ChallengeDetail)
 async def get_dispute(
     challenge_id: str,
+    officer: dict = Depends(verify_admin_auth),
     session: AsyncSession = Depends(get_db),
 ):
-    """Get full detail of a single dispute challenge."""
+    """
+    Get full detail of a single dispute challenge.
+    Protected route: requires valid officer Bearer token.
+    """
     stmt = select(Challenge).where(Challenge.challenge_id == challenge_id)
     result = await session.execute(stmt)
     challenge = result.scalars().first()
@@ -133,21 +251,13 @@ async def get_dispute(
 async def decide_dispute(
     challenge_id: str,
     payload: DecisionPayload,
+    officer: dict = Depends(verify_admin_auth),
     session: AsyncSession = Depends(get_db),
 ):
     """
-    Admin approves or rejects a dispute challenge.
-
-    - **approved**: identifier is added to verified list; challenged=True stays
-    - **rejected**: challenge closed; identifier reverts to normal trust scoring
+    Officer approves or rejects a dispute challenge.
+    Protected route: requires valid officer Bearer token.
     """
-    # Simple admin auth
-    if payload.admin_key != ADMIN_KEY:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid admin key.",
-        )
-
     if payload.decision not in ("approved", "rejected"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -190,12 +300,11 @@ async def decide_dispute(
         # Verified: shield stays active, verdict becomes VERIFIED_BUSINESS
         if summary:
             summary.verdict = "VERIFIED_BUSINESS"
-            summary.challenged = True  # Stays shielded
+            summary.challenged = True
     elif payload.decision == "rejected":
         # Rejected: restore normal scoring
         if summary:
             summary.challenged = False
-            # Re-derive verdict from existing score
             if summary.effective_score >= 70:
                 summary.verdict = "KNOWN_SCAM"
             elif summary.effective_score >= 35:
@@ -211,11 +320,11 @@ async def decide_dispute(
         "identifier_type": challenge.identifier_type,
         "identifier_value": challenge.identifier_value,
         "claimant_name": challenge.claimant_name,
+        "decided_by": officer.get("officer_name", "Grievance Officer"),
         "decided_at": datetime.utcnow().isoformat(),
         "message": (
-            f"Dispute approved — identifier shielded as VERIFIED_BUSINESS."
+            f"Dispute approved by {officer.get('officer_name')} — identifier shielded as VERIFIED_BUSINESS."
             if payload.decision == "approved"
-            else f"Dispute rejected — identifier reverts to normal trust scoring."
+            else f"Dispute rejected by {officer.get('officer_name')} — identifier reverts to normal trust scoring."
         ),
     }
-
