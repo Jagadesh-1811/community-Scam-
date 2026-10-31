@@ -23,7 +23,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
-export default function LookupModal({ isOpen, onClose, apiBaseUrl }) {
+export default function LookupModal({ isOpen, onClose, apiBaseUrl, onOpenDispute }) {
   const [type, setType] = useState("phone");
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
@@ -491,6 +491,24 @@ export default function LookupModal({ isOpen, onClose, apiBaseUrl }) {
                             </div>
                           )}
 
+                          {/* Exact Reported Incident Message with PII Masked */}
+                          {ev.safe_note && (
+                            <div className="p-2.5 bg-white rounded-[6px] border border-[#0A0A0A]/20 text-[11px] font-mono leading-relaxed space-y-1">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-bold text-[#0A0A0A] flex items-center gap-1">
+                                  <Lock className="w-3 h-3 text-[#23E000]" />
+                                  Reported Message (Personal Info Masked)
+                                </span>
+                                <span className="text-[9px] bg-[#23E000]/20 text-[#0A0A0A] font-bold px-1.5 py-0.2 rounded font-sans">
+                                  PII MASKED
+                                </span>
+                              </div>
+                              <p className="italic text-[#0A0A0A]/90 whitespace-pre-wrap">
+                                "{ev.safe_note}"
+                              </p>
+                            </div>
+                          )}
+
                           {/* Community Safety Advice */}
                           <div className="p-2 bg-[rgba(10,10,10,0.03)] border-l-2 border-[#0A0A0A] rounded-[4px] text-[10px] opacity-90 leading-tight">
                             <span className="font-bold block text-[#0A0A0A]">Safety Guidance:</span>
@@ -530,9 +548,12 @@ export default function LookupModal({ isOpen, onClose, apiBaseUrl }) {
                     <button
                       type="button"
                       onClick={() => {
-                        alert(
-                          "Dispute Resolution: To challenge an identifier report, submit your GST certificate, shop licence, or official identity proof via the Dispute API (POST /challenges) or contact national grievance cell. Upon verification, the identifier is shielded from false alerts."
-                        );
+                        if (onOpenDispute) {
+                          onOpenDispute({
+                            identifier_type: type === "sms_header" ? "sender_id" : type,
+                            identifier_value: value || result.display_value,
+                          });
+                        }
                       }}
                       className="underline font-bold text-[#0A0A0A] hover:text-[#E5201B] cursor-pointer"
                     >

@@ -113,7 +113,8 @@ async def lookup_identifier(
             "locality": r.locality or "",
             "city": r.city or "",
             "amount_lost_inr": r.amount_lost_inr,
-            "has_screenshot": bool(r.has_screenshot)
+            "has_screenshot": bool(r.has_screenshot),
+            "safe_note": r.note_scrubbed or ""
         })
 
     # If summary indicates reports exist but rows were merged or archived, provide aggregate evidence

@@ -11,10 +11,12 @@ import {
   Minimize2,
   PanelLeftClose,
   PanelLeftOpen,
+  ShieldCheck,
 } from "lucide-react";
 
 import LookupModal from "./components/LookupModal";
 import ReportModal from "./components/ReportModal";
+import DisputeModal from "./components/DisputeModal";
 
 const ScamMap = dynamic(() => import("./components/ScamMap"), {
   ssr: false,
@@ -36,6 +38,8 @@ export default function DashboardPage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [isLookupOpen, setIsLookupOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [isDisputeOpen, setIsDisputeOpen] = useState(false);
+  const [disputeInitialData, setDisputeInitialData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [backendOnline, setBackendOnline] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState("");
@@ -149,6 +153,17 @@ export default function DashboardPage() {
           >
             <Search className="w-4 h-4" />
             <span>Instant Lookup</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setDisputeInitialData(null);
+              setIsDisputeOpen(true);
+            }}
+            className="min-h-[44px] px-3.5 rounded-[12px] border border-[#0A0A0A] bg-[#F7F7F2] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] flex items-center gap-1.5 text-xs font-bold uppercase transition cursor-pointer"
+          >
+            <ShieldCheck className="w-4 h-4 text-[#23E000]" />
+            <span>Dispute Report</span>
           </button>
 
           <button
@@ -363,6 +378,18 @@ export default function DashboardPage() {
       <LookupModal
         isOpen={isLookupOpen}
         onClose={() => setIsLookupOpen(false)}
+        apiBaseUrl={API_BASE_URL}
+        onOpenDispute={(data) => {
+          setIsLookupOpen(false);
+          setDisputeInitialData(data);
+          setIsDisputeOpen(true);
+        }}
+      />
+
+      <DisputeModal
+        isOpen={isDisputeOpen}
+        onClose={() => setIsDisputeOpen(false)}
+        initialData={disputeInitialData}
         apiBaseUrl={API_BASE_URL}
       />
 

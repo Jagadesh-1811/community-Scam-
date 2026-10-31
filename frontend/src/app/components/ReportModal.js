@@ -264,6 +264,15 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
     }, 200);
   };
 
+  const scrubPII = (text) => {
+    if (!text) return "";
+    let scrubbed = text;
+    scrubbed = scrubbed.replace(/[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+/g, "[EMAIL REDACTED]");
+    scrubbed = scrubbed.replace(/\b\d{4}\s?\d{4}\s?\d{4}\b/g, "[ID REDACTED]");
+    scrubbed = scrubbed.replace(/(\+91[\-\s]?)?[6-9]\d{4}[\-\s]?\d{5}\b/g, "[PHONE REDACTED]");
+    return scrubbed.trim();
+  };
+
   // Client-Side Deterministic Heuristic Analyzer & Dynamic Severity Calculator
   const analyzeIncident = (userText, channel) => {
     const textLower = (userText || "").toLowerCase();
@@ -718,6 +727,7 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
           risk_score: finalRiskScore,
           risk_band: finalRiskBand,
           explanation: finalExplanation,
+          masked_message: scrubPII(userText),
         }
       );
 
@@ -1076,6 +1086,27 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
                           <div className="text-xs p-2.5 rounded-[8px] border border-[#0A0A0A] bg-[rgba(229,32,27,0.06)] leading-relaxed">
                             <strong>Finding:</strong> {m.card.explanation}
                           </div>
+
+                          {/* Exact Reported Incident Message with Personal Info Masked */}
+                          {m.card.masked_message && (
+                            <div className="p-2.5 bg-white rounded-[8px] border border-[#0A0A0A]/30 text-xs space-y-1 font-mono">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-bold text-[#0A0A0A] uppercase flex items-center gap-1 font-sans">
+                                  <Lock className="w-3 h-3 text-[#23E000]" />
+                                  Reported Incident Message (Personal Info Masked)
+                                </span>
+                                <span className="text-[9px] bg-[#23E000]/25 text-[#0A0A0A] font-bold px-1.5 py-0.2 rounded font-sans">
+                                  PII MASKED
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-[#0A0A0A] leading-relaxed whitespace-pre-wrap italic bg-[#F7F7F2] p-2 rounded border border-[#0A0A0A]/15">
+                                "{m.card.masked_message}"
+                              </p>
+                              <span className="text-[9px] opacity-60 block font-sans">
+                                ✓ Phone numbers, emails, and personal IDs automatically scrubbed to preserve privacy.
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
