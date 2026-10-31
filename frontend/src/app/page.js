@@ -119,18 +119,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Database Status Indicator */}
-        <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-[12px] border border-[#0A0A0A] bg-[#F7F7F2] text-xs font-bold">
-          <span
-            className={`w-2.5 h-2.5 rounded-full ${
-              backendOnline ? "bg-[#23E000]" : "bg-[#E5201B]"
-            }`}
-          />
-          <span>
-            {backendOnline ? "Database Online (Port 8000)" : "Connecting to Database..."}
-          </span>
-        </div>
-
         {/* Action Controls */}
         <div className="flex items-center gap-2.5">
           {/* Map Maximize / Restore Toggle */}
