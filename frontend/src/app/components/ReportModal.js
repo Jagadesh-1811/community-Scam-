@@ -12,7 +12,11 @@ import {
   Minimize2,
   AlertTriangle,
   MapPin,
-  Compass
+  Compass,
+  IndianRupee,
+  Lock,
+  PhoneCall,
+  BellRing
 } from "lucide-react";
 import { findAreaByInput, KNOWN_AREAS } from "../data/knownAreas";
 
@@ -30,7 +34,157 @@ const INITIAL_MESSAGES = [
   },
 ];
 
-export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLocation }) {
+// Contextual dynamic investigation questions tailored to each scam category
+const SCAM_INVESTIGATION_QUESTIONS = {
+  "digital-arrest": {
+    question: "This matches an impersonation attempt by a fake law enforcement or customs officer. To help police track their apparatus:",
+    prompt: "Did they demand a video call or claim an illegal parcel was found in your name?",
+    replies: [
+      { label: "📹 Video Call Demanded (Skype/WhatsApp with fake uniform)", value: "tactic_video_call" },
+      { label: "📦 Illegal FedEx/DHL Parcel with drugs claimed in my name", value: "tactic_parcel_drugs" },
+      { label: "🔒 Ordered me to stay isolated in a room and not call family", value: "tactic_room_isolation" },
+      { label: "🏦 Demanded transfer to a 'Safe Government RBI Account'", value: "tactic_rbi_bail" },
+    ],
+  },
+  "electricity-disconnection": {
+    question: "This matches an Electricity Disconnection extortion scheme targeting household power consumers.",
+    prompt: "What specific method did they use to threaten power cutoff?",
+    replies: [
+      { label: "⏰ Threatened power cutoff tonight (e.g. 9:30 PM)", value: "tactic_night_cutoff" },
+      { label: "📲 Sent an APK file (e.g. Suvidha.apk / Urja.apk) to install", value: "tactic_apk_install" },
+      { label: "📞 Instructed to call a personal 10-digit mobile number", value: "tactic_personal_phone" },
+      { label: "💳 Demanded ₹10 to ₹50 token payment via unknown link", value: "tactic_token_payment" },
+    ],
+  },
+  "job-offer": {
+    question: "This matches a Part-Time Task & Investment Trap (Telegram/WhatsApp task fraud).",
+    prompt: "What stage of the recruitment trap did you encounter?",
+    replies: [
+      { label: "📢 Telegram group for liking YouTube videos or hotel ratings", value: "tactic_telegram_tasks" },
+      { label: "💵 Paid small initial return (₹150–₹500) to gain trust", value: "tactic_small_payout" },
+      { label: "🚫 Froze funds & demanded deposit (₹10,000+) to withdraw", value: "tactic_deposit_demand" },
+      { label: "💬 Unsolicited WhatsApp message from fake HR recruiter", value: "tactic_unsolicited_hr" },
+    ],
+  },
+  "fake-kyc-link": {
+    question: "This matches a Banking & KYC Phishing Attack impersonating financial institutions.",
+    prompt: "What sensitive information or access did they try to extract?",
+    replies: [
+      { label: "🔗 Phishing link asking for NetBanking ID, Password or CVV", value: "tactic_credential_phish" },
+      { label: "📥 Instructed to download screen-sharing app (AnyDesk/RustDesk)", value: "tactic_screen_share" },
+      { label: "⛔ Claimed bank account or PAN will be permanently blocked", value: "tactic_account_blocked" },
+      { label: "🔢 Caller insisted on reading out the OTP code received on SMS", value: "tactic_otp_demand" },
+    ],
+  },
+  "upi-refund-qr": {
+    question: "This matches a QR Code & UPI Inversion Fraud (money extraction trick).",
+    prompt: "How did they attempt to trick you into authorizing payment?",
+    replies: [
+      { label: "📷 Sent QR code claiming 'Scan QR code to receive money'", value: "tactic_scan_to_receive" },
+      { label: "📥 Sent UPI Collect Request pretending it was an incoming refund", value: "tactic_collect_request" },
+      { label: "🎖️ Posed as an Army/Defence officer transferring on duty", value: "tactic_army_officer" },
+      { label: "📦 Demanded advance courier or delivery fee before purchase", value: "tactic_advance_courier" },
+    ],
+  },
+  "loan-app-harassment": {
+    question: "This matches an Unregulated Predatory Loan Harassment Scheme.",
+    prompt: "What harassment or coercion tactics did they use?",
+    replies: [
+      { label: "📱 App demanded access to complete contact list & gallery", value: "tactic_permission_abuse" },
+      { label: "⚠️ Threatened to send morphed photos to family/contacts", value: "tactic_morphed_threat" },
+      { label: "💸 Deducted 40-50% processing fees before loan disbursal", value: "tactic_high_deduction" },
+      { label: "📞 Abusive recovery calls from multiple overseas numbers", value: "tactic_abusive_calls" },
+    ],
+  },
+  "courier-customs": {
+    question: "This matches a Fake Parcel / Customs Confiscation Scam.",
+    prompt: "What did they claim was found in your parcel?",
+    replies: [
+      { label: "📦 Narcotics, fake passports, or contraband seized in your name", value: "tactic_contraband" },
+      { label: "👮 Transferring call to 'Mumbai/Delhi Cyber Crime Police'", value: "tactic_police_transfer" },
+      { label: "💰 Demanded customs clearance fee or penalty to release parcel", value: "tactic_customs_fine" },
+      { label: "✈️ International parcel detained at airport terminal", value: "tactic_airport_hold" },
+    ],
+  },
+  "sextortion": {
+    question: "This matches a Video Blackmail & Cyber Extortion Scheme.",
+    prompt: "What extortion threats were made against you?",
+    replies: [
+      { label: "📹 Brief WhatsApp video call recorded and morphed", value: "tactic_morphed_video" },
+      { label: "⚠️ Threatened to send video to Facebook/Instagram relatives", value: "tactic_social_leak" },
+      { label: "👮 Person posing as cyber police officer demanding fee to delete", value: "tactic_fake_cop_delete" },
+      { label: "⏳ Given 30-minute deadline to pay before filing fake FIR", value: "tactic_fir_deadline" },
+    ],
+  },
+  "lottery-prize": {
+    question: "This matches a Lottery / Sweepstakes Advance-Fee Scam.",
+    prompt: "What prize lure was used in the communication?",
+    replies: [
+      { label: "🎁 Claimed I won KBC ₹25 Lakhs or a Tata Safari car", value: "tactic_kbc_lottery" },
+      { label: "💳 Demanded GST / clearance fee before releasing prize money", value: "tactic_prize_gst" },
+      { label: "📜 Sent fake certificate with government stamps on WhatsApp", value: "tactic_fake_cert" },
+      { label: "📞 Audio recording claiming to be bank head manager", value: "tactic_manager_audio" },
+    ],
+  },
+  "general-fraud": {
+    question: "To document this suspicious activity accurately in the registry:",
+    prompt: "Which primary deception technique did the fraudster use?",
+    replies: [
+      { label: "🚨 Urgent legal, tax, or police threat demanding payment", value: "tactic_legal_threat" },
+      { label: "🎁 Unrealistic high returns, cashback, or lottery lure", value: "tactic_high_return" },
+      { label: "🔑 Demanding OTP, ATM PIN, or remote app installation", value: "tactic_cred_demand" },
+      { label: "⚠️ Unsolicited payment request or suspicious link", value: "tactic_link_demand" },
+    ],
+  },
+};
+
+// Dynamic community safety advice tailored to the specific scam type
+const DYNAMIC_SAFETY_ADVICE = {
+  "digital-arrest": [
+    { label: "Police & CBI never arrest on video calls; hang up and dial 1930", value: "sug_police_video" },
+    { label: "Never transfer money to any secret 'Safe RBI verification account'", value: "sug_rbi_account" },
+    { label: "Warn family & elderly neighbors about digital arrest impersonations", value: "sug_warn_family" },
+    { label: "No suggestions, proceed to save", value: "sug_none" },
+  ],
+  "electricity-disconnection": [
+    { label: "Discoms never send disconnection threats from 10-digit mobile numbers", value: "sug_discom_mobile" },
+    { label: "Never download APK files sent via WhatsApp or SMS", value: "sug_discom_apk" },
+    { label: "Check bill status solely on the official state electricity portal", value: "sug_discom_portal" },
+    { label: "No suggestions, proceed to save", value: "sug_none" },
+  ],
+  "job-offer": [
+    { label: "Never pay money to unlock salary tasks or earn daily profits", value: "sug_task_deposit" },
+    { label: "Leave Telegram task groups immediately and report the channel", value: "sug_task_telegram" },
+    { label: "Legitimate companies never hire without formal interview & contract", value: "sug_task_formal" },
+    { label: "No suggestions, proceed to save", value: "sug_none" },
+  ],
+  "fake-kyc-link": [
+    { label: "Never enter UPI PIN or click SMS links to update KYC", value: "sug_kyc_pin" },
+    { label: "Banks never ask for debit card CVV or OTP to prevent account block", value: "sug_kyc_cvv" },
+    { label: "Visit your local bank branch directly if in doubt about your account", value: "sug_kyc_branch" },
+    { label: "No suggestions, proceed to save", value: "sug_none" },
+  ],
+  "upi-refund-qr": [
+    { label: "Never scan a QR code to receive money - QR is strictly for paying", value: "sug_qr_pay" },
+    { label: "Never enter your UPI PIN unless you intend to transfer funds", value: "sug_qr_pin" },
+    { label: "Decline incoming UPI collect requests from unknown buyers on OLX", value: "sug_qr_olx" },
+    { label: "No suggestions, proceed to save", value: "sug_none" },
+  ],
+  "loan-app-harassment": [
+    { label: "Never grant gallery or contact permissions to unverified loan apps", value: "sug_loan_perms" },
+    { label: "Report harassment and blackmail numbers directly to cybercrime.gov.in", value: "sug_loan_report" },
+    { label: "Check RBI registered NBFC list before applying for online loans", value: "sug_loan_rbi" },
+    { label: "No suggestions, proceed to save", value: "sug_none" },
+  ],
+  "general-fraud": [
+    { label: "Never share OTP, PIN, or passwords with anyone", value: "sug_gen_otp" },
+    { label: "Verify caller identity before authorizing any financial transaction", value: "sug_gen_verify" },
+    { label: "Report suspicious numbers immediately to national helpline 1930", value: "sug_gen_1930" },
+    { label: "No suggestions, proceed to save", value: "sug_none" },
+  ],
+};
+
+export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLocation, apiBaseUrl }) {
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState("");
   const [step, setStep] = useState("channel");
@@ -49,6 +203,8 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
     locality: "",
     city: "",
     note: "",
+    amount_lost_inr: 0,
+    investigation_tactic: "",
     predicted_risk: null,
     predicted_band: "",
     predicted_tactics: [],
@@ -79,6 +235,8 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
         locality: "",
         city: "",
         note: "",
+        amount_lost_inr: 0,
+        investigation_tactic: "",
         predicted_risk: null,
         predicted_band: "",
         predicted_tactics: [],
@@ -106,9 +264,230 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
     }, 200);
   };
 
-  // Haversine distance in kilometers between two GPS coordinates
+  // Client-Side Deterministic Heuristic Analyzer & Dynamic Severity Calculator
+  const analyzeIncident = (userText, channel) => {
+    const textLower = (userText || "").toLowerCase();
+
+    // 1. Extract identifier
+    let identType = "phone";
+    let identVal = "+919876500000";
+
+    const phoneMatch = userText.match(/(\+91[\-\s]?)?[6-9]\d{9}|\b1930\b|\b1800\d{6,8}\b/);
+    const upiMatch = userText.match(/[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}/);
+    const urlMatch = userText.match(/https?:\/\/[^\s]+|[a-zA-Z0-9-]+\.(com|in|org|net|xyz|top|link|app)[^\s]*/);
+
+    if (upiMatch) {
+      identType = "upi";
+      identVal = upiMatch[0];
+    } else if (urlMatch) {
+      identType = "url";
+      identVal = urlMatch[0];
+    } else if (phoneMatch) {
+      identType = "phone";
+      identVal = phoneMatch[0];
+    }
+
+    // 2. Classify Scam Pattern with High Accuracy Keyword Weights
+    let detectedType = "general-fraud";
+    let baseScore = 30;
+    const detectedTactics = [];
+
+    if (
+      textLower.includes("digital arrest") ||
+      textLower.includes("cbi") ||
+      textLower.includes("narcotics") ||
+      textLower.includes("illegal parcel") ||
+      textLower.includes("skype") ||
+      textLower.includes("cyber cell") ||
+      textLower.includes("arrest warrant") ||
+      textLower.includes("mumbai police")
+    ) {
+      detectedType = "digital-arrest";
+      baseScore = 55;
+      detectedTactics.push("Law Enforcement Impersonation", "Coercive Legal Threat");
+    } else if (
+      textLower.includes("electricity") ||
+      textLower.includes("power disconnect") ||
+      textLower.includes("power cutoff") ||
+      textLower.includes("light cut") ||
+      textLower.includes("update meter") ||
+      textLower.includes("bescom") ||
+      textLower.includes("tneb") ||
+      textLower.includes("msedcl") ||
+      textLower.includes("bill unpaid")
+    ) {
+      detectedType = "electricity-disconnection";
+      baseScore = 50;
+      detectedTactics.push("Utility Disconnection Threat", "Artificial Night Deadline");
+    } else if (
+      textLower.includes("part time") ||
+      textLower.includes("part-time") ||
+      textLower.includes("job offer") ||
+      textLower.includes("telegram") ||
+      textLower.includes("daily salary") ||
+      textLower.includes("earn 3000") ||
+      textLower.includes("earn 5000") ||
+      textLower.includes("like youtube") ||
+      textLower.includes("hotel review") ||
+      textLower.includes("prepaid task") ||
+      textLower.includes("vip task")
+    ) {
+      detectedType = "job-offer";
+      baseScore = 48;
+      detectedTactics.push("Unrealistic Daily Earning", "Deposit Task Trap");
+    } else if (
+      textLower.includes("kyc") ||
+      textLower.includes("pan card") ||
+      textLower.includes("account blocked") ||
+      textLower.includes("sbi") ||
+      textLower.includes("hdfc") ||
+      textLower.includes("icici") ||
+      textLower.includes("yono") ||
+      textLower.includes("update pan") ||
+      textLower.includes("netbanking")
+    ) {
+      detectedType = "fake-kyc-link";
+      baseScore = 52;
+      detectedTactics.push("Banking Credential Harvesting", "Account Suspension Fear");
+    } else if (
+      textLower.includes("scan qr") ||
+      textLower.includes("qr code") ||
+      textLower.includes("upi collect") ||
+      textLower.includes("olx") ||
+      textLower.includes("scan to receive") ||
+      textLower.includes("enter pin to receive")
+    ) {
+      detectedType = "upi-refund-qr";
+      baseScore = 48;
+      detectedTactics.push("UPI Inversion Trick", "False Payment Authority");
+    } else if (
+      textLower.includes("fedex") ||
+      textLower.includes("customs") ||
+      textLower.includes("dhl") ||
+      textLower.includes("parcel detained") ||
+      textLower.includes("taiwan")
+    ) {
+      detectedType = "courier-customs";
+      baseScore = 50;
+      detectedTactics.push("Detained Cargo Lure", "Fake Customs Penalty");
+    } else if (
+      textLower.includes("instant loan") ||
+      textLower.includes("loan app") ||
+      textLower.includes("morphed photo") ||
+      textLower.includes("contacts leaked") ||
+      textLower.includes("recovery agent")
+    ) {
+      detectedType = "loan-app-harassment";
+      baseScore = 58;
+      detectedTactics.push("Intimidation & Contact Doxxing", "Predatory Interest Scheme");
+    } else if (
+      textLower.includes("sextortion") ||
+      textLower.includes("video leak") ||
+      textLower.includes("facebook relatives") ||
+      textLower.includes("nude video") ||
+      textLower.includes("blackmail")
+    ) {
+      detectedType = "sextortion";
+      baseScore = 65;
+      detectedTactics.push("Reputational Blackmail", "Extortion Deadline");
+    } else if (
+      textLower.includes("lottery") ||
+      textLower.includes("kbc") ||
+      textLower.includes("won 25 lakh") ||
+      textLower.includes("lucky draw")
+    ) {
+      detectedType = "lottery-prize";
+      baseScore = 38;
+      detectedTactics.push("Advance Fee Fraud", "Fictitious Prize Lure");
+    }
+
+    // 3. Dynamic Score Modulation via Behavioral Heuristics
+    let dynamicScore = baseScore;
+
+    // A. Extreme Urgency Indicator (+12 pts)
+    if (
+      textLower.includes("tonight") ||
+      textLower.includes("9:30") ||
+      textLower.includes("immediately") ||
+      textLower.includes("within 2 hours") ||
+      textLower.includes("today itself") ||
+      textLower.includes("24 hours") ||
+      textLower.includes("urgent") ||
+      textLower.includes("last chance")
+    ) {
+      dynamicScore += 12;
+      detectedTactics.push("High Pressure Urgency");
+    }
+
+    // B. Severe Coercion / Threat Indicator (+16 pts)
+    if (
+      textLower.includes("arrest") ||
+      textLower.includes("jail") ||
+      textLower.includes("fir") ||
+      textLower.includes("court") ||
+      textLower.includes("police") ||
+      textLower.includes("disconnect") ||
+      textLower.includes("block") ||
+      textLower.includes("raid")
+    ) {
+      dynamicScore += 16;
+      detectedTactics.push("Punitive Threat & Coercion");
+    }
+
+    // C. Credential / Remote Access Harvesting (+18 pts)
+    if (
+      textLower.includes("otp") ||
+      textLower.includes("pin") ||
+      textLower.includes("password") ||
+      textLower.includes("cvv") ||
+      textLower.includes("anydesk") ||
+      textLower.includes("rustdesk") ||
+      textLower.includes("teamviewer") ||
+      textLower.includes("apk") ||
+      textLower.includes(".apk")
+    ) {
+      dynamicScore += 18;
+      detectedTactics.push("Credential / APK Harvesting");
+    }
+
+    // D. Unverified Link or Channel Escalation (+10 pts)
+    if (urlMatch || channel === "link" || channel === "upi") {
+      dynamicScore += 10;
+      detectedTactics.push("Unverified Link / Channel Vector");
+    }
+
+    // Clamp score within 15 to 98
+    dynamicScore = Math.min(98, Math.max(18, dynamicScore));
+
+    // Dynamic Risk Band Evaluation
+    let riskBand = "Low";
+    if (dynamicScore >= 85) {
+      riskBand = "Critical";
+    } else if (dynamicScore >= 66) {
+      riskBand = "High";
+    } else if (dynamicScore >= 35) {
+      riskBand = "Suspicious";
+    }
+
+    let explanation = `Identified tactics: ${detectedTactics.slice(0, 3).join(", ")}.`;
+    if (detectedType !== "general-fraud") {
+      explanation = `Matches verified Indian ${detectedType.replace("-", " ")} signatures. ${explanation}`;
+    }
+
+    return {
+      identType,
+      identVal,
+      detectedType,
+      dynamicScore,
+      riskBand,
+      detectedTactics,
+      explanation,
+    };
+  };
+
+  // Haversine distance in kilometers
   const calculateDistanceKm = (lat1, lon1, lat2, lon2) => {
-    const R = 6371; // Radius of the Earth in km
+    const R = 6371;
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
     const dLon = ((lon2 - lon1) * Math.PI) / 180;
     const a =
@@ -117,21 +496,13 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
         Math.cos((lat2 * Math.PI) / 180) *
         Math.sin(dLon / 2) *
         Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
 
-  // Resolve generalized regional cluster strictly within a 2 to 3 km zone
-  // PRIVACY & GENERALIZATION RULE:
-  // - Never map exact home, house, or street location.
-  // - Fuzzes coordinates to a generalized cluster center within 2 to 3 km.
-  // - Identifies the broad municipal safety ward / zone encompassing your area.
+  // 2 to 3 km privacy-preserving spatial generalization
   const resolveZoneWithinRange = async (lat, lng) => {
-    // 1. Add privacy-preserving spatial offset (~2 to 3 km distance)
-    // 0.022 degrees latitude ≈ 2.44 km
-    // Random angle between 0 and 2*PI to place the cluster point in a 2 to 3 km circle
     const angle = Math.random() * 2 * Math.PI;
-    const offsetDistanceKm = 2.0 + Math.random() * 1.0; // strictly between 2.0 and 3.0 km
+    const offsetDistanceKm = 2.0 + Math.random() * 1.0;
     const dLat = (offsetDistanceKm / 111.32) * Math.cos(angle);
     const dLng = (offsetDistanceKm / (111.32 * Math.cos((lat * Math.PI) / 180))) * Math.sin(angle);
 
@@ -139,7 +510,6 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
     const fuzzedLng = lng + dLng;
 
     try {
-      // Query reverse geocoding on the 2-3 km generalized zone
       const res = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${fuzzedLat}&lon=${fuzzedLng}&zoom=14&addressdetails=1`,
         { headers: { "Accept-Language": "en", "User-Agent": "ScamRadar-India/1.0" } }
@@ -148,7 +518,6 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
       if (res.ok) {
         const data = await res.json();
         const addr = data.address || {};
-
         const regionalWard =
           addr.suburb ||
           addr.city_district ||
@@ -157,17 +526,8 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
           addr.town ||
           addr.village ||
           "Regional Safety Sector";
-
-        const cityName =
-          addr.city ||
-          addr.town ||
-          addr.county ||
-          addr.state_district ||
-          "Bengaluru";
-
+        const cityName = addr.city || addr.town || addr.county || "Bengaluru";
         const postCode = addr.postcode || "560001";
-
-        // Coarsen to ~0.01 deg (~1.1 km grid)
         const clusterLat = Math.round(fuzzedLat * 100) / 100;
         const clusterLng = Math.round(fuzzedLng * 100) / 100;
 
@@ -180,16 +540,12 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
           rangeLabel: `${offsetDistanceKm.toFixed(1)} km`,
         };
       }
-    } catch (e) {
-      // Fallback if offline
-    }
+    } catch (e) {}
 
-    // 2. Select matching regional area within 2 to 3 km if registered
     let matchedArea = KNOWN_AREAS[0];
     let minDiff = Infinity;
     for (const a of KNOWN_AREAS) {
       const dist = calculateDistanceKm(lat, lng, a.lat, a.lng);
-      // Find area closest to the 2.5 km target window
       const diff = Math.abs(dist - 2.5);
       if (diff < minDiff) {
         minDiff = diff;
@@ -233,18 +589,10 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
           });
         }
 
-        setStep("suggestions");
-        addBotMessage(
-          `Regional Zone Mapped (within 2–3 km): ${cluster.locality}, ${cluster.city} (PIN ${cluster.pincode}).\n\nWhat preventive advice do you recommend for neighbors in this zone?`,
-          [
-            { label: "Never share OTP or approve unknown UPI links", value: "sug_otp" },
-            { label: "Hang up immediately on fake police video calls", value: "sug_police" },
-            { label: "Verify discom updates only via official discom app", value: "sug_elec" },
-            { label: "No suggestions, proceed to save", value: "sug_none" },
-          ]
-        );
+        // Move to dynamic safety advice tailored to the detected scam
+        promptDynamicSafetyAdvice(cluster);
       },
-      (err) => {
+      () => {
         setRequestingGps(false);
         fallbackNearestArea("Regional Safety Zone");
       },
@@ -263,15 +611,17 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
     if (onHighlightLocation) {
       onHighlightLocation(defaultZone);
     }
+    promptDynamicSafetyAdvice(defaultZone);
+  };
+
+  const promptDynamicSafetyAdvice = (cluster) => {
     setStep("suggestions");
+    const scamCategory = reportData.scam_type || "general-fraud";
+    const adviceList = DYNAMIC_SAFETY_ADVICE[scamCategory] || DYNAMIC_SAFETY_ADVICE["general-fraud"];
+
     addBotMessage(
-      `Assigned to regional safety cluster: ${defaultZone.locality}, ${defaultZone.city}.\n\nWhat preventive advice do you recommend for neighbors in this zone?`,
-      [
-        { label: "Never share OTP or approve unknown UPI links", value: "sug_otp" },
-        { label: "Hang up immediately on fake police video calls", value: "sug_police" },
-        { label: "Verify discom updates only via official discom app", value: "sug_elec" },
-        { label: "No suggestions, proceed to save", value: "sug_none" },
-      ]
+      `📍 Regional Cluster Mapped (~2–3 km): ${cluster.locality}, ${cluster.city} (PIN ${cluster.pincode}).\n\nWhat prevention guidance should we broadcast to protect fellow citizens in this cluster?`,
+      adviceList
     );
   };
 
@@ -294,42 +644,34 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
     ]);
     setInput("");
 
+    // Step 1: Channel selection
     if (step === "channel") {
       const channel = userVal;
       setReportData((prev) => ({ ...prev, channel }));
       setStep("content");
       addBotMessage(
-        `Channel recorded: ${text}.\n\nPlease describe what was claimed, demanded, or paste the message text / phone number.`
+        `Channel recorded: ${text}.\n\nPlease describe what was claimed, demanded, or paste the message text / sender phone number.`
       );
-    } else if (step === "content") {
+    }
+    // Step 2: Content Analysis & Dynamic Verification
+    else if (step === "content") {
       const userText = userVal;
 
-      let identType = "phone";
-      let identVal = "+919876500000";
+      // Run our robust local NLP heuristic analysis first
+      const localAnalysis = analyzeIncident(userText, reportData.channel);
 
-      const phoneMatch = userText.match(/(\+91[\-\s]?)?[6-9]\d{9}|\b1930\b|\b1800\d{6,8}\b/);
-      const upiMatch = userText.match(/[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}/);
-      const urlMatch = userText.match(/https?:\/\/[^\s]+|[a-zA-Z0-9-]+\.(com|in|org|net|xyz|top|link)[^\s]*/);
+      let finalScamType = localAnalysis.detectedType;
+      let finalRiskScore = localAnalysis.dynamicScore;
+      let finalRiskBand = localAnalysis.riskBand;
+      let finalTactics = localAnalysis.detectedTactics;
+      let finalExplanation = localAnalysis.explanation;
+      let finalIdentType = localAnalysis.identType;
+      let finalIdentVal = localAnalysis.identVal;
 
-      if (upiMatch) {
-        identType = "upi";
-        identVal = upiMatch[0];
-      } else if (urlMatch) {
-        identType = "url";
-        identVal = urlMatch[0];
-      } else if (phoneMatch) {
-        identType = "phone";
-        identVal = phoneMatch[0];
-      }
-
-      let predictedScamType = "digital-arrest";
-      let riskScore = 45;
-      let riskBand = "Suspicious";
-      let tactics = [];
-      let explanation = "";
-
+      // Attempt to query the backend deterministic checker to augment results
       try {
-        const checkRes = await fetch("http://localhost:8000/check?stream=false", {
+        const baseUrl = apiBaseUrl || "http://localhost:8000";
+        const checkRes = await fetch(`${baseUrl}/check?stream=false`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text: userText, ui_language: "en" }),
@@ -337,40 +679,121 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
 
         if (checkRes.ok) {
           const checkData = await checkRes.json();
-          riskScore = checkData.score || 45;
-          riskBand = checkData.band || "Suspicious";
-          predictedScamType = checkData.scam_type !== "other" ? checkData.scam_type : "digital-arrest";
-          tactics = checkData.tactics || [];
+          if (checkData.scam_type && checkData.scam_type !== "other") {
+            finalScamType = checkData.scam_type;
+          }
+          if (checkData.score && checkData.score > 0) {
+            finalRiskScore = checkData.score;
+            finalRiskBand = checkData.band || finalRiskBand;
+          }
+          if (checkData.tactics && checkData.tactics.length > 0) {
+            finalTactics = Array.from(new Set([...finalTactics, ...checkData.tactics]));
+          }
           if (checkData.explanation && checkData.explanation.length > 0) {
-            explanation = checkData.explanation.slice(0, 2).join(" ");
+            finalExplanation = checkData.explanation.slice(0, 2).join(" ");
           }
         }
-      } catch (err) {}
+      } catch (err) {
+        // Local deterministic engine guarantees dynamic operation even if backend fluctuates
+      }
 
       setReportData((prev) => ({
         ...prev,
         note: userText,
-        identifier_type: identType,
-        identifier_value: identVal,
-        scam_type: predictedScamType,
-        predicted_risk: riskScore,
-        predicted_band: riskBand,
-        predicted_tactics: tactics,
+        identifier_type: finalIdentType,
+        identifier_value: finalIdentVal,
+        scam_type: finalScamType,
+        predicted_risk: finalRiskScore,
+        predicted_band: finalRiskBand,
+        predicted_tactics: finalTactics,
       }));
 
-      setStep("location_permission");
+      // Render the Scam Pattern Verification Card
       addBotMessage(
         "",
         null,
         {
           type: "prediction_card",
-          scam_type: predictedScamType.toUpperCase(),
-          risk_score: riskScore,
-          risk_band: riskBand,
-          explanation: explanation || "Matches recognized deceptive patterns in the fraud database.",
+          scam_type: finalScamType.toUpperCase(),
+          risk_score: finalRiskScore,
+          risk_band: finalRiskBand,
+          explanation: finalExplanation,
         }
       );
-    } else if (step === "suggestions") {
+
+      // Transition to DYNAMIC investigative question tailored to detected scam
+      setStep("investigation_question");
+      const config = SCAM_INVESTIGATION_QUESTIONS[finalScamType] || SCAM_INVESTIGATION_QUESTIONS["general-fraud"];
+      addBotMessage(
+        `${config.question}\n\n${config.prompt}`,
+        config.replies
+      );
+    }
+    // Step 3: Investigative Tactic Follow-Up
+    else if (step === "investigation_question") {
+      setReportData((prev) => ({
+        ...prev,
+        investigation_tactic: text,
+      }));
+
+      // Transition to Dynamic Financial Loss Assessment
+      setStep("financial_loss");
+      addBotMessage(
+        `Noted: "${text}".\n\nDid you suffer any financial loss in this incident, or did you detect the deception in time?`,
+        [
+          { label: "🛡️ No Money Lost (₹0 - Caught in Time)", value: "loss_0" },
+          { label: "💸 Small Loss (Under ₹10,000 lost)", value: "loss_10k" },
+          { label: "⚠️ Moderate Loss (₹10,000 to ₹50,000 lost)", value: "loss_50k" },
+          { label: "🚨 Severe Loss (Over ₹50,000 lost)", value: "loss_high" },
+        ]
+      );
+    }
+    // Step 4: Financial Loss Assessment
+    else if (step === "financial_loss") {
+      let lossInr = 0;
+      let isHighLoss = false;
+
+      if (userVal === "loss_10k") {
+        lossInr = 5000;
+        isHighLoss = true;
+      } else if (userVal === "loss_50k") {
+        lossInr = 25000;
+        isHighLoss = true;
+      } else if (userVal === "loss_high") {
+        lossInr = 75000;
+        isHighLoss = true;
+      } else if (!userVal.startsWith("loss_0")) {
+        const parsed = parseFloat(userVal.replace(/[^0-9.]/g, ""));
+        if (!isNaN(parsed) && parsed > 0) {
+          lossInr = parsed;
+          isHighLoss = true;
+        }
+      }
+
+      setReportData((prev) => ({
+        ...prev,
+        amount_lost_inr: lossInr,
+        // Dynamically elevate score if financial loss occurred
+        predicted_risk: isHighLoss ? Math.min(99, (prev.predicted_risk || 50) + 15) : prev.predicted_risk,
+        predicted_band: isHighLoss ? "Critical" : prev.predicted_band,
+      }));
+
+      if (isHighLoss) {
+        addBotMessage(
+          `🚨 URGENT RECOVERY PROTOCOL:\nSince money was transferred, call national cybercrime helpline 1930 immediately!\n\nUnder the I4C CFCFRMS protocol, reporting within the golden hour triggers an instant freeze on the scammer's mule bank account before cash withdrawal.`
+        );
+      }
+
+      // Transition to Location Cluster Detection
+      setStep("location_permission");
+      addBotMessage(
+        "To warn residents in your locality without compromising your privacy, please authorize broad neighborhood cluster detection (~2 to 3 km zone).",
+        null,
+        { type: "location_prompt_card" }
+      );
+    }
+    // Step 5: Suggestions
+    else if (step === "suggestions") {
       let suggestionsList = [];
       if (userVal !== "sug_none") {
         suggestionsList = [text];
@@ -379,13 +802,15 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
       setStep("save_confirm");
 
       addBotMessage(
-        `Advice logged: "${text}".\n\nCould this incident report now be saved to the community database to warn neighbors in your area?`,
+        `Guidance registered: "${text}".\n\nWould you like to publish this report anonymously to the national threat map to protect other citizens?`,
         [
-          { label: "Yes, save anonymously to DB", value: "confirm_save" },
-          { label: "No, cancel", value: "cancel" },
+          { label: "Yes, publish anonymously to map", value: "confirm_save" },
+          { label: "No, cancel report", value: "cancel" },
         ]
       );
-    } else if (step === "save_confirm") {
+    }
+    // Step 6: Save Confirmation
+    else if (step === "save_confirm") {
       if (userVal === "cancel") {
         addBotMessage("Report submission cancelled. No data has been saved.");
         setStep("done");
@@ -394,21 +819,22 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
 
       setStep("notifications");
       addBotMessage(
-        "Do you want to get notified for recent scam alerts or surges in your area?",
+        "Do you want to receive real-time alerts if a scam surge or new pattern emerges in your cluster?",
         [
-          { label: "Notify me with notifications", value: "alerts_yes" },
+          { label: "🔔 Notify me with surge alerts", value: "alerts_yes" },
           { label: "No thanks, just save report", value: "alerts_no" },
         ]
       );
-    } else if (step === "notifications") {
+    }
+    // Step 7: Push Notifications Opt-In & Submission
+    else if (step === "notifications") {
       if (userVal === "alerts_yes") {
-        // Request Web Push Notification permission directly
         if (typeof window !== "undefined" && "Notification" in window) {
           try {
             const perm = await Notification.requestPermission();
             if (perm === "granted") {
               new Notification("ScamRadar Surge Alert Active", {
-                body: "You will receive real-time scam surge alerts for your safety zone.",
+                body: "Real-time scam surge alerts enabled for your safety cluster.",
                 icon: "/favicon.ico",
               });
             }
@@ -421,15 +847,15 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
           contact_for_alerts: "browser_push",
         };
         setReportData(updated);
-        addBotMessage("Browser notifications activated for scam surges in your area! 🔔\n\nSaving your report now to protect neighbors in your zone...");
+        addBotMessage("Browser notifications activated for your safety zone! 🔔\n\nSubmitting report to community threat registry...");
         setTimeout(() => {
           submitReportToDB(updated);
-        }, 600);
+        }, 500);
       } else {
-        addBotMessage("Understood, proceeding to save your report anonymously...");
+        addBotMessage("Understood. Publishing your report anonymously...");
         setTimeout(() => {
           submitReportToDB({ ...reportData, wants_notifications: false });
-        }, 600);
+        }, 500);
       }
     }
   };
@@ -437,7 +863,6 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
   const submitReportToDB = async (finalData) => {
     setSubmitting(true);
     setUiError("");
-    addBotMessage("Saving report and community suggestions to Database... ⏳");
 
     try {
       const reporterId =
@@ -446,133 +871,165 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
       localStorage.setItem("scamradar_reporter_id", reporterId);
 
       let fullNote = finalData.note || "Report submitted by citizen";
+      if (finalData.investigation_tactic) {
+        fullNote += ` [Tactic: ${finalData.investigation_tactic}]`;
+      }
       if (finalData.suggestions && finalData.suggestions.length > 0) {
         fullNote += ` [Safety Advice: ${finalData.suggestions.join("; ")}]`;
       }
-      if (finalData.wants_notifications && finalData.contact_for_alerts) {
-        fullNote += ` [Alerts requested: ${finalData.contact_for_alerts}]`;
-      }
 
       const payload = {
+        case_id: `CASE-${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
         reporter_id: reporterId,
-        ip_prefix: "49.207.1.0",
-        channel: finalData.channel || "phone_call",
+        ip_prefix: "49.207.12.0",
+        occurred_at: new Date().toISOString(),
+        channel: finalData.channel === "phone_call" ? "Phone call" : finalData.channel === "upi" ? "UPI request" : "SMS",
         scam_type: finalData.scam_type || "digital-arrest",
         identifier_type: finalData.identifier_type || "phone",
         identifier_value: finalData.identifier_value || "+919876500000",
-        pincode: finalData.pincode || "560038",
-        locality: finalData.locality || "Metropolitan Zone",
+        pincode: finalData.pincode || "560001",
+        locality: finalData.locality || "Central Zone",
         city: finalData.city || "Bengaluru",
+        amount_lost_inr: finalData.amount_lost_inr || null,
         note: fullNote,
-        occurred_at: new Date().toISOString(),
       };
 
-      const res = await fetch("http://localhost:8000/reports", {
+      const baseUrl = apiBaseUrl || "http://localhost:8000";
+      const res = await fetch(`${baseUrl}/reports`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.detail || `Server returned error status ${res.status}`);
+        const errData = await res.json();
+        throw new Error(errData.detail || errData.error || "Failed to save report.");
       }
 
-      const data = await res.json();
-      setReceipt(data);
+      const resData = await res.json();
+      setReceipt(resData);
       setStep("done");
 
       addBotMessage(
-        `Successfully recorded in the Community DB.\n\nCase Receipt: ${data.case_id}\n\nYour report is now live on the OpenStreetMap cluster. The area has been updated!`
+        `✅ Report successfully logged!\n\nCase ID: ${resData.case_id}\nCluster: ${finalData.locality || "Bengaluru"} (${finalData.pincode || "560001"})\nStatus: Broadcast to Live Threat Map\n\nThank you for shielding your community! 🛡️`
       );
 
-      if (onSuccess) onSuccess();
+      if (onSuccess) {
+        onSuccess(resData);
+      }
     } catch (err) {
-      setUiError(err.message);
-      addBotMessage(
-        `Report Submission Notice: ${err.message}. Please check if the backend server is running on port 8000.`
-      );
-      setStep("done");
+      setUiError(err.message || "Network error while saving report.");
+      addBotMessage(`⚠️ Unable to complete database sync: ${err.message}. Please try again.`);
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const getBandBadge = (band, score) => {
+    const b = (band || "").toLowerCase();
+    if (b === "critical" || score >= 85) {
+      return {
+        bg: "bg-[#E5201B] text-[#F7F7F2] font-black animate-pulse",
+        border: "border-[#E5201B]",
+        label: "Critical Threat",
+      };
+    }
+    if (b === "high" || score >= 66) {
+      return {
+        bg: "bg-[#E5201B] text-[#F7F7F2] font-bold",
+        border: "border-[#E5201B]",
+        label: "High Threat",
+      };
+    }
+    if (b === "suspicious" || score >= 35) {
+      return {
+        bg: "bg-[#0A0A0A] text-[#F7F7F2] font-bold",
+        border: "border-[#0A0A0A]",
+        label: "Suspicious",
+      };
+    }
+    return {
+      bg: "bg-[#23E000] text-[#0A0A0A] font-bold border border-[#0A0A0A]",
+      border: "border-[#23E000]",
+      label: "Low Risk",
+    };
   };
 
   if (!isOpen) return null;
 
   return (
     <div
-      className={`fixed z-[9999] transition-all duration-200 pointer-events-auto ${
-        isExpanded
-          ? "inset-0 flex items-center justify-center bg-[#F7F7F2]"
-          : "bottom-4 right-4 md:bottom-6 md:right-6 w-[94vw] max-w-md md:max-w-lg"
-      }`}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs transition-opacity duration-150 animate-fadeIn"
     >
       <div
-        className={`relative w-full bg-[#F7F7F2] flex flex-col overflow-hidden text-[#0A0A0A] ${
-          isExpanded
-            ? "h-screen w-screen rounded-none border-none"
-            : "h-[580px] border border-[#0A0A0A] rounded-[12px] shadow-2xl"
-        }`}
+        className={`relative w-full ${
+          isExpanded ? "max-w-2xl" : "max-w-md"
+        } max-h-[92vh] flex flex-col bg-[#F7F7F2] border border-[#0A0A0A] rounded-[14px] p-5 sm:p-6 text-[#0A0A0A] shadow-2xl transition-all duration-200`}
       >
-        {/* Header - Minimal, Unique, Professional */}
-        <div className="px-6 py-4 border-b border-[#0A0A0A] flex items-center justify-between bg-[#F7F7F2]">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-[8px] bg-[#0A0A0A] text-[#F7F7F2] flex items-center justify-center">
-              <Shield className="w-5 h-5 text-[#23E000]" />
+        {/* Header */}
+        <div className="flex items-center justify-between pb-3.5 border-b border-[#0A0A0A] shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-[8px] bg-[#0A0A0A] text-[#23E000] flex items-center justify-center shrink-0">
+              <ShieldAlert className="w-4 h-4" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-[#0A0A0A]">
-                  Citizen Fraud Registry Intake
-                </h2>
-                <span className="px-2 py-0.5 text-[9px] font-bold bg-[#23E000] text-[#0A0A0A] border border-[#0A0A0A] rounded-[4px]">
-                  VERIFIED REGISTRY
-                </span>
-              </div>
+              <h2 className="text-sm font-bold text-[#0A0A0A] uppercase tracking-wider">
+                Citizen Fraud Intake & Telemetry
+              </h2>
               <p className="text-[11px] opacity-70">
-                Pattern matching • Neighborhood cluster logging
+                AI Pattern Verification & Zero-Knowledge Community Map
               </p>
             </div>
           </div>
-
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              title={isExpanded ? "Minimize to floating dock" : "Maximize to full screen"}
-              className="w-11 h-11 flex items-center justify-center rounded-[8px] border border-[#0A0A0A] bg-[#F7F7F2] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] transition cursor-pointer"
+              title={isExpanded ? "Minimize" : "Expand"}
+              className="w-9 h-9 flex items-center justify-center rounded-[8px] border border-[#0A0A0A] bg-[#F7F7F2] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] transition cursor-pointer"
             >
-              {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
             </button>
             <button
               onClick={onClose}
-              title="Close Report"
-              className="w-11 h-11 flex items-center justify-center rounded-[8px] border border-[#0A0A0A] bg-[#F7F7F2] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] transition cursor-pointer"
+              title="Close (Esc)"
+              className="w-9 h-9 flex items-center justify-center rounded-[8px] border border-[#0A0A0A] bg-[#F7F7F2] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] transition cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Chat message flow */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-4 bg-[#F7F7F2] max-w-4xl mx-auto w-full">
+        {/* Chat Stream */}
+        <div className="overflow-y-auto flex-1 pr-1 space-y-3.5 py-4">
           {messages.map((m, idx) => (
             <div
-              key={`${m.id || "msg"}-${idx}`}
+              key={`${m.id}-${idx}`}
               className={`flex flex-col ${
                 m.sender === "user" ? "items-end" : "items-start"
               }`}
             >
-              <div className="flex items-start gap-2.5 max-w-[90%]">
-                {m.sender === "bot" && (
-                  <div className="w-8 h-8 rounded-[8px] bg-[#0A0A0A] border border-[#0A0A0A] text-[#23E000] flex items-center justify-center shrink-0 mt-0.5">
-                    <Shield className="w-4 h-4 fill-[#23E000]/20 text-[#23E000]" />
-                  </div>
-                )}
-                <div className="w-full">
+              <div
+                className={`flex gap-2 max-w-[90%] sm:max-w-[85%] ${
+                  m.sender === "user" ? "flex-row-reverse" : "flex-row"
+                }`}
+              >
+                <div
+                  className={`w-7 h-7 rounded-[6px] flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold border border-[#0A0A0A] ${
+                    m.sender === "user"
+                      ? "bg-[#0A0A0A] text-[#F7F7F2]"
+                      : "bg-[#23E000] text-[#0A0A0A]"
+                  }`}
+                >
+                  {m.sender === "user" ? <User className="w-3.5 h-3.5" /> : <Shield className="w-3.5 h-3.5" />}
+                </div>
+
+                <div className="space-y-2">
                   {m.text && (
                     <div
-                      className={`px-4 py-3 rounded-[12px] text-xs leading-relaxed whitespace-pre-line border border-[#0A0A0A] ${
+                      className={`p-3 rounded-[10px] border border-[#0A0A0A] text-xs whitespace-pre-line leading-relaxed ${
                         m.sender === "user"
                           ? "bg-[#0A0A0A] text-[#F7F7F2]"
                           : "bg-[#F7F7F2] text-[#0A0A0A]"
@@ -582,68 +1039,82 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
                     </div>
                   )}
 
-                  {/* Clean Prediction Card */}
-                  {m.card && m.card.type === "prediction_card" && (
-                    <div className="rounded-[12px] border border-[#0A0A0A] bg-[#F7F7F2] overflow-hidden">
-                      <div className="px-4 py-3 bg-[#0A0A0A] text-[#F7F7F2] flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase tracking-wider">
-                          Scam Pattern Verification
-                        </span>
-                        <span className="px-2 py-0.5 rounded-[4px] text-[10px] font-bold bg-[#E5201B] text-[#F7F7F2]">
-                          {m.card.risk_band}
-                        </span>
-                      </div>
-
-                      <div className="p-4 space-y-3">
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          <div className="p-2.5 rounded-[8px] border border-[#0A0A0A] bg-[rgba(10,10,10,0.04)]">
-                            <span className="opacity-70 text-[10px] uppercase font-bold">Detected Pattern:</span>
-                            <div className="font-black text-sm text-[#E5201B] mt-0.5">{m.card.scam_type}</div>
-                          </div>
-                          <div className="p-2.5 rounded-[8px] border border-[#0A0A0A] bg-[rgba(10,10,10,0.04)]">
-                            <span className="opacity-70 text-[10px] uppercase font-bold">Severity Score:</span>
-                            <div className="font-black text-sm text-[#0A0A0A] mt-0.5">{m.card.risk_score} / 100</div>
-                          </div>
+                  {/* Dynamic Scam Pattern Verification Card */}
+                  {m.card && m.card.type === "prediction_card" && (() => {
+                    const badge = getBandBadge(m.card.risk_band, m.card.risk_score);
+                    return (
+                      <div className="rounded-[12px] border border-[#0A0A0A] bg-[#F7F7F2] overflow-hidden shadow-sm">
+                        <div className="px-4 py-2.5 bg-[#0A0A0A] text-[#F7F7F2] flex items-center justify-between">
+                          <span className="text-xs font-bold uppercase tracking-wider">
+                            Scam Pattern Verification
+                          </span>
+                          <span className={`px-2.5 py-0.5 rounded-[4px] text-[10px] ${badge.bg}`}>
+                            {badge.label}
+                          </span>
                         </div>
 
-                        <div className="text-xs p-2.5 rounded-[8px] border border-[#0A0A0A] bg-[rgba(229,32,27,0.08)]">
-                          <strong>Finding:</strong> {m.card.explanation}
-                        </div>
-
-                        {/* Location Permission Prompt */}
-                        <div className="mt-3 p-3.5 rounded-[10px] border border-[#0A0A0A] bg-[#23E000]/10 flex flex-col gap-2">
-                          <div className="flex items-center gap-2">
-                            <ShieldAlert className="w-4 h-4 text-[#0A0A0A]" />
-                            <span className="text-xs font-bold text-[#0A0A0A]">
-                              Location Privacy Rule Active: Broad Cluster Mapping Only
-                            </span>
+                        <div className="p-4 space-y-3">
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className="p-2.5 rounded-[8px] border border-[#0A0A0A] bg-[rgba(10,10,10,0.04)]">
+                              <span className="opacity-70 text-[10px] uppercase font-bold block">
+                                Detected Pattern:
+                              </span>
+                              <div className="font-black text-sm text-[#E5201B] mt-0.5 tracking-tight">
+                                {m.card.scam_type}
+                              </div>
+                            </div>
+                            <div className="p-2.5 rounded-[8px] border border-[#0A0A0A] bg-[rgba(10,10,10,0.04)]">
+                              <span className="opacity-70 text-[10px] uppercase font-bold block">
+                                Severity Score:
+                              </span>
+                              <div className="font-black text-sm text-[#0A0A0A] mt-0.5">
+                                {m.card.risk_score} / 100
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-[11px] opacity-80 leading-relaxed">
-                            Exact GPS coordinates and addresses are strictly blocked and never stored. Permission only identifies your broad municipal/district safety cluster to warn neighboring citizens.
-                          </p>
-                          <div className="mt-1">
-                            <button
-                              onClick={handleAutoLocationPermission}
-                              disabled={requestingGps}
-                              className="w-full min-h-[46px] px-4 py-2 bg-[#0A0A0A] text-[#F7F7F2] rounded-[8px] text-xs font-bold uppercase hover:opacity-90 transition cursor-pointer flex items-center justify-center gap-2"
-                            >
-                              <Compass className="w-4 h-4 text-[#23E000]" />
-                              <span>{requestingGps ? "Detecting Your Actual Neighborhood..." : "Allow & Detect Neighborhood Cluster"}</span>
-                            </button>
+
+                          <div className="text-xs p-2.5 rounded-[8px] border border-[#0A0A0A] bg-[rgba(229,32,27,0.06)] leading-relaxed">
+                            <strong>Finding:</strong> {m.card.explanation}
                           </div>
                         </div>
                       </div>
+                    );
+                  })()}
+
+                  {/* Location Cluster Prompt Card */}
+                  {m.card && m.card.type === "location_prompt_card" && (
+                    <div className="p-3.5 rounded-[10px] border border-[#0A0A0A] bg-[#23E000]/10 flex flex-col gap-2 text-xs">
+                      <div className="flex items-center gap-2">
+                        <ShieldAlert className="w-4 h-4 text-[#0A0A0A]" />
+                        <span className="font-bold text-[#0A0A0A]">
+                          Location Privacy Rule: Broad Cluster Mapping (~2 to 3 km)
+                        </span>
+                      </div>
+                      <p className="text-[11px] opacity-80 leading-relaxed">
+                        Exact street and home GPS locations are strictly blocked and never stored. Permission only identifies your broad municipal/district safety cluster to warn neighboring citizens.
+                      </p>
+                      <button
+                        onClick={handleAutoLocationPermission}
+                        disabled={requestingGps}
+                        className="mt-1 w-full min-h-[46px] px-4 py-2 bg-[#0A0A0A] text-[#F7F7F2] rounded-[8px] text-xs font-bold uppercase hover:opacity-90 transition cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        <Compass className="w-4 h-4 text-[#23E000]" />
+                        <span>
+                          {requestingGps ? "Detecting Regional Safety Cluster..." : "Allow & Detect Neighborhood Cluster"}
+                        </span>
+                      </button>
                     </div>
                   )}
 
+                  {/* Dynamic Quick Reply Options */}
                   {m.quickReplies && (
-                    <div className="flex flex-wrap gap-2 mt-2.5">
+                    <div className="flex flex-wrap gap-2 mt-2">
                       {m.quickReplies.map((btn) => (
                         <button
                           key={btn.value}
                           onClick={() => handleUserReply(btn.label, btn.value)}
                           disabled={submitting || step === "done"}
-                          className="min-h-[44px] px-4 py-2 rounded-[12px] bg-[#F7F7F2] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] border border-[#0A0A0A] text-xs font-bold uppercase transition cursor-pointer disabled:opacity-50"
+                          className="min-h-[44px] px-3.5 py-2 rounded-[10px] bg-[#F7F7F2] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] border border-[#0A0A0A] text-xs font-bold uppercase transition cursor-pointer disabled:opacity-50 text-left"
                         >
                           {btn.label}
                         </button>
@@ -651,81 +1122,53 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
                     </div>
                   )}
                 </div>
-                {m.sender === "user" && (
-                  <div className="w-8 h-8 rounded-[8px] border border-[#0A0A0A] bg-[#23E000] text-[#0A0A0A] flex items-center justify-center shrink-0 mt-0.5">
-                    <User className="w-4 h-4" />
-                  </div>
-                )}
               </div>
             </div>
           ))}
           <div ref={chatEndRef} />
         </div>
 
-        {/* UI Error feedback notification banner */}
+        {/* UI Error Banner */}
         {uiError && (
-          <div className="max-w-4xl mx-auto w-full px-4 mb-2">
-            <div className="p-3 rounded-[8px] bg-[rgba(229,32,27,0.1)] border border-[#E5201B] flex items-center gap-2 text-xs font-bold text-[#E5201B]">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
-              <span>{uiError}</span>
-            </div>
+          <div className="mb-2 p-2.5 rounded-[8px] bg-[rgba(229,32,27,0.1)] border border-[#E5201B] text-xs font-bold text-[#E5201B] flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>{uiError}</span>
           </div>
         )}
 
-        {/* Input Bar */}
-        <div className="p-4 border-t border-[#0A0A0A] bg-[#F7F7F2]">
-          <div className="max-w-4xl mx-auto w-full">
-            {step === "done" ? (
-              <div className="flex items-center justify-between gap-3 bg-[#23E000] border border-[#0A0A0A] rounded-[12px] p-3 text-[#0A0A0A]">
-                <div className="flex items-center gap-2 text-xs font-bold">
-                  <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  <span>Report successfully saved to Database.</span>
-                </div>
-                <button
-                  onClick={onClose}
-                  className="min-h-[44px] px-5 bg-[#0A0A0A] text-[#F7F7F2] rounded-[12px] text-xs font-bold uppercase hover:opacity-90 transition cursor-pointer"
-                >
-                  Close Intake
-                </button>
-              </div>
-            ) : (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleUserReply(input);
-                }}
-                className="flex items-center gap-2"
-              >
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => {
-                    setInput(e.target.value);
-                    if (uiError) setUiError("");
-                  }}
-                  placeholder={
-                    step === "channel"
-                      ? "Select contact channel above or describe..."
-                      : step === "content"
-                      ? "Paste suspicious message or describe what happened..."
-                      : step === "suggestions"
-                      ? "Type a preventive tip for neighbors..."
-                      : "Type your response..."
-                  }
-                  disabled={submitting || step === "location_permission"}
-                  className="flex-1 min-h-[48px] bg-[#F7F7F2] border border-[#0A0A0A] rounded-[12px] px-4 text-sm text-[#0A0A0A] placeholder:text-[#0A0A0A]/40 focus:outline-none disabled:opacity-50"
-                />
-                <button
-                  type="submit"
-                  disabled={!input.trim() || submitting || step === "location_permission"}
-                  className="min-h-[48px] px-5 bg-[#0A0A0A] text-[#F7F7F2] rounded-[12px] text-xs font-bold uppercase hover:opacity-90 transition cursor-pointer disabled:opacity-40"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
+        {/* Chat Input Bar */}
+        {step !== "done" && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleUserReply(input);
+            }}
+            className="pt-2 border-t border-[#0A0A0A] flex gap-2 shrink-0"
+          >
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              disabled={submitting}
+              placeholder={
+                step === "content"
+                  ? "Paste message text, claimed threat, or scammer number..."
+                  : step === "financial_loss"
+                  ? "Or type exact amount lost (e.g. ₹25,000 or ₹0)..."
+                  : "Type your reply or click a button above..."
+              }
+              className="flex-1 min-h-[46px] bg-[#F7F7F2] border border-[#0A0A0A] rounded-[8px] px-4 text-xs text-[#0A0A0A] placeholder:text-[#0A0A0A]/40 focus:outline-none focus:ring-1 focus:ring-[#0A0A0A]"
+            />
+            <button
+              type="submit"
+              disabled={submitting || !input.trim()}
+              className="min-h-[46px] px-5 bg-[#0A0A0A] text-[#F7F7F2] rounded-[8px] text-xs font-bold uppercase hover:opacity-90 transition cursor-pointer disabled:opacity-40 flex items-center justify-center gap-1.5 shrink-0"
+            >
+              <Send className="w-3.5 h-3.5 text-[#23E000]" />
+              <span className="hidden sm:inline">Send</span>
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

@@ -369,6 +369,7 @@ export default function DashboardPage() {
       <ReportModal
         isOpen={isReportOpen}
         onClose={() => setIsReportOpen(false)}
+        apiBaseUrl={API_BASE_URL}
         onHighlightLocation={(loc) => {
           if (!loc) return;
           const lat = loc.lat || (loc.pincode?.startsWith("56") ? 12.9784 : 28.5494);

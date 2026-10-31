@@ -55,7 +55,7 @@ def calculate_message_score(state: CheckState) -> Tuple[int, str, Dict[str, int]
     signals["risky_link"] = min(20, link_points)
 
     # 3. Pressure Language (Max 20)
-    # urgency +6, threat +8, credential request +10, fee/fine demand (payment_request) +6. Cap 20.
+    # urgency +6, threat +8, credential request +10, fee/fine demand +6, lure/reward +8. Cap 20.
     pressure_pts = 0
     if "urgency" in state.matched_tactics:
         pressure_pts += 6
@@ -65,6 +65,8 @@ def calculate_message_score(state: CheckState) -> Tuple[int, str, Dict[str, int]
         pressure_pts += 10
     if "payment_request" in state.matched_tactics:
         pressure_pts += 6
+    if "reward" in state.matched_tactics or any(r in (state.redacted_text or "").lower() for r in ["daily salary", "daily earning", "profit", "earn 3000", "earn 5000"]):
+        pressure_pts += 8
 
     signals["pressure_language"] = min(20, pressure_pts)
 
@@ -117,6 +119,21 @@ def calculate_message_score(state: CheckState) -> Tuple[int, str, Dict[str, int]
         if raw_score < 68:
             raw_score = 68
             floors.append("digital_arrest_pattern")
+
+    # Floor B2: Major recognized fraud schemes
+    scores = state.scam_type_scores or {}
+    if scores.get("electricity-disconnection", 0) >= 3 and raw_score < 68:
+        raw_score = 68
+        floors.append("electricity_disconnection_pattern")
+    elif scores.get("job-offer", 0) >= 3 and raw_score < 65:
+        raw_score = 65
+        floors.append("task_investment_pattern")
+    elif scores.get("fake-kyc-link", 0) >= 3 and raw_score < 66:
+        raw_score = 66
+        floors.append("kyc_phishing_pattern")
+    elif scores.get("sextortion", 0) >= 3 and raw_score < 75:
+        raw_score = 75
+        floors.append("sextortion_pattern")
 
     # Floor C: any KNOWN_SCAM identifier: score >= 61
     if has_known_scam:
