@@ -157,6 +157,15 @@ export default function HeaderBar({ currentView = 'home', onSelectView }) {
                     )}
                   </button>
                 ))}
+
+                <Link
+                  href="/map"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className="mt-3 w-full min-h-[46px] rounded-full bg-[#0A0A0A] text-[#23E000] border-2 border-[#23E000] font-futuristic text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#23E000] hover:text-[#0A0A0A] transition shadow-md"
+                >
+                  <Globe className="w-4 h-4 text-[#23E000]" />
+                  <span>Open Threat Radar Map &rarr;</span>
+                </Link>
               </nav>
 
               {/* Horizontal Divider Line */}
