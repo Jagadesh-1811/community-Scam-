@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createClient } from "@supabase/supabase-js";
 import {
   ShieldCheck,
   ShieldAlert,
@@ -42,6 +43,10 @@ export default function AdminQueueModal({
   const [allowedEmails, setAllowedEmails] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState("");
   const [customEmail, setCustomEmail] = useState("");
+  const [supabaseConfig, setSupabaseConfig] = useState({
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL || "https://psvmzqigzpvzbggrmhvw.supabase.co",
+    key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "sb_publishable_VZQuRJIyJL8hIjeBuisq1A_uCU_dyZ9",
+  });
 
   // Queue State
   const [disputes, setDisputes] = useState([]);
@@ -63,13 +68,47 @@ export default function AdminQueueModal({
       .then((d) => {
         if (d?.allowed_emails && Array.isArray(d.allowed_emails)) {
           setAllowedEmails(d.allowed_emails);
-          if (d.allowed_emails.length > 0) {
+          if (d.allowed_emails.length > 0 && !selectedEmail) {
             setSelectedEmail(d.allowed_emails[0]);
           }
+        }
+        if (d?.supabase_url && d?.supabase_anon_key) {
+          setSupabaseConfig({ url: d.supabase_url, key: d.supabase_anon_key });
         }
       })
       .catch(() => {});
   }, [baseUrl]);
+
+  // Handle OAuth session redirect (when redirected back from Google OAuth)
+  useEffect(() => {
+    if (!isOpen || adminToken) return;
+
+    try {
+      const client = createClient(supabaseConfig.url, supabaseConfig.key);
+
+      // Check existing session from hash/cookies
+      client.auth.getSession().then(async ({ data: { session } }) => {
+        if (session?.user?.email) {
+          const userEmail = session.user.email.toLowerCase().trim();
+          const fullName = session.user.user_metadata?.full_name || session.user.email;
+          await handleGoogleSignIn(userEmail, fullName, session.access_token);
+        }
+      });
+
+      // Listen for active OAuth state transition
+      const { data: authListener } = client.auth.onAuthStateChange(async (event, session) => {
+        if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session?.user?.email) {
+          const userEmail = session.user.email.toLowerCase().trim();
+          const fullName = session.user.user_metadata?.full_name || session.user.email;
+          await handleGoogleSignIn(userEmail, fullName, session.access_token);
+        }
+      });
+
+      return () => {
+        authListener?.subscription?.unsubscribe();
+      };
+    } catch (_) {}
+  }, [isOpen, adminToken, supabaseConfig]);
 
   // Check persisted session when modal opens
   useEffect(() => {
@@ -102,8 +141,37 @@ export default function AdminQueueModal({
     }
   }, [isOpen, adminToken, statusFilter]);
 
-  // ── Google OAuth Sign-In (Exclusive Authentication Method) ───────────────
-  const handleGoogleSignIn = async (emailOverride) => {
+  // ── Launch Connected Live Google OAuth Redirect ──────────────────────────
+  const handleLaunchLiveGoogleOAuth = async () => {
+    setLoggingIn(true);
+    setLoginError("");
+
+    try {
+      const client = createClient(supabaseConfig.url, supabaseConfig.key);
+      const redirectUrl = typeof window !== "undefined"
+        ? `${window.location.origin}/admin`
+        : "http://localhost:3000/admin";
+
+      const { data, error } = await client.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: "offline",
+            prompt: "select_account",
+          },
+        },
+      });
+
+      if (error) throw error;
+    } catch (err) {
+      setLoggingIn(false);
+      setLoginError(err.message || "Failed to launch Google OAuth.");
+    }
+  };
+
+  // ── Google OAuth Sign-In (Verified against .env ADMIN_ALLOWED_EMAILS) ─────
+  const handleGoogleSignIn = async (emailOverride, nameOverride, credentialToken) => {
     setLoggingIn(true);
     setLoginError("");
 
@@ -111,7 +179,7 @@ export default function AdminQueueModal({
       emailOverride ||
       customEmail ||
       selectedEmail ||
-      (allowedEmails.length > 0 ? allowedEmails[0] : "officer.grievance@cybercrime.gov.in")
+      (allowedEmails.length > 0 ? allowedEmails[0] : "jagadeshwar2014@gmail.com")
     ).trim().toLowerCase();
 
     try {
@@ -121,13 +189,19 @@ export default function AdminQueueModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: targetEmail,
-          name: targetEmail.split("@")[0].replace(/[._]/g, " ").toUpperCase() + " (Officer)",
+          name: nameOverride || targetEmail.split("@")[0].replace(/[._]/g, " ").toUpperCase() + " (Officer)",
+          credential: credentialToken || null,
         }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || data.detail || "Google authentication failed.");
+        // Sign out of Supabase if an unauthorized account was picked
+        try {
+          const client = createClient(supabaseConfig.url, supabaseConfig.key);
+          await client.auth.signOut();
+        } catch (_) {}
+        throw new Error(data.error || data.detail || `Access Denied: ${targetEmail} is not authorized.`);
       }
 
       setAdminToken(data.token);
@@ -412,17 +486,17 @@ export default function AdminQueueModal({
                 </div>
               </div>
 
-              {/* Main Google SSO Button */}
+              {/* Primary Live Google OAuth Button */}
               <button
                 type="button"
-                onClick={() => handleGoogleSignIn()}
+                onClick={handleLaunchLiveGoogleOAuth}
                 disabled={loggingIn}
-                className="w-full min-h-[50px] bg-[#FFFFFF] text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-[10px] text-xs font-black uppercase flex items-center justify-center gap-3 hover:bg-[#F0F0ED] active:scale-[0.99] transition shadow-md cursor-pointer disabled:opacity-40"
+                className="w-full min-h-[52px] bg-[#FFFFFF] text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-[10px] text-xs font-black uppercase flex items-center justify-center gap-3 hover:bg-[#F0F0ED] active:scale-[0.99] transition shadow-md cursor-pointer disabled:opacity-40"
               >
                 {loggingIn ? (
                   <>
                     <span className="w-4 h-4 border-2 border-[#0A0A0A]/30 border-t-[#0A0A0A] rounded-full animate-spin" />
-                    <span>Verifying with Google Identity...</span>
+                    <span>Connecting to Google OAuth Provider...</span>
                   </>
                 ) : (
                   <>
@@ -444,14 +518,25 @@ export default function AdminQueueModal({
                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                       />
                     </svg>
-                    <span>
-                      Sign in with Google as{" "}
-                      <span className="font-mono text-[#0A0A0A]">
-                        {(customEmail || selectedEmail || "Google Officer").split("@")[0]}
-                      </span>
-                    </span>
+                    <span>Sign in with Google OAuth (Select Account)</span>
                   </>
                 )}
+              </button>
+
+              {/* Direct Instant Verify Action for Local Testing */}
+              <button
+                type="button"
+                onClick={() => handleGoogleSignIn()}
+                disabled={loggingIn}
+                className="w-full min-h-[44px] bg-[#0A0A0A] text-[#F7F7F2] rounded-[8px] text-xs font-bold uppercase hover:opacity-90 active:scale-[0.99] transition cursor-pointer flex items-center justify-center gap-2"
+              >
+                <UserCheck className="w-4 h-4 text-[#23E000]" />
+                <span>
+                  Verify Session as{" "}
+                  <span className="font-mono text-[#23E000]">
+                    {(customEmail || selectedEmail || "jagadeshwar2014@gmail.com").split("@")[0]}
+                  </span>
+                </span>
               </button>
 
               <div className="p-3 bg-[#0A0A0A]/5 border border-[#0A0A0A]/20 rounded-[8px] space-y-1 text-center">
@@ -460,7 +545,7 @@ export default function AdminQueueModal({
                   <span>Strict Whitelist Enforced by Backend</span>
                 </div>
                 <p className="text-[10px] opacity-70 leading-relaxed">
-                  Only emails listed under <code className="font-mono font-bold">ADMIN_ALLOWED_EMAILS</code> in backend <code className="font-mono">.env</code> are granted entrance.
+                  Only Gmails listed in <code className="font-mono font-bold">ADMIN_ALLOWED_EMAILS</code> in backend <code className="font-mono">.env</code> can access. All other Google accounts are rejected with 403 Forbidden.
                 </p>
               </div>
             </div>

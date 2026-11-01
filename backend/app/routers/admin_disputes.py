@@ -330,12 +330,16 @@ async def admin_google_auth(payload: GoogleLoginRequest):
 @router.get("/auth/config")
 async def get_admin_auth_config():
     """
-    Return non-sensitive auth configuration info (whitelisted emails for UI helper).
+    Return non-sensitive auth configuration info (whitelisted emails and OAuth provider credentials).
     """
     allowed = get_allowed_admin_emails()
+    supabase_url = os.getenv("SUPABASE_URL", "https://psvmzqigzpvzbggrmhvw.supabase.co")
+    supabase_key = os.getenv("SUPABASE_PUBLISHABLE_KEY", "sb_publishable_VZQuRJIyJL8hIjeBuisq1A_uCU_dyZ9")
     return {
         "ok": True,
         "auth_provider": "google",
+        "supabase_url": supabase_url,
+        "supabase_anon_key": supabase_key,
         "allowed_emails": sorted(list(allowed)),
     }
 
