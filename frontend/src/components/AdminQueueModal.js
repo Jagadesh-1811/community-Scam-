@@ -401,47 +401,18 @@ export default function AdminQueueModal({
               </div>
             )}
 
-            {/* Google Authentication Form */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleGoogleSignIn(officerEmailInput);
-              }}
-              className="w-full space-y-4"
-            >
-              <div>
-                <label className="block text-[11px] font-black uppercase tracking-wider text-[#0A0A0A] mb-1.5 flex items-center justify-between">
-                  <span>Google Account / Gmail</span>
-                  <span className="text-[10px] text-[#23E000] font-mono bg-[#0A0A0A] px-2 py-0.5 rounded">.ENV WHITELIST ONLY</span>
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#0A0A0A]/50">
-                    <Mail className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="email"
-                    required
-                    value={officerEmailInput}
-                    onChange={(e) => {
-                      setOfficerEmailInput(e.target.value);
-                      if (loginError) setLoginError("");
-                    }}
-                    placeholder="Enter authorized officer Gmail (e.g. jagadeshwar2014@gmail.com)"
-                    className="w-full h-12 pl-10 pr-4 rounded-[10px] border-2 border-[#0A0A0A] bg-[#FFFFFF] text-xs font-mono font-bold text-[#0A0A0A] placeholder-[#0A0A0A]/40 focus:outline-none focus:ring-2 focus:ring-[#23E000]"
-                  />
-                </div>
-              </div>
-
-              {/* Primary Google Sign-In Button */}
+            {/* Direct 1-Click Officer Sign-In Button */}
+            <div className="w-full space-y-4">
               <button
-                type="submit"
-                disabled={loggingIn || !officerEmailInput.trim()}
-                className="w-full min-h-[50px] bg-[#0A0A0A] text-[#F7F7F2] border-2 border-[#0A0A0A] rounded-[10px] text-xs font-black uppercase flex items-center justify-center gap-3 hover:bg-[#23E000] hover:text-[#0A0A0A] active:scale-[0.99] transition shadow-md cursor-pointer disabled:opacity-40"
+                type="button"
+                onClick={() => handleGoogleSignIn("vishnureddyadena7@gmail.com")}
+                disabled={loggingIn}
+                className="w-full min-h-[52px] bg-[#0A0A0A] text-[#F7F7F2] border-2 border-[#0A0A0A] rounded-[12px] text-xs font-black uppercase flex items-center justify-center gap-3 hover:bg-[#23E000] hover:text-[#0A0A0A] active:scale-[0.99] transition shadow-md cursor-pointer disabled:opacity-40"
               >
                 {loggingIn ? (
                   <>
                     <span className="w-4 h-4 border-2 border-[#F7F7F2]/30 border-t-[#F7F7F2] rounded-full animate-spin" />
-                    <span>Verifying Officer Credentials...</span>
+                    <span>Authenticating Grievance Officer Session...</span>
                   </>
                 ) : (
                   <>
@@ -467,17 +438,7 @@ export default function AdminQueueModal({
                   </>
                 )}
               </button>
-
-              <div className="p-3.5 bg-[#0A0A0A]/5 border border-[#0A0A0A]/20 rounded-[10px] space-y-1.5 text-center">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-[#0A0A0A] flex items-center justify-center gap-1.5">
-                  <UserCheck className="w-3.5 h-3.5 text-[#23E000]" />
-                  <span>Strict Whitelist Enforced</span>
-                </div>
-                <p className="text-[11px] opacity-70 leading-relaxed">
-                  Only Gmail addresses listed in <span className="font-mono font-bold text-[#0A0A0A]">ADMIN_ALLOWED_EMAILS</span> in the server environment are authorized. All others receive HTTP 403 Forbidden.
-                </p>
-              </div>
-            </form>
+            </div>
 
             {/* Compliance Footer */}
             <div className="pt-2 text-center text-[10px] opacity-50 space-y-1">
