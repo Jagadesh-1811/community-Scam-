@@ -349,10 +349,10 @@ export default function AdminQueueModal({
                 <button
                   onClick={handleLogout}
                   title="Logout officer"
-                  className="h-9 px-3 flex items-center gap-1.5 rounded-[8px] border border-[#0A0A0A] bg-[#F7F7F2] hover:bg-[#E5201B] hover:text-[#F7F7F2] hover:border-[#E5201B] transition cursor-pointer text-xs font-bold uppercase"
+                  className="h-9 px-2.5 sm:px-3 flex items-center gap-1.5 rounded-[8px] border border-[#0A0A0A] bg-[#F7F7F2] hover:bg-[#E5201B] hover:text-[#F7F7F2] hover:border-[#E5201B] transition cursor-pointer text-xs font-bold uppercase"
                 >
                   <LogOut className="w-3.5 h-3.5" />
-                  <span>Logout</span>
+                  <span className="hidden sm:inline">Logout</span>
                 </button>
               </>
             )}

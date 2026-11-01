@@ -118,7 +118,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Action Controls - Always Fully Visible */}
+        {/* Action Controls - Icon-Only on Mobile, Full Labels on Desktop */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Map Maximize / Restore Toggle */}
           <button
@@ -128,7 +128,7 @@ export default function DashboardPage() {
               else setIsSidebarOpen(true);
             }}
             title={isMapMaximized ? "Restore Layout" : "Maximize Map View"}
-            className="h-10 px-2.5 sm:px-3 rounded-[10px] border border-[#0A0A0A] bg-[#F7F7F2] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] flex items-center gap-1.5 text-xs font-bold uppercase transition cursor-pointer"
+            className="w-10 h-10 sm:w-auto sm:px-3 rounded-[10px] border border-[#0A0A0A] bg-[#F7F7F2] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] flex items-center justify-center gap-1.5 text-xs font-bold uppercase transition cursor-pointer shrink-0"
           >
             {isMapMaximized ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
             <span className="hidden lg:inline">{isMapMaximized ? "Restore" : "Maximize"}</span>
@@ -138,10 +138,10 @@ export default function DashboardPage() {
           <button
             onClick={() => setIsLookupOpen(true)}
             title="Instant Threat Lookup"
-            className="h-10 px-2.5 sm:px-3.5 rounded-[10px] border border-[#0A0A0A] bg-[#F7F7F2] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] flex items-center gap-1.5 text-xs font-bold uppercase transition cursor-pointer"
+            className="w-10 h-10 sm:w-auto sm:px-3.5 rounded-[10px] border border-[#0A0A0A] bg-[#F7F7F2] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] flex items-center justify-center gap-1.5 text-xs font-bold uppercase transition cursor-pointer shrink-0"
           >
             <Search className="w-4 h-4" />
-            <span className="hidden sm:inline">Lookup</span>
+            <span className="hidden md:inline">Lookup</span>
           </button>
 
           {/* Dispute False Positive */}
@@ -151,7 +151,7 @@ export default function DashboardPage() {
               setIsDisputeOpen(true);
             }}
             title="Dispute / Challenge Listing"
-            className="h-10 px-2.5 sm:px-3 rounded-[10px] border border-[#0A0A0A] bg-[#F7F7F2] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] flex items-center gap-1.5 text-xs font-bold uppercase transition cursor-pointer"
+            className="w-10 h-10 sm:w-auto sm:px-3 rounded-[10px] border border-[#0A0A0A] bg-[#F7F7F2] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] flex items-center justify-center gap-1.5 text-xs font-bold uppercase transition cursor-pointer shrink-0"
           >
             <ShieldCheck className="w-4 h-4 text-[#23E000]" />
             <span className="hidden md:inline">Dispute</span>
@@ -161,20 +161,20 @@ export default function DashboardPage() {
           <button
             onClick={() => setIsReportOpen(true)}
             title="Report Scam Incident"
-            className="h-10 px-3 sm:px-4 rounded-[10px] border border-[#0A0A0A] bg-[#0A0A0A] text-[#F7F7F2] hover:opacity-90 flex items-center gap-1.5 text-xs font-black uppercase transition cursor-pointer shadow-sm"
+            className="w-10 h-10 sm:w-auto sm:px-4 rounded-[10px] border border-[#0A0A0A] bg-[#0A0A0A] text-[#F7F7F2] hover:opacity-90 flex items-center justify-center gap-1.5 text-xs font-black uppercase transition cursor-pointer shadow-sm shrink-0"
           >
             <PlusCircle className="w-4 h-4 text-[#23E000]" />
-            <span>Report Scam</span>
+            <span className="hidden sm:inline">Report Scam</span>
           </button>
 
           {/* Admin / Grievance Officer Portal Link */}
           <a
             href="/admin"
             title="Grievance Officer Portal"
-            className="h-10 px-2.5 sm:px-3 rounded-[10px] border border-[#0A0A0A] bg-[#0A0A0A] text-[#23E000] hover:bg-[#23E000] hover:text-[#0A0A0A] flex items-center gap-1.5 text-xs font-mono font-bold uppercase transition"
+            className="w-10 h-10 sm:w-auto sm:px-3 rounded-[10px] border border-[#0A0A0A] bg-[#0A0A0A] text-[#23E000] hover:bg-[#23E000] hover:text-[#0A0A0A] flex items-center justify-center gap-1.5 text-xs font-mono font-bold uppercase transition shrink-0"
           >
             <Lock className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Admin</span>
+            <span className="hidden lg:inline">Admin</span>
           </a>
         </div>
       </header>
