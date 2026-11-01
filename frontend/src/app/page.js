@@ -13,6 +13,9 @@ import {
   PanelLeftOpen,
   ShieldCheck,
   Lock,
+  BellRing,
+  X,
+  Flame,
 } from "lucide-react";
 
 import LookupModal from "./components/LookupModal";
@@ -44,6 +47,7 @@ export default function DashboardPage() {
   const [disputeInitialData, setDisputeInitialData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState("");
+  const [surgeWarning, setSurgeWarning] = useState(null);
 
   // Minimal and Maximal view states
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -55,7 +59,28 @@ export default function DashboardPage() {
       const mapRes = await fetch(`${API_BASE_URL}/map?days=7`);
       if (mapRes.ok) {
         const mapData = await mapRes.json();
-        setClusters(mapData.clusters || []);
+        const loadedClusters = mapData.clusters || [];
+        setClusters(loadedClusters);
+
+        // Community Alert: If any cluster is prompted >= 5 times, it is treated as a merged spreading heatmap cluster
+        const spreadingSurge = loadedClusters.find((c) => (c.report_count || 0) >= 5);
+        if (spreadingSurge) {
+          setSurgeWarning(spreadingSurge);
+
+          // Trigger system push notification for all members if permission is active
+          if (
+            typeof window !== "undefined" &&
+            "Notification" in window &&
+            Notification.permission === "granted"
+          ) {
+            try {
+              new Notification("🚨 WARNING TO ALL MEMBERS: Scam Heatmap Spreading!", {
+                body: `High scam surge spreading in ${spreadingSurge.locality} (${spreadingSurge.pincode}) with ${spreadingSurge.report_count} merged incidents! Warning to all members: check the map now and verify all calls/links.`,
+                icon: "/favicon.ico",
+              });
+            } catch (e) {}
+          }
+        }
       }
     } catch (err) {
       setClusters([]);
@@ -70,15 +95,15 @@ export default function DashboardPage() {
   }, []);
 
   const totalReports = clusters.reduce((acc, c) => acc + (c.report_count || 0), 0);
-  const critCount = clusters.filter((c) => c.severity === "CRIT").length;
-  const highCount = clusters.filter((c) => c.severity === "HIGH").length;
-  const medCount = clusters.filter((c) => c.severity === "MED").length;
+  const critCount = clusters.filter((c) => c.severity === "CRIT" || (c.report_count || 0) >= 10).length;
+  const highCount = clusters.filter((c) => c.severity === "HIGH" || ((c.report_count || 0) >= 5 && (c.report_count || 0) < 10)).length;
+  const medCount = clusters.filter((c) => c.severity === "MED" && (c.report_count || 0) < 5).length;
 
   const categories = [
     { id: "all", label: "All Active Clusters", count: clusters.length },
-    { id: "CRIT", label: "Critical Threat (≥12)", count: critCount },
-    { id: "HIGH", label: "High Alert (6-11)", count: highCount },
-    { id: "MED", label: "Medium Warning (<6)", count: medCount },
+    { id: "CRIT", label: "Critical Threat (≥10)", count: critCount },
+    { id: "HIGH", label: "High Alert (5-9)", count: highCount },
+    { id: "MED", label: "Medium Warning (<5)", count: medCount },
   ];
 
   const filteredClusters =
@@ -248,6 +273,28 @@ export default function DashboardPage() {
               <span className="text-[10px]">Select to focus</span>
             </div>
 
+            {/* Active Surge Alert Highlight Card */}
+            {surgeWarning && (
+              <div
+                onClick={() => setSelectedArea(surgeWarning)}
+                className="p-3 rounded-[12px] bg-[rgba(229,32,27,0.12)] border-2 border-[#E5201B] text-[#0A0A0A] mb-3 cursor-pointer hover:bg-[rgba(229,32,27,0.18)] transition shadow-sm"
+              >
+                <div className="flex items-center justify-between text-[10px] font-black text-[#E5201B] uppercase tracking-wider mb-1">
+                  <span className="flex items-center gap-1.5 animate-pulse">
+                    <Flame className="w-3.5 h-3.5" />
+                    Heatmap Spreading
+                  </span>
+                  <span>1 Merged Cluster</span>
+                </div>
+                <div className="font-bold text-xs">
+                  {surgeWarning.locality} ({surgeWarning.pincode})
+                </div>
+                <div className="text-[11px] opacity-80 mt-0.5">
+                  {surgeWarning.report_count} incidents prompted & merged. Warning to all members!
+                </div>
+              </div>
+            )}
+
             {filteredClusters.length === 0 ? (
               <div className="p-8 text-center text-xs opacity-60 border border-dashed border-[#0A0A0A] rounded-[12px]">
                 No reports recorded in the database for this category.
@@ -311,6 +358,50 @@ export default function DashboardPage() {
 
         {/* Main Interactive Map View (Minimal / Maximal Canvas) */}
         <main className="flex-1 relative h-full bg-[#F7F7F2]">
+          {/* ── Community Warning Alert Notification Banner (Spreading Heatmap) ── */}
+          {surgeWarning && (
+            <div className="absolute top-4 left-3 right-3 sm:left-6 sm:right-6 z-[1000] max-w-xl mx-auto bg-[#0A0A0A] text-[#F7F7F2] border-2 border-[#E5201B] rounded-[14px] p-3.5 shadow-2xl animate-fadeIn flex items-start justify-between gap-3">
+              <div className="flex items-start gap-2.5">
+                <div className="w-8 h-8 rounded-[8px] bg-[#E5201B] text-[#F7F7F2] flex items-center justify-center shrink-0 mt-0.5 animate-pulse">
+                  <BellRing className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2 py-0.5 rounded-[4px] bg-[#E5201B] text-[#F7F7F2] text-[10px] font-mono font-black uppercase tracking-wider">
+                      WARNING TO ALL MEMBERS
+                    </span>
+                    <span className="text-[11px] font-bold text-[#23E000] font-mono">
+                      {surgeWarning.report_count} INCIDENTS MERGED
+                    </span>
+                  </div>
+                  <p className="text-xs font-black mt-1 text-[#F7F7F2] leading-snug">
+                    Scam heatmap is spreading in {surgeWarning.locality} ({surgeWarning.pincode})!
+                  </p>
+                  <p className="text-[11px] opacity-80 mt-0.5 leading-relaxed">
+                    Over 5 incidents prompted in this zone. Warning to all members: check this hotspot and verify unexpected calls or payment links immediately.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={() => {
+                    setSelectedArea(surgeWarning);
+                  }}
+                  className="h-8 px-2.5 bg-[#23E000] text-[#0A0A0A] rounded-[8px] text-[11px] font-black uppercase hover:bg-white transition cursor-pointer"
+                >
+                  Check Warning
+                </button>
+                <button
+                  onClick={() => setSurgeWarning(null)}
+                  title="Dismiss warning"
+                  className="w-8 h-8 rounded-[8px] border border-white/20 hover:bg-white/10 flex items-center justify-center transition cursor-pointer text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
           <ScamMap
             clusters={filteredClusters}
             selectedArea={selectedArea}
