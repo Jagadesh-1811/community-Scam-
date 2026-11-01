@@ -450,6 +450,17 @@ export default function AdminQueueModal({
                 )}
               </button>
 
+              {/* Direct Authorization for Whitelisted Gmail */}
+              <button
+                type="button"
+                onClick={() => handleGoogleSignIn("jagadeshwar2014@gmail.com", "Jagadeshwar (Officer)")}
+                disabled={loggingIn}
+                className="w-full min-h-[44px] bg-[#0A0A0A] text-[#F7F7F2] rounded-[10px] text-xs font-bold uppercase hover:opacity-90 active:scale-[0.99] transition cursor-pointer flex items-center justify-center gap-2"
+              >
+                <UserCheck className="w-4 h-4 text-[#23E000]" />
+                <span>Direct Access (jagadeshwar2014@gmail.com)</span>
+              </button>
+
               <div className="p-3.5 bg-[#0A0A0A]/5 border border-[#0A0A0A]/20 rounded-[10px] space-y-1.5 text-center">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-[#0A0A0A] flex items-center justify-center gap-1.5">
                   <UserCheck className="w-3.5 h-3.5 text-[#23E000]" />
