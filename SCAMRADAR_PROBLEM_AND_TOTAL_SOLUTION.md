@@ -294,3 +294,4 @@ backend\tests\test_scamradar.py ................                         [100%]
 
 ---
 *Created for CyberForge Hackathon 2026 // ScamRadar India Architecture Documentation.*
+
