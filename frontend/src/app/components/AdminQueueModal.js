@@ -41,8 +41,6 @@ export default function AdminQueueModal({
   const [loggingIn, setLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [allowedEmails, setAllowedEmails] = useState([]);
-  const [selectedEmail, setSelectedEmail] = useState("");
-  const [customEmail, setCustomEmail] = useState("");
   const [supabaseConfig, setSupabaseConfig] = useState({
     url: process.env.NEXT_PUBLIC_SUPABASE_URL || "https://psvmzqigzpvzbggrmhvw.supabase.co",
     key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "sb_publishable_VZQuRJIyJL8hIjeBuisq1A_uCU_dyZ9",
@@ -177,8 +175,6 @@ export default function AdminQueueModal({
 
     const targetEmail = (
       emailOverride ||
-      customEmail ||
-      selectedEmail ||
       (allowedEmails.length > 0 ? allowedEmails[0] : "jagadeshwar2014@gmail.com")
     ).trim().toLowerCase();
 
@@ -437,66 +433,17 @@ export default function AdminQueueModal({
 
             {/* Exclusive Google OAuth Sign-In Card */}
             <div className="w-full space-y-4">
-              {/* Whitelist Email Selector */}
-              <div className="p-3.5 bg-[#FFFFFF] border-2 border-[#0A0A0A] rounded-[10px] space-y-2.5 shadow-sm">
-                <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
-                  <span className="opacity-75">Designated Officer Account:</span>
-                  <span className="font-mono text-[9px] px-1.5 py-0.5 bg-[#23E000]/20 text-[#0A0A0A] rounded border border-[#23E000]">
-                    Authorized Only
-                  </span>
-                </div>
-
-                {/* Email quick-select pills */}
-                <div className="flex flex-wrap gap-1.5">
-                  {(allowedEmails.length > 0 ? allowedEmails : [
-                    "officer.grievance@cybercrime.gov.in",
-                    "jagadeshwar2014@gmail.com",
-                    "admin@scamradar.in"
-                  ]).map((em) => (
-                    <button
-                      key={em}
-                      type="button"
-                      onClick={() => {
-                        setSelectedEmail(em);
-                        setCustomEmail("");
-                      }}
-                      className={`px-2.5 py-1 rounded-[6px] text-[11px] font-mono font-bold transition cursor-pointer border ${
-                        (customEmail ? false : selectedEmail === em)
-                          ? "bg-[#0A0A0A] text-[#23E000] border-[#0A0A0A]"
-                          : "bg-[#F7F7F2] text-[#0A0A0A] border-[#0A0A0A]/40 hover:border-[#0A0A0A]"
-                      }`}
-                    >
-                      {em}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Custom email input */}
-                <div className="pt-1">
-                  <label className="text-[10px] uppercase font-bold opacity-60 block mb-1">
-                    Or enter officer Google email:
-                  </label>
-                  <input
-                    type="email"
-                    value={customEmail}
-                    onChange={(e) => setCustomEmail(e.target.value)}
-                    placeholder="officer@cybercrime.gov.in"
-                    className="w-full h-9 bg-[#F7F7F2] border border-[#0A0A0A] rounded-[6px] px-3 text-xs font-mono font-bold focus:outline-none focus:ring-1 focus:ring-[#0A0A0A]"
-                  />
-                </div>
-              </div>
-
               {/* Primary Live Google OAuth Button */}
               <button
                 type="button"
                 onClick={handleLaunchLiveGoogleOAuth}
                 disabled={loggingIn}
-                className="w-full min-h-[52px] bg-[#FFFFFF] text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-[10px] text-xs font-black uppercase flex items-center justify-center gap-3 hover:bg-[#F0F0ED] active:scale-[0.99] transition shadow-md cursor-pointer disabled:opacity-40"
+                className="w-full min-h-[54px] bg-[#FFFFFF] text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-[12px] text-xs font-black uppercase flex items-center justify-center gap-3 hover:bg-[#F0F0ED] active:scale-[0.99] transition shadow-md cursor-pointer disabled:opacity-40"
               >
                 {loggingIn ? (
                   <>
                     <span className="w-4 h-4 border-2 border-[#0A0A0A]/30 border-t-[#0A0A0A] rounded-full animate-spin" />
-                    <span>Connecting to Google OAuth Provider...</span>
+                    <span>Connecting to Google Identity...</span>
                   </>
                 ) : (
                   <>
@@ -518,34 +465,18 @@ export default function AdminQueueModal({
                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                       />
                     </svg>
-                    <span>Sign in with Google OAuth (Select Account)</span>
+                    <span>Sign in with Google OAuth</span>
                   </>
                 )}
               </button>
 
-              {/* Direct Instant Verify Action for Testing */}
-              <button
-                type="button"
-                onClick={() => handleGoogleSignIn()}
-                disabled={loggingIn}
-                className="w-full min-h-[44px] bg-[#0A0A0A] text-[#F7F7F2] rounded-[8px] text-xs font-bold uppercase hover:opacity-90 active:scale-[0.99] transition cursor-pointer flex items-center justify-center gap-2"
-              >
-                <UserCheck className="w-4 h-4 text-[#23E000]" />
-                <span>
-                  Verify Session as{" "}
-                  <span className="font-mono text-[#23E000]">
-                    {(customEmail || selectedEmail || "jagadeshwar2014@gmail.com").split("@")[0]}
-                  </span>
-                </span>
-              </button>
-
-              <div className="p-3 bg-[#0A0A0A]/5 border border-[#0A0A0A]/20 rounded-[8px] space-y-1 text-center">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-[#0A0A0A] flex items-center justify-center gap-1">
-                  <UserCheck className="w-3 h-3 text-[#23E000]" />
-                  <span>Restricted Access Control</span>
+              <div className="p-3.5 bg-[#0A0A0A]/5 border border-[#0A0A0A]/20 rounded-[10px] space-y-1.5 text-center">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[#0A0A0A] flex items-center justify-center gap-1.5">
+                  <UserCheck className="w-3.5 h-3.5 text-[#23E000]" />
+                  <span>Authorized Personnel Only</span>
                 </div>
-                <p className="text-[10px] opacity-70 leading-relaxed">
-                  Access is restricted to authorized cyber cell personnel. Unauthorized accounts are strictly denied access (HTTP 403 Forbidden).
+                <p className="text-[11px] opacity-70 leading-relaxed">
+                  Access is strictly restricted to designated Cyber Crime Grievance Officers. Unauthorized Google accounts will be denied access (HTTP 403 Forbidden).
                 </p>
               </div>
             </div>
