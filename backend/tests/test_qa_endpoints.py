@@ -245,7 +245,7 @@ async def test_qa_admin_login_and_protection(qa_client: AsyncClient):
     assert unauth_google.status_code == 403
     unauth_json = unauth_google.json()
     err_text = unauth_json.get("error") or unauth_json.get("detail", "")
-    assert "not in the authorized officer whitelist" in err_text
+    assert "not authorized to access" in err_text
 
     # C. Whitelisted email in .env must succeed
     google_res = await qa_client.post("/admin/auth/google", json={

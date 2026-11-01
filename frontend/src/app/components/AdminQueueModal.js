@@ -424,7 +424,7 @@ export default function AdminQueueModal({
                 Officer Single Sign-On
               </h3>
               <p className="text-xs opacity-75 leading-relaxed max-w-sm mx-auto">
-                Protected administration zone. Authentication is restricted to authorized Google Workspace emails configured in <code className="font-mono bg-[#0A0A0A]/10 px-1 rounded">.env</code>.
+                Protected administration zone. Access is strictly restricted to designated Cyber Crime Grievance Officers.
               </p>
             </div>
 
@@ -440,9 +440,9 @@ export default function AdminQueueModal({
               {/* Whitelist Email Selector */}
               <div className="p-3.5 bg-[#FFFFFF] border-2 border-[#0A0A0A] rounded-[10px] space-y-2.5 shadow-sm">
                 <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
-                  <span className="opacity-75">Select Authorized Officer Account:</span>
+                  <span className="opacity-75">Designated Officer Account:</span>
                   <span className="font-mono text-[9px] px-1.5 py-0.5 bg-[#23E000]/20 text-[#0A0A0A] rounded border border-[#23E000]">
-                    .env Configured
+                    Authorized Only
                   </span>
                 </div>
 
@@ -471,10 +471,10 @@ export default function AdminQueueModal({
                   ))}
                 </div>
 
-                {/* Custom email input for manual or custom .env verification */}
+                {/* Custom email input */}
                 <div className="pt-1">
                   <label className="text-[10px] uppercase font-bold opacity-60 block mb-1">
-                    Or Enter Google Email to Verify Against .env Whitelist:
+                    Or enter officer Google email:
                   </label>
                   <input
                     type="email"
@@ -523,7 +523,7 @@ export default function AdminQueueModal({
                 )}
               </button>
 
-              {/* Direct Instant Verify Action for Local Testing */}
+              {/* Direct Instant Verify Action for Testing */}
               <button
                 type="button"
                 onClick={() => handleGoogleSignIn()}
@@ -542,10 +542,10 @@ export default function AdminQueueModal({
               <div className="p-3 bg-[#0A0A0A]/5 border border-[#0A0A0A]/20 rounded-[8px] space-y-1 text-center">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-[#0A0A0A] flex items-center justify-center gap-1">
                   <UserCheck className="w-3 h-3 text-[#23E000]" />
-                  <span>Strict Whitelist Enforced by Backend</span>
+                  <span>Restricted Access Control</span>
                 </div>
                 <p className="text-[10px] opacity-70 leading-relaxed">
-                  Only Gmails listed in <code className="font-mono font-bold">ADMIN_ALLOWED_EMAILS</code> in backend <code className="font-mono">.env</code> can access. All other Google accounts are rejected with 403 Forbidden.
+                  Access is restricted to authorized cyber cell personnel. Unauthorized accounts are strictly denied access (HTTP 403 Forbidden).
                 </p>
               </div>
             </div>

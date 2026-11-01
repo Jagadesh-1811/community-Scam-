@@ -304,7 +304,7 @@ async def admin_google_auth(payload: GoogleLoginRequest):
     if allowed_emails and email not in allowed_emails:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Access denied: '{email}' is not in the authorized officer whitelist. Add this email to ADMIN_ALLOWED_EMAILS in .env to grant portal access."
+            detail=f"Access denied: '{email}' is not authorized to access the Grievance Officer Portal."
         )
 
     token = f"sr_admin_g_{uuid.uuid4().hex}"
