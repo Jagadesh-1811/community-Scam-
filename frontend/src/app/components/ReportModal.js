@@ -1109,7 +1109,129 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
       return;
     }
 
-    // ── 7. LOCATION ENTERED IN TEXT (e.g. "Koramangala", "560001", "Bengaluru", etc.) ──
+    // ── 7. SAFETY ADVICE & SUGGESTIONS SELECTION (Never treat as scam incident text) ──
+    if (
+      userVal.startsWith("sug_") ||
+      userVal === "sug_none" ||
+      valLower === "sug_none" ||
+      textLower.includes("no suggestions") ||
+      textLower.includes("proceed to save")
+    ) {
+      const isNone =
+        userVal === "sug_none" ||
+        valLower === "sug_none" ||
+        textLower.includes("no suggestions") ||
+        textLower.includes("proceed to save");
+      const adviceText = isNone ? "" : text;
+
+      setReportData((prev) => ({
+        ...prev,
+        citizen_suggestion: adviceText,
+      }));
+
+      addBotMessage(
+        isNone
+          ? `✅ Safety advice noted.\n\nReady to broadcast this incident anonymously to your neighborhood cluster?`
+          : `✅ Community Safety Advice Recorded:\n"${adviceText}"\n\nReady to broadcast this threat anonymously to warn fellow residents?`,
+        [
+          { label: "📍 Confirm & Broadcast to Map", value: "confirm_save" },
+          { label: "🔔 Opt-in to Real-Time Alerts", value: "alerts_yes" },
+          { label: "💬 Ask a Safety Question", value: "ask_question" },
+        ]
+      );
+      setStep("save_confirm");
+      return;
+    }
+
+    // ── 8. SYSTEM ACTIONS (ask_question, ask_check_another) ──
+    if (
+      userVal === "ask_question" ||
+      textLower === "ask a question" ||
+      textLower === "ask another question" ||
+      textLower === "ask a safety question"
+    ) {
+      addBotMessage(
+        `💬 What question do you have regarding cyber fraud prevention or recovery? Tap a topic below or type your question:`,
+        [
+          { label: "📞 How Does 1930 Helpline Work?", value: "ask_1930" },
+          { label: "🚨 Is Digital Arrest Real?", value: "digital arrest" },
+          { label: "⚡ Electricity Cutoff Threat", value: "electricity power cutoff" },
+          { label: "🔒 Protecting Bank Accounts", value: "ask_bank_safety" },
+          { label: "📍 Proceed to Broadcast Report", value: "confirm_save" },
+        ]
+      );
+      return;
+    }
+
+    if (
+      userVal === "ask_check_another" ||
+      textLower === "check another scam message" ||
+      textLower === "check another message"
+    ) {
+      setReportData({
+        channel: "sms",
+        scam_type: "general-fraud",
+        predicted_risk: 50,
+        predicted_band: "Medium",
+        amount_lost_inr: 0,
+        pincode: "",
+        locality: "",
+        city: "",
+        tactics_selected: [],
+        citizen_suggestion: "",
+        raw_message: "",
+        wants_notifications: false,
+      });
+      setStep("channel");
+      addBotMessage(
+        `🔍 Examining a new incident.\n\nHow did the scammer attempt to contact you?`,
+        INITIAL_CHANNEL_OPTIONS
+      );
+      return;
+    }
+
+    // ── 9. CONVERSATIONAL REPLIES WHEN REPORT ALREADY ANALYZED ──
+    // Prevent short conversational replies from overwriting detected scam score
+    if (
+      reportData.raw_message &&
+      (textLower === "ok" ||
+        textLower === "okay" ||
+        textLower === "thanks" ||
+        textLower === "thank you" ||
+        textLower === "understood" ||
+        textLower === "done" ||
+        textLower === "next" ||
+        textLower === "proceed" ||
+        textLower === "save")
+    ) {
+      if (textLower === "save" || textLower === "proceed" || textLower === "done") {
+        if (!reportData.pincode && !reportData.locality) {
+          setStep("location_permission");
+          addBotMessage(
+            "To warn residents in your locality without compromising your privacy, please authorize broad neighborhood cluster detection (~2 to 3 km zone).",
+            null,
+            { type: "location_prompt_card" }
+          );
+        } else {
+          addBotMessage("Submitting report to community threat registry...");
+          setTimeout(() => {
+            submitReportToDB(reportData);
+          }, 300);
+        }
+      } else {
+        addBotMessage(
+          "I'm here to assist you. You can confirm & broadcast your report to warn neighbors, or ask any safety questions.",
+          [
+            { label: "📍 Confirm & Broadcast to Map", value: "confirm_save" },
+            { label: "📞 Helpline 1930 Info", value: "ask_1930" },
+            { label: "💬 Ask a Question", value: "ask_question" },
+          ]
+        );
+      }
+      return;
+    }
+
+    // ── 10. LOCATION ENTERED IN TEXT (e.g. "Koramangala", "560001", "Bengaluru", etc.) ──
     const areaMatch = findAreaByInput(text);
     if (areaMatch) {
       setReportData((prev) => ({
@@ -1131,14 +1253,14 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
       return;
     }
 
-    // ── 8. KNOWLEDGE BASE & INFORMATIONAL QUESTIONS (Continuous Q&A) ──
+    // ── 11. KNOWLEDGE BASE & INFORMATIONAL QUESTIONS (Continuous Q&A) ──
     const answer = getAssistantAnswer(text, reportData);
     if (answer) {
       addBotMessage(answer.text, answer.quickReplies);
       return;
     }
 
-    // ── 9. SCAM INCIDENT TEXT (Direct paste or message description) ──
+    // ── 12. SCAM INCIDENT TEXT (Direct paste or message description) ──
     // Runs heuristic analysis + backend checker
     const localAnalysis = analyzeIncident(text, reportData.channel || "sms");
     let finalScamType = localAnalysis.detectedType;
@@ -1308,6 +1430,10 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
     };
   };
 
+  const lastMsgWithRepliesId = [...messages]
+    .reverse()
+    .find((msg) => msg.sender === "bot" && msg.quickReplies && msg.quickReplies.length > 0)?.id;
+
   if (!isOpen) return null;
 
   return (
@@ -1357,12 +1483,7 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
 
         {/* Chat Stream */}
         <div className="overflow-y-auto flex-1 pr-1 space-y-3.5 py-4">
-          {(() => {
-            const lastMsgWithRepliesId = [...messages]
-              .reverse()
-              .find((msg) => msg.sender === "bot" && msg.quickReplies && msg.quickReplies.length > 0)?.id;
-
-            return messages.map((m, idx) => (
+          {messages.map((m, idx) => (
             <div
               key={`${m.id}-${idx}`}
               className={`flex flex-col ${
@@ -1503,8 +1624,7 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
                 </div>
               </div>
             </div>
-          ));
-        })()}
+          ))}
           <div ref={chatEndRef} />
         </div>
 
