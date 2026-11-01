@@ -67,7 +67,14 @@ async def check_message(
         if image:
             image_bytes = await image.read()
 
-    # 3. Initialize CheckState in memory
+    # 3. Validate: at least one of text or link must be provided
+    if not raw_text.strip() and not raw_link:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No readable text or link provided. Please paste a message or URL to analyze."
+        )
+
+    # 4. Initialize CheckState in memory
     state = CheckState(
         raw_text=raw_text,
         raw_link=raw_link,
@@ -75,7 +82,7 @@ async def check_message(
         ui_language=lang
     )
 
-    # 4. Handle non-streaming mode (for tests or simple clients)
+    # 5. Handle non-streaming mode (for tests or simple clients)
     if not stream:
         async with CHECKER_SEMAPHORE:
             state = await run_checker(state)
@@ -86,7 +93,7 @@ async def check_message(
                 )
             return JSONResponse(content=state.to_result_dict())
 
-    # 5. Handle SSE streaming mode
+    # 6. Handle SSE streaming mode
     async def event_generator():
         async with CHECKER_SEMAPHORE:
             async for sse_event in run_checker_stream(state):

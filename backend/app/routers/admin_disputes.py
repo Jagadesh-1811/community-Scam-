@@ -304,8 +304,14 @@ async def admin_google_auth(payload: GoogleLoginRequest):
         except Exception:
             pass
 
+    # SECURITY FIX: Empty credential with no email must be rejected — no fallback identity allowed.
     if not email:
-        email = "officer.grievance@cybercrime.gov.in"
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google credential is invalid or missing: no email identity could be extracted. "
+                   "Please sign in with a valid Google Workspace account.",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
     if not name:
         name = "Grievance Officer (Google Verified)"
 

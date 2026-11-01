@@ -38,7 +38,8 @@ async def qa_client():
 async def test_qa_health(qa_client: AsyncClient):
     res = await qa_client.get("/health")
     assert res.status_code == 200
-    assert res.json() == {"ok": True}
+    assert res.json()["ok"] is True
+    assert res.json()["status"] == "operational"
 
 # 2. QA for POST /reports
 @pytest.mark.asyncio

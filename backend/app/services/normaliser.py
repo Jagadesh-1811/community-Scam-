@@ -5,6 +5,13 @@ import phonenumbers
 # Regexes for repeated and sequential patterns
 REPEATED_DIGITS = re.compile(r"^(\d)\1+$")
 
+def _safe(raw: str, max_len: int = 60) -> str:
+    """Strip HTML tags and truncate raw user input before embedding in error messages."""
+    cleaned = re.sub(r"<[^>]+>", "", str(raw))  # strip HTML tags
+    cleaned = cleaned[:max_len]                   # truncate
+    return cleaned
+
+
 def is_sequential_or_repeated(num_str: str) -> bool:
     if REPEATED_DIGITS.match(num_str):
         return True
@@ -25,7 +32,7 @@ def normalise_phone(raw_value: str) -> str:
     # Check toll-free / bank care numbers starting with 1800 or 1860
     if cleaned.startswith("1800") or cleaned.startswith("1860"):
         if not cleaned.isdigit() or len(cleaned) < 8 or len(cleaned) > 12:
-            raise ValueError(f"Invalid toll-free number: {raw_value}")
+            raise ValueError(f"Invalid toll-free number: {_safe(raw_value)}")
         if is_sequential_or_repeated(cleaned):
             raise ValueError("Junk toll-free number detected")
         return cleaned
@@ -35,7 +42,7 @@ def normalise_phone(raw_value: str) -> str:
     digits = cleaned[1:] if has_plus else cleaned
 
     if not digits.isdigit():
-        raise ValueError(f"Invalid characters in phone number: {raw_value}")
+        raise ValueError(f"Invalid characters in phone number: {_safe(raw_value)}")
 
     # Standardize to 10-digit Indian number
     ten_digit = ""
@@ -53,10 +60,10 @@ def normalise_phone(raw_value: str) -> str:
                 return phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
         except Exception:
             pass
-        raise ValueError(f"Invalid phone number length or format: {raw_value}")
+        raise ValueError(f"Invalid phone number length or format: {_safe(raw_value)}")
 
     if len(ten_digit) != 10:
-        raise ValueError(f"Phone number must resolve to 10 digits: {raw_value}")
+        raise ValueError(f"Phone number must resolve to 10 digits: {_safe(raw_value)}")
 
     if is_sequential_or_repeated(ten_digit):
         raise ValueError("Junk phone number detected (repeated or sequential digits)")
@@ -82,10 +89,10 @@ def normalise_upi(raw_value: str) -> str:
         raise ValueError("UPI ID cannot have empty username or handle")
 
     if not re.match(r"^[a-z0-9\.\-_]{2,}$", user_part):
-        raise ValueError(f"Invalid characters or too short UPI user: {user_part}")
+        raise ValueError(f"Invalid characters or too short UPI user: {_safe(user_part)}")
 
     if not re.match(r"^[a-z0-9]{2,}$", handle_part):
-        raise ValueError(f"Invalid UPI bank handle: {handle_part}")
+        raise ValueError(f"Invalid UPI bank handle: {_safe(handle_part)}")
 
     if is_sequential_or_repeated(user_part):
         raise ValueError("Junk UPI ID detected")
@@ -114,11 +121,11 @@ def normalise_url(raw_value: str) -> str:
         host = host[4:]
 
     if not host or "." not in host or host.endswith("."):
-        raise ValueError(f"Invalid domain in URL: {raw_value}")
+        raise ValueError(f"Invalid domain in URL: {_safe(raw_value)}")
 
     # Validate host characters
     if not re.match(r"^[a-z0-9\-]+(\.[a-z0-9\-]+)+$", host):
-        raise ValueError(f"Invalid domain format: {host}")
+        raise ValueError(f"Invalid domain format: {_safe(host)}")
 
     path = parsed.path.rstrip("/")
     normalized = f"https://{host}{path}"
@@ -135,10 +142,10 @@ def normalise_sender_id(raw_value: str) -> str:
     elif len(cleaned) == 6 and cleaned.isalnum():
         pass
     else:
-        raise ValueError(f"Invalid SMS sender ID: {raw_value} (expected 6 alphanumeric characters)")
+        raise ValueError(f"Invalid SMS sender ID: {_safe(raw_value)} (expected 6 alphanumeric characters)")
 
     if len(cleaned) != 6:
-        raise ValueError(f"Sender ID must be exactly 6 characters: {raw_value}")
+        raise ValueError(f"Sender ID must be exactly 6 characters: {_safe(raw_value)}")
 
     return cleaned
 
@@ -159,4 +166,4 @@ def normalise_identifier(identifier_type: str, identifier_value: str) -> str:
     elif t in ("sender_id", "sms_sender", "sender"):
         return normalise_sender_id(v)
     else:
-        raise ValueError(f"Unsupported identifier type: {identifier_type}")
+        raise ValueError(f"Unsupported identifier type: {_safe(identifier_type)}")

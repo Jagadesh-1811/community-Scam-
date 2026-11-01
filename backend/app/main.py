@@ -112,6 +112,28 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
         content=content
     )
 
+
+# Security Headers middleware — applied to all responses
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    response = await call_next(request)
+    # Prevent MIME type sniffing
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    # Prevent clickjacking
+    response.headers["X-Frame-Options"] = "DENY"
+    # XSS protection for older browsers
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    # Disable Referrer header leakage
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    # Strict Transport Security (in production with HTTPS)
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    # Minimal Content Security Policy for API server
+    response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
+    # Remove server identity header to prevent fingerprinting
+    if "server" in response.headers:
+        del response.headers["server"]
+    return response
+
 # Include core routers
 app.include_router(health_router)
 app.include_router(reports_router)
