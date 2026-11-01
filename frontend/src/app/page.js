@@ -128,16 +128,16 @@ export default function DashboardPage() {
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-[10px] sm:rounded-[12px] bg-[#0A0A0A] text-[#F7F7F2] flex items-center justify-center shrink-0">
             <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5 text-[#E5201B]" />
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <h1 className="font-extrabold text-sm sm:text-base tracking-tight text-[#0A0A0A] truncate">
+          <div className="min-w-0 flex flex-col justify-center">
+            <div className="flex items-center gap-2 flex-nowrap">
+              <h1 className="font-extrabold text-sm sm:text-base tracking-tight text-[#0A0A0A] shrink-0 leading-tight">
                 ScamRadar
               </h1>
-              <span className="hidden md:inline px-1.5 py-0.2 bg-[#0A0A0A] text-[#F7F7F2] text-[9px] font-bold rounded-[4px] uppercase tracking-wider">
+              <span className="hidden lg:inline-flex items-center whitespace-nowrap px-2 py-0.5 bg-[#0A0A0A] text-[#F7F7F2] text-[9px] font-black rounded-[4px] uppercase tracking-wider shrink-0 leading-tight">
                 NATIONAL REGISTRY
               </span>
             </div>
-            <p className="hidden xl:block text-[11px] opacity-70 truncate">
+            <p className="hidden 2xl:block text-[11px] opacity-70 truncate leading-tight">
               Community Incident Radar & Defense Hub
             </p>
           </div>
@@ -191,16 +191,6 @@ export default function DashboardPage() {
             <PlusCircle className="w-4 h-4 text-[#23E000]" />
             <span className="hidden sm:inline">Report Scam</span>
           </button>
-
-          {/* Admin / Grievance Officer Portal Link */}
-          <a
-            href="/admin"
-            title="Grievance Officer Portal"
-            className="w-10 h-10 sm:w-auto sm:px-3 rounded-[10px] border border-[#0A0A0A] bg-[#0A0A0A] text-[#23E000] hover:bg-[#23E000] hover:text-[#0A0A0A] flex items-center justify-center gap-1.5 text-xs font-mono font-bold uppercase transition shrink-0"
-          >
-            <Lock className="w-3.5 h-3.5" />
-            <span className="hidden lg:inline">Admin</span>
-          </a>
         </div>
       </header>
 

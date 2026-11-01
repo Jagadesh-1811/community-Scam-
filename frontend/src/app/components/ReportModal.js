@@ -907,7 +907,7 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
 
     const uniqueUserMsgId = `user-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     setMessages((prev) => [
-      ...prev,
+      ...prev.map((msg) => (msg.quickReplies ? { ...msg, quickReplies: null } : msg)),
       {
         id: uniqueUserMsgId,
         sender: "user",
@@ -1086,7 +1086,25 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
       setReportData((prev) => ({ ...prev, channel: userVal }));
       setStep("content");
       addBotMessage(
-        `Channel recorded: ${channelName}.\n\nPlease describe what was claimed, paste the message text, or enter the scammer's phone number or UPI ID below.`
+        `Channel recorded: ${channelName}.\n\nWhat did the fraudster claim or demand? Tap a common scam pattern below, or paste the message / phone number in the chat:`,
+        [
+          {
+            label: "⚡ Electricity Will Be Cut Off Tonight",
+            value: "Dear consumer your electricity power will be disconnected tonight at 9:30 PM due to unpaid bill. Call 9876543210 immediately.",
+          },
+          {
+            label: "🚨 Digital Arrest from Police / CBI",
+            value: "CBI / Mumbai Cyber Crime: Illegal narcotics parcel detained at airport in your name. You are under digital arrest on Skype video call.",
+          },
+          {
+            label: "💼 Part-Time Task (Earn ₹3,000/day)",
+            value: "Work from home part-time task. Like YouTube videos and hotel ratings to earn 3000 per day. Join Telegram group.",
+          },
+          {
+            label: "🏦 Bank KYC / PAN Card Blocked",
+            value: "Dear customer your SBI / HDFC netbanking account is blocked due to expired KYC. Update PAN card immediately on the link.",
+          },
+        ]
       );
       return;
     }
@@ -1339,7 +1357,12 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
 
         {/* Chat Stream */}
         <div className="overflow-y-auto flex-1 pr-1 space-y-3.5 py-4">
-          {messages.map((m, idx) => (
+          {(() => {
+            const lastMsgWithRepliesId = [...messages]
+              .reverse()
+              .find((msg) => msg.sender === "bot" && msg.quickReplies && msg.quickReplies.length > 0)?.id;
+
+            return messages.map((m, idx) => (
             <div
               key={`${m.id}-${idx}`}
               className={`flex flex-col ${
@@ -1462,8 +1485,8 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
                     </div>
                   )}
 
-                  {/* Dynamic Quick Reply Options */}
-                  {m.quickReplies && (
+                  {/* Dynamic Quick Reply Options - Only active on latest bot prompt */}
+                  {m.quickReplies && m.id === lastMsgWithRepliesId && (
                     <div className="flex flex-wrap gap-2 mt-2">
                       {m.quickReplies.map((btn) => (
                         <button
@@ -1480,7 +1503,8 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
                 </div>
               </div>
             </div>
-          ))}
+          ));
+        })()}
           <div ref={chatEndRef} />
         </div>
 
