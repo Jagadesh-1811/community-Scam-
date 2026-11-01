@@ -222,6 +222,272 @@ const SCAM_INVESTIGATION_QUESTIONS = {
   },
 };
 
+// Contextual dynamic tactical explanations for investigation responses
+const TACTIC_EXPLANATIONS = {
+  tactic_video_call: {
+    title: "📹 Video Call Coercion Analysis",
+    content: "Scammers use fake police uniforms, forged ID cards, and blurred office backdrops on Skype/WhatsApp to induce panic.\n\n• Legal Fact: Under CrPC § 41A / BNSS, law enforcement CANNOT arrest, detain, or try anyone over a video call.\n• Demanding money transfer to an 'RBI verification account' is 100% fraud.\n• Hang up, block the number, and do not remain isolated.",
+  },
+  tactic_parcel_drugs: {
+    title: "📦 Fake Parcel Confiscation Scheme",
+    content: "Scammers claim an international courier (FedEx, DHL, Taiwan Post) containing contraband was seized in your name.\n\n• Real customs officers do not call to negotiate settlements.\n• Parcels detained by Indian Customs follow formal written procedures under the Customs Act 1962, never instant phone fines via UPI.\n• Disconnect and block immediately.",
+  },
+  tactic_room_isolation: {
+    title: "🔒 Psychological Room Isolation Tactic",
+    content: "The fraudster orders you to stay locked in a room, keep the camera on 24/7, and not talk to your family or lawyer.\n\n• Purpose: To prevent you from verifying their claims with rational friends or family.\n• Action: Break isolation immediately. Call a trusted relative or lawyer and dial 1930.",
+  },
+  tactic_rbi_bail: {
+    title: "🏦 Fake 'Safe Government RBI Account' Trick",
+    content: "The scammer demands you transfer your bank deposits to a 'Government Safe Account' for verification or bail.\n\n• Crucial Fact: The Reserve Bank of India (RBI) is a central regulatory bank. It DOES NOT maintain citizen retail accounts, nor does it conduct financial integrity checks via UPI/NEFT.\n• Any account number given is a criminal mule account.",
+  },
+  tactic_night_cutoff: {
+    title: "⏰ Electricity Disconnection Deadline Trick",
+    content: "Threatens that your electricity will be disconnected tonight at 9:30 PM due to an unpaid bill.\n\n• Discom Rules: Under Section 56 of the Electricity Act 2003, power companies must give at least 15 days formal written notice before disconnection.\n• Discoms never send disconnection warnings from personal 10-digit mobile numbers.",
+  },
+  tactic_apk_install: {
+    title: "📲 Malicious APK Trojan Warning",
+    content: "The attacker sent an APK (e.g. Suvidha.apk, Urja.apk, Bijli.apk) via WhatsApp or SMS.\n\n• Risk: Malicious APKs contain SMS-stealing and remote-control malware to read your banking OTPs and drain accounts.\n• Action: Turn on Airplane mode, go to Settings → Apps, and uninstall the APK immediately. Reset passwords from another device.",
+  },
+  tactic_personal_phone: {
+    title: "📞 Personal Mobile Number Impersonation",
+    content: "Instructed to call a personal 10-digit mobile number instead of the official power company helpline.\n\n• Power utilities have official 3-4 digit shortcodes (e.g. 1912) and verified toll-free numbers, not personal cell phones.",
+  },
+  tactic_token_payment: {
+    title: "💳 ₹10 to ₹50 Token Payment Trap",
+    content: "The caller demands a small ₹10 or ₹50 payment via a link to 'update the bill'.\n\n• Risk: The link opens a phishing page or initiates a recurring e-mandate/auto-debit permission that allows fraudsters to siphon funds repeatedly.",
+  },
+  tactic_telegram_tasks: {
+    title: "📢 Telegram Task & Rating Trap",
+    content: "Promised high daily income (₹3,000–₹5,000) for liking YouTube videos, Google maps ratings, or hotel reviews.\n\n• Structure: A classic advance-fee task scam. Small initial returns (₹150–₹500) are paid purely to gain trust before demanding big deposits.",
+  },
+  tactic_small_payout: {
+    title: "💵 Psychological Conditioning via Small Payouts",
+    content: "Fraudsters paid ₹150–₹500 directly into your UPI account.\n\n• This is calculated psychological bait to make you believe the system is genuine before trapping you in ₹20,000–₹1,00,000 'VIP tasks'.\n• Do not deposit any money.",
+  },
+  tactic_deposit_demand: {
+    title: "🚫 Frozen Funds & Withdrawal Deposit Trap",
+    content: "The platform froze your virtual balance and demands ₹10,000+ deposit to unfreeze or withdraw.\n\n• Reality: The dashboard is fake. Depositing more will NEVER unlock your money—fraudsters keep demanding additional 'taxes' or 'penalties' until you stop paying.",
+  },
+  tactic_unsolicited_hr: {
+    title: "💬 Unsolicited HR Recruiter Lure",
+    content: "Received an unexpected message on WhatsApp claiming to be an international HR agency.\n\n• Legitimate multinational employers never recruit employees via unsolicited WhatsApp messages offering daily cash tasks.",
+  },
+  tactic_credential_phish: {
+    title: "🔗 Banking & KYC Phishing Link Attack",
+    content: "A link asking for NetBanking User ID, Password, Debit Card CVV, or ATM PIN.\n\n• Golden Rule: Legitimate banks NEVER ask for your password, PIN, or CVV to update KYC or unblock an account.\n• Immediately freeze debit card and reset NetBanking credentials.",
+  },
+  tactic_screen_share: {
+    title: "📥 Screen-Sharing Exploitation (AnyDesk / RustDesk)",
+    content: "The caller instructed you to install AnyDesk, RustDesk, or TeamViewer QuickSupport.\n\n• Risk: Remote access tools allow the fraudster to view your screen in real time, capture your OTPs as they arrive, and transfer funds.\n• Uninstall the remote app immediately and reboot your device.",
+  },
+  tactic_account_blocked: {
+    title: "⛔ Fake Account Suspension Fear Tactic",
+    content: "Claimed your bank account, debit card, or PAN will be permanently blocked within 24 hours.\n\n• Panic Mechanism: Scammers manufacture urgency so you click dangerous links without verification. Banks issue formal mail notices, not WhatsApp threats.",
+  },
+  tactic_otp_demand: {
+    title: "🔢 Direct OTP Extraction Attempt",
+    content: "Caller insisted that you read out an OTP received on SMS to 'verify' your identity.\n\n• Absolute Rule: Bank staff NEVER ask for OTPs. An OTP is your personal digital signature to authorize debits.",
+  },
+  tactic_scan_to_receive: {
+    title: "📷 QR Code Inversion Fraud",
+    content: "Sent a QR code claiming 'Scan this QR code to receive money into your account'.\n\n• Technical Fact: QR codes and UPI PINs are SOLELY for sending money. Receiving money NEVER requires scanning a QR code or entering your PIN.",
+  },
+  tactic_collect_request: {
+    title: "📥 Deceptive UPI Collect Request",
+    content: "Sent a UPI 'Collect Request' pretending it is an incoming payment.\n\n• Reality: Approving a collect request and entering your PIN immediately transfers money FROM your account to the scammer. Decline it.",
+  },
+  tactic_army_officer: {
+    title: "🎖️ Fake Armed Forces / Defence Officer Impersonation",
+    content: "The buyer claims to be an Army or CISF officer stationed at an airport or military base, offering advance payment.\n\n• Scammers frequently forge military canteen cards to gain trust before sending fake QR codes or collect requests.",
+  },
+  tactic_advance_courier: {
+    title: "📦 Advance Courier Fee Scam",
+    content: "Demanded you transfer a ₹500–₹2,000 courier or insurance fee before dispatching an item.\n\n• Never pay courier fees upfront to unknown online buyers or sellers on OLX / social media.",
+  },
+  tactic_permission_abuse: {
+    title: "📱 Predatory Loan App Permission Abuse",
+    content: "An unverified loan app accessed your entire phone contact list, SMS inbox, and photo gallery.\n\n• RBI Mandate: Under RBI digital lending guidelines, loan apps cannot access mobile contacts, call logs, or media galleries. Report the app on sachet.rbi.org.in.",
+  },
+  tactic_morphed_threat: {
+    title: "⚠️ Morphed Photos & Criminal Blackmail",
+    content: "Threatening to send morphed photos to your contacts or family.\n\n• Legal Protection: Morphing and extortion are serious criminal offences under IT Act § 66E, § 67, and IPC § 506 / BNS § 351.\n• Do not pay extortion money. File an immediate complaint at cybercrime.gov.in.",
+  },
+  tactic_high_deduction: {
+    title: "💸 Usurious Deductions & Predatory Interest",
+    content: "Loan app disbursed only ₹3,000 against a ₹5,000 loan and demanded ₹6,000 in 7 days.\n\n• Unregulated predatory apps operate illegal 300%+ APR loan sharking. Legitimate NBFCs are regulated under RBI Fair Practices Code.",
+  },
+  tactic_abusive_calls: {
+    title: "📞 Abusive Recovery Harassment",
+    content: "Receiving abusive, threatening calls from multiple virtual or overseas numbers.\n\n• Under RBI guidelines, recovery agents cannot call before 8 AM or after 7 PM, nor use abusive language or intimidate relatives.",
+  },
+};
+
+// Authoritative Indian Cybercrime Knowledge Base Responses
+const getAssistantAnswer = (text, reportData) => {
+  const t = text.toLowerCase();
+
+  // 1. Helpline 1930 / Reporting / Police / FIR
+  if (
+    t.includes("1930") ||
+    t.includes("helpline") ||
+    t.includes("how to report") ||
+    t.includes("cyber police") ||
+    t.includes("cyber cell") ||
+    t.includes("file complaint") ||
+    t.includes("fir")
+  ) {
+    return {
+      text: "📞 National Cyber Crime Helpline: 1930\n\n• Operates 24x7 toll-free under the Ministry of Home Affairs (I4C).\n• Golden Hour Action: If you transferred funds within the last 2 to 4 hours, calling 1930 triggers an instant freeze/lien on the fraudster's mule account before cash withdrawal.\n• Official Portal: File an e-complaint on https://cybercrime.gov.in to receive an official FIR / Acknowledgement Number.\n• Keep Ready: Transaction UTR / Ref number, bank account details, and screenshot of payment.",
+      quickReplies: [
+        { label: "📍 Broadcast to Threat Map", value: "confirm_save" },
+        { label: "🛡️ How to Protect My Bank", value: "ask_bank_safety" },
+        { label: "💬 Ask Another Question", value: "ask_question" },
+      ],
+    };
+  }
+
+  // 2. Digital Arrest / Video Call
+  if (
+    t.includes("digital arrest") ||
+    t.includes("video call") ||
+    t.includes("skype") ||
+    t.includes("cbi") ||
+    t.includes("police arrest") ||
+    t.includes("customs arrest")
+  ) {
+    return {
+      text: "🚨 Official Police Advisory on \"Digital Arrest\":\n\n1. NO DIGITAL ARREST IN LAW: Under Indian Criminal Law (CrPC § 41A / BNSS), police and CBI CANNOT arrest, try, or detain citizens over WhatsApp or Skype video calls.\n2. NO 'SAFE RBI ACCOUNTS': Government agencies never ask you to transfer funds to any 'verification account' or demand bail via UPI/RTGS.\n3. ACTION: Disconnect the call immediately. Do not stay locked in a room. Inform your family and report the number to 1930.",
+      quickReplies: [
+        { label: "🛡️ No Money Lost (₹0)", value: "loss_0" },
+        { label: "💸 I Transferred Money", value: "loss_10k" },
+        { label: "📍 Broadcast to Threat Map", value: "confirm_save" },
+      ],
+    };
+  }
+
+  // 3. Electricity Cutoff
+  if (
+    t.includes("electricity") ||
+    t.includes("power cut") ||
+    t.includes("power cutoff") ||
+    t.includes("light cut") ||
+    t.includes("bescom") ||
+    t.includes("msedcl") ||
+    t.includes("tneb") ||
+    t.includes("discom")
+  ) {
+    return {
+      text: "⚡ Electricity Disconnection Extortion Warning:\n\n1. Discoms NEVER send disconnection threats from personal 10-digit mobile numbers.\n2. Under Section 56 of the Electricity Act 2003, power boards must provide at least 15 days written notice before disconnecting supply.\n3. The 9:30 PM deadline is artificial panic engineered to make you click phishing links or download malware.\n4. Check bill status only on the official state electricity portal.",
+      quickReplies: [
+        { label: "📲 They Sent an APK", value: "tactic_apk_install" },
+        { label: "🛡️ Caught in Time (₹0 Lost)", value: "loss_0" },
+        { label: "📍 Broadcast to Threat Map", value: "confirm_save" },
+      ],
+    };
+  }
+
+  // 4. Malicious APKs / Screen Sharing
+  if (
+    t.includes("apk") ||
+    t.includes("virus") ||
+    t.includes("download") ||
+    t.includes("anydesk") ||
+    t.includes("rustdesk") ||
+    t.includes("suvidha") ||
+    t.includes("urja") ||
+    t.includes("teamviewer")
+  ) {
+    return {
+      text: "📲 Emergency Protocol for Suspicious APKs & Screen Sharing:\n\n1. Turn on AIRPLANE MODE immediately to cut remote internet control.\n2. Go to phone Settings → Apps → Find the downloaded APK (e.g. Suvidha, Urja, AnyDesk, QuickSupport) and tap UNINSTALL.\n3. From a different, clean device: Change your NetBanking login password, transaction password, and UPI PINs.\n4. Call 1930 or your bank to check for any unauthorized debit requests.",
+      quickReplies: [
+        { label: "🔒 Bank Security Checklist", value: "ask_bank_safety" },
+        { label: "📞 Dial 1930 Helpline", value: "ask_1930" },
+        { label: "📍 Broadcast to Threat Map", value: "confirm_save" },
+      ],
+    };
+  }
+
+  // 5. UPI / QR Code / Collect Request
+  if (
+    t.includes("qr") ||
+    t.includes("upi collect") ||
+    t.includes("scan to receive") ||
+    t.includes("olx")
+  ) {
+    return {
+      text: "💳 QR Code & UPI Security Rule:\n\n• You NEVER need to scan a QR code or enter your UPI PIN to receive money.\n• Scanning a QR code or approving a 'Collect Request' exclusively TRANSFERS MONEY OUT of your bank account.\n• Incoming funds enter your account automatically with zero action needed on your phone.\n• Decline any incoming collect request from unknown buyers immediately.",
+      quickReplies: [
+        { label: "🛡️ Caught in Time (₹0 Lost)", value: "loss_0" },
+        { label: "💸 Money Transferred by Mistake", value: "loss_10k" },
+        { label: "📍 Broadcast to Threat Map", value: "confirm_save" },
+      ],
+    };
+  }
+
+  // 6. Telegram Task & Job Fraud
+  if (
+    t.includes("telegram") ||
+    t.includes("task") ||
+    t.includes("part time") ||
+    t.includes("job offer") ||
+    t.includes("daily salary") ||
+    t.includes("vip task")
+  ) {
+    return {
+      text: "📢 Telegram Task & Rating Fraud Advisory:\n\n• Fraudsters pay small amounts (₹150–₹500) initially to lure you into depositing larger amounts (₹10,000–₹1,00,000).\n• Once money is deposited, your account is 'frozen' and they demand more money for 'tax' or 'credit score'.\n• Do NOT send any more money. You will never recover previous deposits by paying more.\n• File an immediate report on 1930 with the scammer's bank details and Telegram handles.",
+      quickReplies: [
+        { label: "🚫 Froze Funds & Demanded Deposit", value: "tactic_deposit_demand" },
+        { label: "💸 I Lost Money to Tasks", value: "loss_10k" },
+        { label: "📍 Broadcast to Threat Map", value: "confirm_save" },
+      ],
+    };
+  }
+
+  // 7. Loan App Blackmail
+  if (
+    t.includes("loan app") ||
+    t.includes("instant loan") ||
+    t.includes("morphed") ||
+    t.includes("contacts leaked") ||
+    t.includes("blackmail")
+  ) {
+    return {
+      text: "⚠️ Predatory Loan App Blackmail Protection:\n\n1. Do NOT pay extortion demands. Paying once causes scammers to demand higher amounts repeatedly.\n2. Inform your contacts and family that an illegal app has accessed your contact list.\n3. Morphing images is a criminal offence under IT Act § 66E / § 67 and IPC § 506 / BNS § 351.\n4. File an immediate complaint on https://cybercrime.gov.in under 'Cyber Harassment' and report to RBI on https://sachet.rbi.org.in.",
+      quickReplies: [
+        { label: "📞 How to Report to 1930", value: "ask_1930" },
+        { label: "📍 Broadcast to Threat Map", value: "confirm_save" },
+        { label: "💬 Ask Another Question", value: "ask_question" },
+      ],
+    };
+  }
+
+  // 8. Bank Safety Checklist
+  if (t.includes("bank safety") || t.includes("protect my bank") || t.includes("unfreeze")) {
+    return {
+      text: "🔒 Citizen Bank Protection Checklist:\n\n1. Immediately call your bank's official 24x7 customer care number (printed on the back of your card) to block cards and freeze NetBanking.\n2. If money was deducted, note down the 12-digit UTR/RRN number from the SMS.\n3. Call national cybercrime helpline 1930 within the Golden Hour.\n4. File a dispute/chargeback with your home branch in writing within 3 working days under RBI Zero-Liability circular.",
+      quickReplies: [
+        { label: "📞 Dial 1930 Helpline", value: "ask_1930" },
+        { label: "📍 Broadcast to Threat Map", value: "confirm_save" },
+        { label: "💬 Ask Another Question", value: "ask_question" },
+      ],
+    };
+  }
+
+  // 9. Chakshu / Sanchar Saathi
+  if (t.includes("chakshu") || t.includes("sanchar saathi") || t.includes("block number")) {
+    return {
+      text: "🌐 DoT Sanchar Saathi & Chakshu Facility:\n\n• Chakshu (https://sancharsaathi.gov.in) allows citizens to report suspected fraud communications via calls, SMS, or WhatsApp.\n• The Department of Telecommunications verifies reports and can disconnect the scammer's SIM card and block their mobile handset IMEI across all Indian telecom operators.",
+      quickReplies: [
+        { label: "📍 Broadcast to Threat Map", value: "confirm_save" },
+        { label: "📞 Dial 1930 Helpline", value: "ask_1930" },
+        { label: "💬 Ask Another Question", value: "ask_question" },
+      ],
+    };
+  }
+
+  return null;
+};
+
 // Dynamic community safety advice tailored to the specific scam type
 const DYNAMIC_SAFETY_ADVICE = {
   "digital-arrest": [
@@ -512,21 +778,18 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
     }
   }, [isOpen]);
 
-  let botMsgCounter = 0;
   const addBotMessage = (text, quickReplies = null, card = null) => {
-    const uniqueId = `bot-${Date.now()}-${++botMsgCounter}-${Math.random().toString(36).slice(2, 7)}`;
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: uniqueId,
-          sender: "bot",
-          text,
-          quickReplies,
-          card,
-        },
-      ]);
-    }, 200);
+    const uniqueId = `bot-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: uniqueId,
+        sender: "bot",
+        text,
+        quickReplies,
+        card,
+      },
+    ]);
   };
 
   const scrubPII = (text) => {
@@ -901,7 +1164,7 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
 
   const handleUserReply = async (text, payloadVal = null) => {
     setUiError("");
-    const userVal = payloadVal || text.trim();
+    const userVal = (payloadVal || text || "").trim();
     if (!userVal) {
       setUiError("Please enter or select a response.");
       return;
@@ -909,7 +1172,7 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
 
     const uniqueUserMsgId = `user-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     setMessages((prev) => [
-      ...prev,
+      ...prev.map((msg) => (msg.quickReplies ? { ...msg, quickReplies: null } : msg)),
       {
         id: uniqueUserMsgId,
         sender: "user",
@@ -918,103 +1181,22 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
     ]);
     setInput("");
 
-    // Step 1: Channel selection
-    if (step === "channel") {
-      const channel = userVal;
-      setReportData((prev) => ({ ...prev, channel }));
-      setStep("content");
-      addBotMessage(
-        `Channel recorded: ${text}.\n\nPlease describe what was claimed, demanded, or paste the message text / sender phone number.`
-      );
-    }
-    // Step 2: Content Analysis & Dynamic Verification
-    else if (step === "content") {
-      const userText = userVal;
+    const valLower = userVal.toLowerCase();
+    const textLower = text.toLowerCase();
 
-      // Run our robust local NLP heuristic analysis first
-      const localAnalysis = analyzeIncident(userText, reportData.channel);
-
-      let finalScamType = localAnalysis.detectedType;
-      let finalRiskScore = localAnalysis.dynamicScore;
-      let finalRiskBand = localAnalysis.riskBand;
-      let finalTactics = localAnalysis.detectedTactics;
-      let finalExplanation = localAnalysis.explanation;
-      let finalIdentType = localAnalysis.identType;
-      let finalIdentVal = localAnalysis.identVal;
-
-      // Attempt to query the backend deterministic checker to augment results
-      try {
-        const baseUrl = apiBaseUrl || "http://localhost:8000";
-        const checkRes = await fetch(`${baseUrl}/check?stream=false`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: userText, ui_language: "en" }),
-        });
-
-        if (checkRes.ok) {
-          const checkData = await checkRes.json();
-          if (checkData.scam_type && checkData.scam_type !== "other") {
-            finalScamType = checkData.scam_type;
-          }
-          if (checkData.score && checkData.score > 0) {
-            finalRiskScore = checkData.score;
-            finalRiskBand = checkData.band || finalRiskBand;
-          }
-          if (checkData.tactics && checkData.tactics.length > 0) {
-            finalTactics = Array.from(new Set([...finalTactics, ...checkData.tactics]));
-          }
-          if (checkData.explanation && checkData.explanation.length > 0) {
-            finalExplanation = checkData.explanation.slice(0, 2).join(" ");
-          }
-        }
-      } catch (err) {
-        // Local deterministic engine guarantees dynamic operation even if backend fluctuates
-      }
-
-      setReportData((prev) => ({
-        ...prev,
-        note: userText,
-        identifier_type: finalIdentType,
-        identifier_value: finalIdentVal,
-        scam_type: finalScamType,
-        predicted_risk: finalRiskScore,
-        predicted_band: finalRiskBand,
-        predicted_tactics: finalTactics,
-      }));
-
-      // Render the Scam Pattern Verification Card
-      addBotMessage(
-        "",
-        null,
-        {
-          type: "prediction_card",
-          scam_type: finalScamType.toUpperCase(),
-          risk_score: finalRiskScore,
-          risk_band: finalRiskBand,
-          explanation: finalExplanation,
-          masked_message: scrubPII(userText),
-        }
-      );
-
-      // Transition to DYNAMIC investigative question tailored to detected scam
-      setStep("investigation_question");
-      const config = SCAM_INVESTIGATION_QUESTIONS[finalScamType] || SCAM_INVESTIGATION_QUESTIONS["general-fraud"];
-      addBotMessage(
-        `${config.question}\n\n${config.prompt}`,
-        config.replies
-      );
-    }
-    // Step 3: Investigative Tactic Follow-Up
-    else if (step === "investigation_question") {
+    // ── 1. TACTICAL INVESTIGATION FOLLOW-UP (When user clicked or mentioned a tactic) ──
+    if (TACTIC_EXPLANATIONS[userVal] || valLower.startsWith("tactic_")) {
+      const tacticInfo = TACTIC_EXPLANATIONS[userVal] || {
+        title: "Tactical Investigation Finding",
+        content: `Detailed insight into ${text}: Scammers utilize this coercion vector to bypass rational verification.`,
+      };
       setReportData((prev) => ({
         ...prev,
         investigation_tactic: text,
       }));
 
-      // Transition to Dynamic Financial Loss Assessment
-      setStep("financial_loss");
       addBotMessage(
-        `Noted: "${text}".\n\nDid you suffer any financial loss in this incident, or did you detect the deception in time?`,
+        `${tacticInfo.title}\n\n${tacticInfo.content}\n\nDid you suffer any financial loss in this incident, or did you detect the deception in time?`,
         [
           { label: "🛡️ No Money Lost (₹0 - Caught in Time)", value: "loss_0" },
           { label: "💸 Small Loss (Under ₹10,000 lost)", value: "loss_10k" },
@@ -1022,9 +1204,20 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
           { label: "🚨 Severe Loss (Over ₹50,000 lost)", value: "loss_high" },
         ]
       );
+      setStep("financial_loss");
+      return;
     }
-    // Step 4: Financial Loss Assessment
-    else if (step === "financial_loss") {
+
+    // ── 2. FINANCIAL LOSS EVALUATION & GOLDEN HOUR PROTOCOL ──
+    if (
+      userVal.startsWith("loss_") ||
+      textLower.includes("money lost") ||
+      textLower.includes("no loss") ||
+      textLower.includes("₹0") ||
+      textLower.includes("transferred") ||
+      textLower.includes("lost ₹") ||
+      textLower.includes("paid ₹")
+    ) {
       let lossInr = 0;
       let isHighLoss = false;
 
@@ -1037,8 +1230,8 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
       } else if (userVal === "loss_high") {
         lossInr = 75000;
         isHighLoss = true;
-      } else if (!userVal.startsWith("loss_0")) {
-        const parsed = parseFloat(userVal.replace(/[^0-9.]/g, ""));
+      } else if (!userVal.startsWith("loss_0") && !textLower.includes("no money") && !textLower.includes("₹0")) {
+        const parsed = parseFloat(text.replace(/[^0-9.]/g, ""));
         if (!isNaN(parsed) && parsed > 0) {
           lossInr = parsed;
           isHighLoss = true;
@@ -1048,61 +1241,73 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
       setReportData((prev) => ({
         ...prev,
         amount_lost_inr: lossInr,
-        // Dynamically elevate score if financial loss occurred
         predicted_risk: isHighLoss ? Math.min(99, (prev.predicted_risk || 50) + 15) : prev.predicted_risk,
         predicted_band: isHighLoss ? "Critical" : prev.predicted_band,
       }));
 
       if (isHighLoss) {
         addBotMessage(
-          `🚨 URGENT RECOVERY PROTOCOL:\nSince money was transferred, call national cybercrime helpline 1930 immediately!\n\nUnder the I4C CFCFRMS protocol, reporting within the golden hour triggers an instant freeze on the scammer's mule bank account before cash withdrawal.`
+          `🚨 URGENT RECOVERY PROTOCOL (Golden Hour Helpline 1930):\n\nSince money was transferred, call national cybercrime helpline 1930 immediately!\n\n1. Under the I4C CFCFRMS protocol, reporting within the golden hour triggers an instant freeze on the scammer's mule bank account before cash withdrawal.\n2. Note down your transaction UTR / Reference number, bank account details, and screenshot of payment.\n3. File an official complaint on https://cybercrime.gov.in.\n\nWould you like to broadcast this threat anonymously to warn other citizens in your area?`,
+          [
+            { label: "📍 Broadcast Anonymously to Map", value: "confirm_save" },
+            { label: "📞 How to Dial 1930 Helpline", value: "ask_1930" },
+            { label: "💬 Ask Another Question", value: "ask_question" },
+          ]
+        );
+      } else {
+        addBotMessage(
+          `🛡️ Excellent vigilance! You detected the scam in time before any money was lost.\n\nEven with zero loss, logging this threat anonymously helps shield elderly neighbors and students in your area from falling victim.\n\nWould you like to broadcast this report anonymously to the national threat map?`,
+          [
+            { label: "📍 Broadcast Anonymously to Map", value: "confirm_save" },
+            { label: "🔔 Notify Me of Surge Alerts", value: "alerts_yes" },
+            { label: "💬 Ask Another Question", value: "ask_question" },
+          ]
         );
       }
-
-      // Transition to Location Cluster Detection
-      setStep("location_permission");
-      addBotMessage(
-        "To warn residents in your locality without compromising your privacy, please authorize broad neighborhood cluster detection (~2 to 3 km zone).",
-        null,
-        { type: "location_prompt_card" }
-      );
-    }
-    // Step 5: Suggestions
-    else if (step === "suggestions") {
-      let suggestionsList = [];
-      if (userVal !== "sug_none") {
-        suggestionsList = [text];
-      }
-      setReportData((prev) => ({ ...prev, suggestions: suggestionsList }));
       setStep("save_confirm");
-
-      addBotMessage(
-        `Guidance registered: "${text}".\n\nWould you like to publish this report anonymously to the national threat map to protect other citizens?`,
-        [
-          { label: "Yes, publish anonymously to map", value: "confirm_save" },
-          { label: "No, cancel report", value: "cancel" },
-        ]
-      );
+      return;
     }
-    // Step 6: Save Confirmation
-    else if (step === "save_confirm") {
-      if (userVal === "cancel") {
-        addBotMessage("Report submission cancelled. No data has been saved.");
-        setStep("done");
-        return;
+
+    // ── 3. BROADCAST / SAVE TO COMMUNITY THREAT MAP ──
+    if (
+      userVal === "confirm_save" ||
+      userVal === "broadcast_map" ||
+      textLower === "yes, publish anonymously to map" ||
+      textLower === "broadcast" ||
+      textLower === "publish" ||
+      textLower === "save" ||
+      textLower === "save report"
+    ) {
+      if (!reportData.pincode && !reportData.locality) {
+        setStep("location_permission");
+        addBotMessage(
+          "To warn residents in your locality without compromising your privacy, please authorize broad neighborhood cluster detection (~2 to 3 km zone).",
+          null,
+          { type: "location_prompt_card" }
+        );
+      } else {
+        addBotMessage("Submitting report to community threat registry...");
+        setTimeout(() => {
+          submitReportToDB(reportData);
+        }, 300);
       }
+      return;
+    }
 
-      setStep("notifications");
+    // ── 4. CANCEL REPORT ──
+    if (userVal === "cancel" || textLower === "cancel") {
       addBotMessage(
-        "Do you want to receive real-time alerts if a scam surge or new pattern emerges in your cluster?",
+        "Report submission paused. No data was saved.\n\nYou can continue chatting with me below if you want safety advice, have questions, or want to check another message.",
         [
-          { label: "🔔 Notify me with surge alerts", value: "alerts_yes" },
-          { label: "No thanks, just save report", value: "alerts_no" },
+          { label: "📞 Helpline 1930 Information", value: "ask_1930" },
+          { label: "🔍 Check Another Message", value: "ask_check_another" },
         ]
       );
+      return;
     }
-    // Step 7: Push Notifications Opt-In & Submission
-    else if (step === "notifications") {
+
+    // ── 5. NOTIFICATIONS OPT-IN ──
+    if (userVal === "alerts_yes" || userVal === "alerts_no") {
       if (userVal === "alerts_yes") {
         if (typeof window !== "undefined" && "Notification" in window) {
           try {
@@ -1115,24 +1320,279 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
             }
           } catch (e) {}
         }
-
         const updated = {
           ...reportData,
           wants_notifications: true,
           contact_for_alerts: "browser_push",
         };
         setReportData(updated);
-        addBotMessage("Browser notifications activated for your safety zone! 🔔\n\nSubmitting report to community threat registry...");
+        addBotMessage("🔔 Real-time scam surge alerts enabled for your safety cluster!\n\nSubmitting report to community threat registry...");
         setTimeout(() => {
           submitReportToDB(updated);
-        }, 500);
+        }, 300);
       } else {
         addBotMessage("Understood. Publishing your report anonymously...");
         setTimeout(() => {
           submitReportToDB({ ...reportData, wants_notifications: false });
-        }, 500);
+        }, 300);
       }
+      return;
     }
+
+    // ── 6. CHANNEL SELECTION ──
+    if (userVal === "phone_call" || userVal === "sms" || userVal === "upi" || userVal === "link") {
+      const channelLabels = {
+        phone_call: "Phone Call Threat",
+        sms: "SMS / WhatsApp Message",
+        upi: "Fake UPI / QR Request",
+        link: "Phishing Link / Website",
+      };
+      const channelName = channelLabels[userVal] || userVal;
+      setReportData((prev) => ({ ...prev, channel: userVal }));
+      setStep("content");
+      addBotMessage(
+        `Channel recorded: ${channelName}.\n\nWhat did the fraudster claim or demand? Tap a common scam pattern below, or paste the message / phone number in the chat:`,
+        [
+          {
+            label: "⚡ Electricity Will Be Cut Off Tonight",
+            value: "Dear consumer your electricity power will be disconnected tonight at 9:30 PM due to unpaid bill. Call 9876543210 immediately.",
+          },
+          {
+            label: "🚨 Digital Arrest from Police / CBI",
+            value: "CBI / Mumbai Cyber Crime: Illegal narcotics parcel detained at airport in your name. You are under digital arrest on Skype video call.",
+          },
+          {
+            label: "💼 Part-Time Task (Earn ₹3,000/day)",
+            value: "Work from home part-time task. Like YouTube videos and hotel ratings to earn 3000 per day. Join Telegram group.",
+          },
+          {
+            label: "🏦 Bank KYC / PAN Card Blocked",
+            value: "Dear customer your SBI / HDFC netbanking account is blocked due to expired KYC. Update PAN card immediately on the link.",
+          },
+        ]
+      );
+      return;
+    }
+
+    // ── 7. SAFETY ADVICE & SUGGESTIONS SELECTION (Never treat as scam incident text) ──
+    if (
+      userVal.startsWith("sug_") ||
+      userVal === "sug_none" ||
+      valLower === "sug_none" ||
+      textLower.includes("no suggestions") ||
+      textLower.includes("proceed to save")
+    ) {
+      const isNone =
+        userVal === "sug_none" ||
+        valLower === "sug_none" ||
+        textLower.includes("no suggestions") ||
+        textLower.includes("proceed to save");
+      const adviceText = isNone ? "" : text;
+
+      setReportData((prev) => ({
+        ...prev,
+        citizen_suggestion: adviceText,
+      }));
+
+      addBotMessage(
+        isNone
+          ? `✅ Safety advice noted.\n\nReady to broadcast this incident anonymously to your neighborhood cluster?`
+          : `✅ Community Safety Advice Recorded:\n"${adviceText}"\n\nReady to broadcast this threat anonymously to warn fellow residents?`,
+        [
+          { label: "📍 Confirm & Broadcast to Map", value: "confirm_save" },
+          { label: "🔔 Opt-in to Real-Time Alerts", value: "alerts_yes" },
+          { label: "💬 Ask a Safety Question", value: "ask_question" },
+        ]
+      );
+      setStep("save_confirm");
+      return;
+    }
+
+    // ── 8. SYSTEM ACTIONS (ask_question, ask_check_another) ──
+    if (
+      userVal === "ask_question" ||
+      textLower === "ask a question" ||
+      textLower === "ask another question" ||
+      textLower === "ask a safety question"
+    ) {
+      addBotMessage(
+        `💬 What question do you have regarding cyber fraud prevention or recovery? Tap a topic below or type your question:`,
+        [
+          { label: "📞 How Does 1930 Helpline Work?", value: "ask_1930" },
+          { label: "🚨 Is Digital Arrest Real?", value: "digital arrest" },
+          { label: "⚡ Electricity Cutoff Threat", value: "electricity power cutoff" },
+          { label: "🔒 Protecting Bank Accounts", value: "ask_bank_safety" },
+          { label: "📍 Proceed to Broadcast Report", value: "confirm_save" },
+        ]
+      );
+      return;
+    }
+
+    if (
+      userVal === "ask_check_another" ||
+      textLower === "check another scam message" ||
+      textLower === "check another message"
+    ) {
+      setReportData({
+        channel: "sms",
+        scam_type: "general-fraud",
+        predicted_risk: 50,
+        predicted_band: "Medium",
+        amount_lost_inr: 0,
+        pincode: "",
+        locality: "",
+        city: "",
+        tactics_selected: [],
+        citizen_suggestion: "",
+        raw_message: "",
+        wants_notifications: false,
+      });
+      setStep("channel");
+      addBotMessage(
+        `🔍 Examining a new incident.\n\nHow did the scammer attempt to contact you?`,
+        INITIAL_CHANNEL_OPTIONS
+      );
+      return;
+    }
+
+    // ── 9. CONVERSATIONAL REPLIES WHEN REPORT ALREADY ANALYZED ──
+    // Prevent short conversational replies from overwriting detected scam score
+    if (
+      reportData.raw_message &&
+      (textLower === "ok" ||
+        textLower === "okay" ||
+        textLower === "thanks" ||
+        textLower === "thank you" ||
+        textLower === "understood" ||
+        textLower === "done" ||
+        textLower === "next" ||
+        textLower === "proceed" ||
+        textLower === "save")
+    ) {
+      if (textLower === "save" || textLower === "proceed" || textLower === "done") {
+        if (!reportData.pincode && !reportData.locality) {
+          setStep("location_permission");
+          addBotMessage(
+            "To warn residents in your locality without compromising your privacy, please authorize broad neighborhood cluster detection (~2 to 3 km zone).",
+            null,
+            { type: "location_prompt_card" }
+          );
+        } else {
+          addBotMessage("Submitting report to community threat registry...");
+          setTimeout(() => {
+            submitReportToDB(reportData);
+          }, 300);
+        }
+      } else {
+        addBotMessage(
+          "I'm here to assist you. You can confirm & broadcast your report to warn neighbors, or ask any safety questions.",
+          [
+            { label: "📍 Confirm & Broadcast to Map", value: "confirm_save" },
+            { label: "📞 Helpline 1930 Info", value: "ask_1930" },
+            { label: "💬 Ask a Question", value: "ask_question" },
+          ]
+        );
+      }
+      return;
+    }
+
+    // ── 10. LOCATION ENTERED IN TEXT (e.g. "Koramangala", "560001", "Bengaluru", etc.) ──
+    const areaMatch = findAreaByInput(text);
+    if (areaMatch) {
+      setReportData((prev) => ({
+        ...prev,
+        pincode: areaMatch.pincode,
+        locality: areaMatch.locality,
+        city: areaMatch.city,
+      }));
+      if (onHighlightLocation) {
+        onHighlightLocation(areaMatch);
+      }
+      addBotMessage(
+        `📍 Location Cluster Set (~2–3 km): ${areaMatch.locality}, ${areaMatch.city} (PIN ${areaMatch.pincode}).\n\nBroadcasting anonymously to this cluster protects fellow residents without storing your exact address.`,
+        [
+          { label: "📍 Confirm & Broadcast to Map", value: "confirm_save" },
+          { label: "💬 Ask a Safety Question", value: "ask_question" },
+        ]
+      );
+      return;
+    }
+
+    // ── 11. KNOWLEDGE BASE & INFORMATIONAL QUESTIONS (Continuous Q&A) ──
+    const answer = getAssistantAnswer(text, reportData);
+    if (answer) {
+      addBotMessage(answer.text, answer.quickReplies);
+      return;
+    }
+
+    // ── 12. SCAM INCIDENT TEXT (Direct paste or message description) ──
+    // Runs heuristic analysis + backend checker
+    const localAnalysis = analyzeIncident(text, reportData.channel || "sms");
+    let finalScamType = localAnalysis.detectedType;
+    let finalRiskScore = localAnalysis.dynamicScore;
+    let finalRiskBand = localAnalysis.riskBand;
+    let finalTactics = localAnalysis.detectedTactics;
+    let finalExplanation = localAnalysis.explanation;
+    let finalIdentType = localAnalysis.identType;
+    let finalIdentVal = localAnalysis.identVal;
+
+    try {
+      const baseUrl = apiBaseUrl || "http://localhost:8000";
+      const checkRes = await fetch(`${baseUrl}/check?stream=false`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text, ui_language: "en" }),
+      });
+      if (checkRes.ok) {
+        const checkData = await checkRes.json();
+        if (checkData.scam_type && checkData.scam_type !== "other") {
+          finalScamType = checkData.scam_type;
+        }
+        if (checkData.score && checkData.score > 0) {
+          finalRiskScore = checkData.score;
+          finalRiskBand = checkData.band || finalRiskBand;
+        }
+        if (checkData.tactics && checkData.tactics.length > 0) {
+          finalTactics = Array.from(new Set([...finalTactics, ...checkData.tactics]));
+        }
+        if (checkData.explanation && checkData.explanation.length > 0) {
+          finalExplanation = checkData.explanation.slice(0, 2).join(" ");
+        }
+      }
+    } catch (e) {}
+
+    setReportData((prev) => ({
+      ...prev,
+      note: text,
+      identifier_type: finalIdentType,
+      identifier_value: finalIdentVal,
+      scam_type: finalScamType,
+      predicted_risk: finalRiskScore,
+      predicted_band: finalRiskBand,
+      predicted_tactics: finalTactics,
+    }));
+
+    // Output Prediction Card
+    addBotMessage(
+      "",
+      null,
+      {
+        type: "prediction_card",
+        scam_type: finalScamType.toUpperCase(),
+        risk_score: finalRiskScore,
+        risk_band: finalRiskBand,
+        explanation: finalExplanation,
+        masked_message: scrubPII(text),
+      }
+    );
+
+    // Follow-up investigative questions & suggestions
+    const config = SCAM_INVESTIGATION_QUESTIONS[finalScamType] || SCAM_INVESTIGATION_QUESTIONS["general-fraud"];
+    addBotMessage(
+      `${config.question}\n\n${config.prompt}`,
+      config.replies
+    );
+    setStep("investigation_question");
   };
 
   const submitReportToDB = async (finalData) => {
@@ -1186,7 +1646,12 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
       setStep("done");
 
       addBotMessage(
-        `✅ Report successfully logged!\n\nCase ID: ${resData.case_id}\nCluster: ${finalData.locality || "Bengaluru"} (${finalData.pincode || "560001"})\nStatus: Broadcast to Live Threat Map\n\nThank you for shielding your community! 🛡️`
+        `✅ Report successfully logged!\n\nCase ID: ${resData.case_id}\nCluster: ${finalData.locality || "Bengaluru"} (${finalData.pincode || "560001"})\nStatus: Broadcast to Live Threat Map\n\nThank you for shielding your community! 🛡️\n\n💬 I am still here with you. Feel free to ask any follow-up questions, get bank safety advice, or paste another suspicious message below.`,
+        [
+          { label: "🔍 Check Another Scam Message", value: "ask_check_another" },
+          { label: "📞 Helpline 1930 Information", value: "ask_1930" },
+          { label: "🔒 Bank Security Checklist", value: "ask_bank_safety" },
+        ]
       );
 
       if (onSuccess) {
@@ -1229,6 +1694,10 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
       label: "Low Risk",
     };
   };
+
+  const lastMsgWithRepliesId = [...messages]
+    .reverse()
+    .find((msg) => msg.sender === "bot" && msg.quickReplies && msg.quickReplies.length > 0)?.id;
 
   if (!isOpen) return null;
 
@@ -1402,14 +1871,14 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
                     </div>
                   )}
 
-                  {/* Dynamic Quick Reply Options */}
-                  {m.quickReplies && (
+                  {/* Dynamic Quick Reply Options - Only active on latest bot prompt */}
+                  {m.quickReplies && m.id === lastMsgWithRepliesId && (
                     <div className="flex flex-wrap gap-2 mt-2">
                       {m.quickReplies.map((btn) => (
                         <button
                           key={btn.value}
                           onClick={() => handleUserReply(btn.label, btn.value)}
-                          disabled={submitting || step === "done"}
+                          disabled={submitting}
                           className="min-h-[44px] px-3.5 py-2 rounded-[10px] bg-[#F7F7F2] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] border border-[#0A0A0A] text-xs font-bold uppercase transition cursor-pointer disabled:opacity-50 text-left"
                         >
                           {btn.label}
@@ -1432,102 +1901,102 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
           </div>
         )}
 
-        {/* Chat Input Bar */}
-        {step !== "done" && (
-          <div className="pt-2 border-t border-[#0A0A0A] shrink-0 space-y-2">
-            {/* Active Continuous Voice Listening Banner with Auto-Detected Language */}
-            {isListening && (
-              <div className="px-3 py-1.5 rounded-[8px] bg-[#0A0A0A] text-[#F7F7F2] text-[11px] flex items-center justify-between border border-[#23E000] animate-in fade-in select-none">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#23E000] animate-ping shrink-0" />
-                  <span className="font-mono font-bold text-[#23E000]">
-                    VOICE ACTIVE // CONTINUOUS LISTENING
+        {/* Chat Input Bar - Continuous Multiturn Dialogue & Voice AI Agent */}
+        <div className="pt-2 border-t border-[#0A0A0A] shrink-0 space-y-2">
+          {/* Active Continuous Voice Listening Banner with Auto-Detected Language */}
+          {isListening && (
+            <div className="px-3 py-1.5 rounded-[8px] bg-[#0A0A0A] text-[#F7F7F2] text-[11px] flex items-center justify-between border border-[#23E000] animate-in fade-in select-none">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#23E000] animate-ping shrink-0" />
+                <span className="font-mono font-bold text-[#23E000]">
+                  VOICE ACTIVE // CONTINUOUS LISTENING
+                </span>
+                {detectedLangInfo && (
+                  <span className="text-[10px] bg-[#23E000] text-[#0A0A0A] px-2 py-0.2 rounded font-bold font-mono">
+                    AUTO-DETECTED: {detectedLangInfo.label} ({detectedLangInfo.native})
                   </span>
-                  {detectedLangInfo && (
-                    <span className="text-[10px] bg-[#23E000] text-[#0A0A0A] px-2 py-0.2 rounded font-bold font-mono">
-                      AUTO-DETECTED: {detectedLangInfo.label} ({detectedLangInfo.native})
-                    </span>
-                  )}
-                  <span className="text-[10px] opacity-70 hidden md:inline">
-                    (Speaking in Telugu, Tamil, Kannada, or Hindi — Click voice icon to finish)
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={toggleVoiceRecording}
-                  className="text-[10px] bg-[#E5201B] text-white hover:opacity-90 px-2.5 py-0.5 rounded font-bold cursor-pointer"
-                >
-                  STOP
-                </button>
+                )}
+                <span className="text-[10px] opacity-70 hidden md:inline">
+                  (Speaking in Telugu, Tamil, Kannada, or Hindi — Click voice icon to finish)
+                </span>
               </div>
-            )}
-
-            {/* Error Notification if mic is blocked */}
-            {voiceNotice && !isListening && (
-              <div className="px-3 py-1.5 rounded-[8px] bg-[rgba(229,32,27,0.1)] text-[#E5201B] text-[11px] border border-[#E5201B] flex items-center gap-2">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                <span>{voiceNotice}</span>
-              </div>
-            )}
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (isListening) {
-                  stopVoiceRecording();
-                }
-                handleUserReply(input);
-              }}
-              className="flex gap-2 items-center"
-            >
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                disabled={submitting}
-                placeholder={
-                  isListening
-                    ? "Actively listening... speak in Telugu, Tamil, Kannada, or Hindi..."
-                    : step === "content"
-                    ? "Paste message text, claimed threat, or scammer number..."
-                    : step === "financial_loss"
-                    ? "Or type exact amount lost (e.g. ₹25,000 or ₹0)..."
-                    : "Type reply or click voice icon to speak in your language..."
-                }
-                className="flex-1 min-h-[46px] bg-[#F7F7F2] border border-[#0A0A0A] rounded-[8px] px-4 text-xs text-[#0A0A0A] placeholder:text-[#0A0A0A]/40 focus:outline-none focus:ring-1 focus:ring-[#0A0A0A]"
-              />
-
-              {/* 3rd uploaded image icon: Multilingual Voice Input AI Agent Button (Pure Waveform Icon - No Dropdowns) */}
               <button
                 type="button"
                 onClick={toggleVoiceRecording}
-                disabled={submitting}
-                title={
-                  isListening
-                    ? "Recording active... Click to stop"
-                    : "Voice AI Agent: Auto-detects Telugu, Tamil, Kannada, Hindi. Click to speak"
-                }
-                className={`min-h-[46px] min-w-[46px] px-3.5 rounded-[8px] border transition flex items-center justify-center cursor-pointer ${
-                  isListening
-                    ? "bg-[#23E000] text-[#0A0A0A] shadow-[0_0_15px_rgba(35,224,0,0.6)] border-[#23E000] animate-pulse"
-                    : "bg-[#F7F7F2] text-[#0A0A0A] border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2]"
-                }`}
+                className="text-[10px] bg-[#E5201B] text-white hover:opacity-90 px-2.5 py-0.5 rounded font-bold cursor-pointer"
               >
-                <VoiceWaveIcon className="w-5 h-5" isListening={isListening} />
+                STOP
               </button>
+            </div>
+          )}
 
-              {/* 2nd uploaded image icon: Send Arrow Button */}
-              <button
-                type="submit"
-                disabled={submitting || !input.trim()}
-                title="Send reply"
-                className="min-h-[46px] min-w-[46px] px-3.5 bg-[#0A0A0A] text-[#F7F7F2] rounded-[8px] hover:bg-[#23E000] hover:text-[#0A0A0A] transition cursor-pointer disabled:opacity-40 flex items-center justify-center shrink-0 border border-[#0A0A0A]"
-              >
-                <SendArrowIcon className="w-5 h-5" />
-              </button>
-            </form>
-          </div>
-        )}
+          {/* Error Notification if mic is blocked */}
+          {voiceNotice && !isListening && (
+            <div className="px-3 py-1.5 rounded-[8px] bg-[rgba(229,32,27,0.1)] text-[#E5201B] text-[11px] border border-[#E5201B] flex items-center gap-2">
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+              <span>{voiceNotice}</span>
+            </div>
+          )}
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (isListening) {
+                stopVoiceRecording();
+              }
+              handleUserReply(input);
+            }}
+            className="flex gap-2 items-center"
+          >
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              disabled={submitting}
+              placeholder={
+                isListening
+                  ? "Actively listening... speak in Telugu, Tamil, Kannada, or Hindi..."
+                  : submitting
+                  ? "Submitting report to community threat map..."
+                  : step === "content"
+                  ? "Paste message text, claimed threat, or scammer number..."
+                  : step === "financial_loss"
+                  ? "Or type exact amount lost (e.g. ₹25,000 or ₹0)..."
+                  : "Type your reply, ask a safety question, or click voice icon to speak..."
+              }
+              className="flex-1 min-h-[46px] bg-[#F7F7F2] border border-[#0A0A0A] rounded-[8px] px-4 text-xs text-[#0A0A0A] placeholder:text-[#0A0A0A]/40 focus:outline-none focus:ring-1 focus:ring-[#0A0A0A]"
+            />
+
+            {/* 3rd uploaded image icon: Multilingual Voice Input AI Agent Button (Pure Waveform Icon - No Dropdowns) */}
+            <button
+              type="button"
+              onClick={toggleVoiceRecording}
+              disabled={submitting}
+              title={
+                isListening
+                  ? "Recording active... Click to stop"
+                  : "Voice AI Agent: Auto-detects Telugu, Tamil, Kannada, Hindi. Click to speak"
+              }
+              className={`min-h-[46px] min-w-[46px] px-3.5 rounded-[8px] border transition flex items-center justify-center cursor-pointer ${
+                isListening
+                  ? "bg-[#23E000] text-[#0A0A0A] shadow-[0_0_15px_rgba(35,224,0,0.6)] border-[#23E000] animate-pulse"
+                  : "bg-[#F7F7F2] text-[#0A0A0A] border-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2]"
+              }`}
+            >
+              <VoiceWaveIcon className="w-5 h-5" isListening={isListening} />
+            </button>
+
+            {/* 2nd uploaded image icon: Send Arrow Button */}
+            <button
+              type="submit"
+              disabled={submitting || !input.trim()}
+              title="Send reply"
+              className="min-h-[46px] min-w-[46px] px-3.5 bg-[#0A0A0A] text-[#F7F7F2] rounded-[8px] hover:bg-[#23E000] hover:text-[#0A0A0A] transition cursor-pointer disabled:opacity-40 flex items-center justify-center shrink-0 border border-[#0A0A0A]"
+            >
+              <SendArrowIcon className="w-5 h-5" />
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

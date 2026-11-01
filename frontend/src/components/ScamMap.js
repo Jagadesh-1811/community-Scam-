@@ -68,24 +68,48 @@ export default function ScamMap({ clusters, selectedArea, onSelectArea, isSideba
     (clusters || []).forEach((c) => {
       if (!c.lat || !c.lng) return;
 
-      const isCrit = c.severity === "CRIT";
-      const isHigh = c.severity === "HIGH";
+      const isSpreadingHeatmap = c.report_count >= 5;
+      const isCrit = c.severity === "CRIT" || c.report_count >= 10;
+      const isHigh = c.severity === "HIGH" || c.report_count >= 5;
 
       const color = "#E5201B";
-      const fillOpacity = isCrit ? 0.75 : isHigh ? 0.45 : 0.2;
-      const radius = isCrit ? 18 : isHigh ? 13 : 9;
+      const fillOpacity = isCrit ? 0.85 : isHigh ? 0.55 : 0.25;
+      const radius = isCrit ? 20 : isHigh ? 15 : 10;
 
+      // ── Spreading Heatmap Perimeter Ring for Consolidating Clusters (≥ 5 reports) ──
+      if (isSpreadingHeatmap) {
+        const spreadDistanceMeters = Math.min(3000, 1000 + (c.report_count * 180));
+        const heatPerimeter = L.circle([c.lat, c.lng], {
+          radius: spreadDistanceMeters,
+          color: "#E5201B",
+          weight: 1.5,
+          opacity: 0.65,
+          fillColor: "#E5201B",
+          fillOpacity: 0.12,
+          dashArray: "5, 8",
+        });
+        markersLayer.addLayer(heatPerimeter);
+      }
+
+      // Core cluster marker
       const circle = L.circleMarker([c.lat, c.lng], {
         radius: radius,
         fillColor: color,
         color: "#0A0A0A",
-        weight: 1.5,
+        weight: isSpreadingHeatmap ? 2.5 : 1.5,
         opacity: 1,
         fillOpacity: fillOpacity,
       });
 
       const popupHtml = `
-        <div style="min-width: 170px; padding: 4px; font-family: inherit;">
+        <div style="min-width: 190px; padding: 4px; font-family: inherit;">
+          ${
+            isSpreadingHeatmap
+              ? `<div style="background: #E5201B; color: #FFFFFF; padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 10px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; text-align: center;">
+                  🔥 CONSOLIDATED HEATMAP (${c.report_count} INCIDENTS MERGED)
+                </div>`
+              : ""
+          }
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
             <strong style="font-size: 14px; color: #0A0A0A;">${c.locality}</strong>
             <span style="font-size: 11px; padding: 2px 6px; border-radius: 6px; font-weight: 700; background: rgba(229, 32, 27, 0.12); color: #E5201B; border: 1px solid #E5201B;">
@@ -96,11 +120,18 @@ export default function ScamMap({ clusters, selectedArea, onSelectArea, isSideba
             PIN: <strong>${c.pincode}</strong> &bull; ${c.city}
           </div>
           <div style="font-size: 13px; font-weight: 700; color: #E5201B; margin-bottom: 4px;">
-            ${c.report_count} Reports in 7D
+            ${c.report_count} Verified Incidents (1 Single Cluster)
           </div>
           ${
+            isSpreadingHeatmap
+              ? `<div style="font-size: 11px; font-weight: 700; color: #E5201B; background: rgba(229, 32, 27, 0.08); padding: 4px 6px; border-radius: 4px; border: 1px solid rgba(229, 32, 27, 0.3); margin-bottom: 4px;">
+                  ⚠️ Warning to all members: Heatmap spreading in this zone!
+                </div>`
+              : ""
+          }
+          ${
             c.top_scam_type
-              ? `<div style="font-size: 11px; color: #0A0A0A; background: rgba(10, 10, 10, 0.06); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(10, 10, 10, 0.15);">Top: ${c.top_scam_type}</div>`
+              ? `<div style="font-size: 11px; color: #0A0A0A; background: rgba(10, 10, 10, 0.06); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(10, 10, 10, 0.15);">Top Vector: ${c.top_scam_type}</div>`
               : ""
           }
         </div>

@@ -99,9 +99,12 @@ class Challenge(Base):
     proof_note = Column(Text, nullable=False)
     status = Column(String(32), default="under_review")
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    decided_at = Column(DateTime, nullable=True)
+    decision_note = Column(Text, nullable=True)
 
     __table_args__ = (
         Index("ix_challenges_ident", "identifier_type", "identifier_value"),
+        Index("ix_challenges_status", "status"),
     )
 
 

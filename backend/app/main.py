@@ -17,6 +17,7 @@ from app.routers import (
     license_router,
     admin_router
 )
+from app.routers.admin_disputes import router as admin_disputes_router
 from app.checker.router import router as checker_router
 
 @asynccontextmanager
@@ -120,6 +121,7 @@ app.include_router(alerts_router)
 app.include_router(challenges_router)
 app.include_router(license_router)
 app.include_router(admin_router)
+app.include_router(admin_disputes_router)
 app.include_router(checker_router)
 
 @app.get("/")

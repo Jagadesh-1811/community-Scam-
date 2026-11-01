@@ -92,10 +92,10 @@ class MapAlertsService:
                     continue
 
             count = len(pin_reports)
-            # Severity calculation: under 6 = MED, 6 to 11 = HIGH, >= 12 = CRIT
-            if count >= 12:
+            # Consolidation & Severity: count < 5 = MED, 5 to 9 = HIGH (Surge), >= 10 = CRIT (Critical Spreading)
+            if count >= 10:
                 severity = "CRIT"
-            elif count >= 6:
+            elif count >= 5:
                 severity = "HIGH"
             else:
                 severity = "MED"
