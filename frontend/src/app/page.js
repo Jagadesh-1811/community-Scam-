@@ -12,6 +12,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ShieldCheck,
+  Lock,
 } from "lucide-react";
 
 import LookupModal from "./components/LookupModal";
@@ -88,37 +89,37 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col h-screen w-screen bg-[#F7F7F2] text-[#0A0A0A] overflow-hidden select-none">
       {/* Top Navigation Bar */}
-      <header className="h-16 border-b border-[#0A0A0A] bg-[#F7F7F2] px-6 flex items-center justify-between shrink-0 z-20">
-        <div className="flex items-center gap-3">
+      <header className="h-16 border-b border-[#0A0A0A] bg-[#F7F7F2] px-3 sm:px-6 flex items-center justify-between shrink-0 z-20 gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
           {/* Sidebar Toggle Minimize/Maximize button */}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             title={isSidebarOpen ? "Minimize Sidebar" : "Maximize Sidebar"}
-            className="w-11 h-11 flex items-center justify-center rounded-[12px] border border-[#0A0A0A] bg-[#F7F7F2] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] transition cursor-pointer"
+            className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-[10px] sm:rounded-[12px] border border-[#0A0A0A] bg-[#F7F7F2] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] transition cursor-pointer shrink-0"
           >
-            {isSidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
+            {isSidebarOpen ? <PanelLeftClose className="w-4 h-4 sm:w-5 sm:h-5" /> : <PanelLeftOpen className="w-4 h-4 sm:w-5 sm:h-5" />}
           </button>
 
-          <div className="w-10 h-10 rounded-[12px] bg-[#0A0A0A] text-[#F7F7F2] flex items-center justify-center">
-            <ShieldAlert className="w-5 h-5 text-[#E5201B]" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-[10px] sm:rounded-[12px] bg-[#0A0A0A] text-[#F7F7F2] flex items-center justify-center shrink-0">
+            <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5 text-[#E5201B]" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-extrabold text-base tracking-tight text-[#0A0A0A]">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <h1 className="font-extrabold text-sm sm:text-base tracking-tight text-[#0A0A0A] truncate">
                 ScamRadar
               </h1>
-              <span className="px-1.5 py-0.2 bg-[#0A0A0A] text-[#F7F7F2] text-[10px] font-bold rounded-[6px]">
+              <span className="hidden md:inline px-1.5 py-0.2 bg-[#0A0A0A] text-[#F7F7F2] text-[9px] font-bold rounded-[4px] uppercase tracking-wider">
                 NATIONAL REGISTRY
               </span>
             </div>
-            <p className="text-[11px] opacity-70">
+            <p className="hidden xl:block text-[11px] opacity-70 truncate">
               Community Incident Radar & Defense Hub
             </p>
           </div>
         </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-2.5">
+        {/* Action Controls - Always Fully Visible */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Map Maximize / Restore Toggle */}
           <button
             onClick={() => {
@@ -127,38 +128,54 @@ export default function DashboardPage() {
               else setIsSidebarOpen(true);
             }}
             title={isMapMaximized ? "Restore Layout" : "Maximize Map View"}
-            className="min-h-[44px] px-3.5 rounded-[12px] border border-[#0A0A0A] bg-[#F7F7F2] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] flex items-center gap-2 text-xs font-bold uppercase transition cursor-pointer"
+            className="h-10 px-2.5 sm:px-3 rounded-[10px] border border-[#0A0A0A] bg-[#F7F7F2] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] flex items-center gap-1.5 text-xs font-bold uppercase transition cursor-pointer"
           >
             {isMapMaximized ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-            <span className="hidden sm:inline">{isMapMaximized ? "Restore" : "Maximize Map"}</span>
+            <span className="hidden lg:inline">{isMapMaximized ? "Restore" : "Maximize"}</span>
           </button>
 
+          {/* Instant Lookup */}
           <button
             onClick={() => setIsLookupOpen(true)}
-            className="min-h-[44px] px-4 rounded-[12px] border border-[#0A0A0A] bg-[#F7F7F2] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] flex items-center gap-2 text-xs font-bold uppercase transition cursor-pointer"
+            title="Instant Threat Lookup"
+            className="h-10 px-2.5 sm:px-3.5 rounded-[10px] border border-[#0A0A0A] bg-[#F7F7F2] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] flex items-center gap-1.5 text-xs font-bold uppercase transition cursor-pointer"
           >
             <Search className="w-4 h-4" />
-            <span>Instant Lookup</span>
+            <span className="hidden sm:inline">Lookup</span>
           </button>
 
+          {/* Dispute False Positive */}
           <button
             onClick={() => {
               setDisputeInitialData(null);
               setIsDisputeOpen(true);
             }}
-            className="min-h-[44px] px-3.5 rounded-[12px] border border-[#0A0A0A] bg-[#F7F7F2] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] flex items-center gap-1.5 text-xs font-bold uppercase transition cursor-pointer"
+            title="Dispute / Challenge Listing"
+            className="h-10 px-2.5 sm:px-3 rounded-[10px] border border-[#0A0A0A] bg-[#F7F7F2] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] flex items-center gap-1.5 text-xs font-bold uppercase transition cursor-pointer"
           >
             <ShieldCheck className="w-4 h-4 text-[#23E000]" />
-            <span>Dispute Report</span>
+            <span className="hidden md:inline">Dispute</span>
           </button>
 
+          {/* Report Scam Button */}
           <button
             onClick={() => setIsReportOpen(true)}
-            className="min-h-[44px] px-4 rounded-[12px] border border-[#0A0A0A] bg-[#0A0A0A] text-[#F7F7F2] hover:opacity-90 flex items-center gap-2 text-xs font-bold uppercase transition cursor-pointer"
+            title="Report Scam Incident"
+            className="h-10 px-3 sm:px-4 rounded-[10px] border border-[#0A0A0A] bg-[#0A0A0A] text-[#F7F7F2] hover:opacity-90 flex items-center gap-1.5 text-xs font-black uppercase transition cursor-pointer shadow-sm"
           >
             <PlusCircle className="w-4 h-4 text-[#23E000]" />
             <span>Report Scam</span>
           </button>
+
+          {/* Admin / Grievance Officer Portal Link */}
+          <a
+            href="/admin"
+            title="Grievance Officer Portal"
+            className="h-10 px-2.5 sm:px-3 rounded-[10px] border border-[#0A0A0A] bg-[#0A0A0A] text-[#23E000] hover:bg-[#23E000] hover:text-[#0A0A0A] flex items-center gap-1.5 text-xs font-mono font-bold uppercase transition"
+          >
+            <Lock className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Admin</span>
+          </a>
         </div>
       </header>
 
