@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Compass, ShieldAlert, PhoneCall } from 'lucide-react';
 import { I18nProvider, useI18n } from '@/lib/i18n';
 import HeaderBar from '@/components/HeaderBar';
 import HeroSection from '@/components/HeroSection';
@@ -73,7 +75,7 @@ function CyberforgeContent() {
   };
 
   return (
-    <div className={`flex-1 flex flex-col w-full min-h-screen transition-colors duration-300 ${
+    <div className={`flex-1 flex flex-col w-full min-h-screen transition-colors duration-300 pb-16 md:pb-0 ${
       theme === 'dark' ? 'bg-[#000000] text-[#F7F7F2]' : 'bg-[#F7F7F2] text-[#0A0A0A]'
     }`}>
       {/* Top Header Bar with Centered 5-Button PillNav + Bulb Icon + Language Selector */}
@@ -133,6 +135,37 @@ function CyberforgeContent() {
 
       {/* Footer matching uploaded design */}
       <Footer onNavigate={(view) => scrollToView(view)} />
+
+      {/* ── Mobile PWA Sticky Bottom Quick Action Bar ── */}
+      <div 
+        className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0A0A0A] border-t-2 border-[#23E000]/40 px-3 py-2 flex items-center justify-between gap-2 shadow-2xl"
+        style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
+      >
+        <Link
+          href="/map"
+          className="flex-1 min-h-[42px] px-3 rounded-[10px] bg-[#141414] border border-[#23E000]/40 text-[#23E000] flex items-center justify-center gap-1.5 text-xs font-futuristic font-black uppercase tracking-wider hover:bg-[#23E000] hover:text-[#0A0A0A] transition"
+        >
+          <Compass className="w-4 h-4 animate-spin-slow" />
+          <span>Threat Radar</span>
+        </Link>
+
+        <button
+          onClick={() => openReport()}
+          className="flex-1 min-h-[42px] px-3 rounded-[10px] bg-[#E5201B] border border-[#E5201B] text-[#F7F7F2] flex items-center justify-center gap-1.5 text-xs font-futuristic font-black uppercase tracking-wider hover:bg-white hover:text-[#E5201B] transition shadow-md cursor-pointer"
+        >
+          <ShieldAlert className="w-4 h-4" />
+          <span>Report Scam</span>
+        </button>
+
+        <a
+          href="tel:1930"
+          className="min-h-[42px] px-3 rounded-[10px] bg-[#141414] border border-[#E5201B] text-[#E5201B] flex items-center justify-center gap-1 text-xs font-mono font-black uppercase hover:bg-[#E5201B] hover:text-[#F7F7F2] transition"
+          title="Emergency Cyber Crime Helpline 1930"
+        >
+          <PhoneCall className="w-3.5 h-3.5" />
+          <span>1930</span>
+        </a>
+      </div>
 
       {/* Report Modal */}
       <ReportModal
