@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
 import {
   ShieldCheck,
   ShieldAlert,
@@ -28,6 +27,9 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
+const defaultSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://psvmzqigzpvzbggrmhvw.supabase.co";
+const defaultSupabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "sb_publishable_VZQuRJIyJL8hIjeBuisq1A_uCU_dyZ9";
+
 export default function AdminQueueModal({
   isOpen,
   onClose,
@@ -41,10 +43,6 @@ export default function AdminQueueModal({
   const [loggingIn, setLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [allowedEmails, setAllowedEmails] = useState([]);
-  const [supabaseConfig, setSupabaseConfig] = useState({
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL || "https://psvmzqigzpvzbggrmhvw.supabase.co",
-    key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "sb_publishable_VZQuRJIyJL8hIjeBuisq1A_uCU_dyZ9",
-  });
 
   // Queue State
   const [disputes, setDisputes] = useState([]);
@@ -59,56 +57,19 @@ export default function AdminQueueModal({
 
   const baseUrl = apiBaseUrl || "http://localhost:8000";
 
-  // Fetch allowed email whitelist from .env via backend auth config
+  // Fetch allowed email whitelist once on mount
   useEffect(() => {
     fetch(`${baseUrl}/admin/auth/config`)
       .then((r) => r.json())
       .then((d) => {
         if (d?.allowed_emails && Array.isArray(d.allowed_emails)) {
           setAllowedEmails(d.allowed_emails);
-          if (d.allowed_emails.length > 0 && !selectedEmail) {
-            setSelectedEmail(d.allowed_emails[0]);
-          }
-        }
-        if (d?.supabase_url && d?.supabase_anon_key) {
-          setSupabaseConfig({ url: d.supabase_url, key: d.supabase_anon_key });
         }
       })
       .catch(() => {});
   }, [baseUrl]);
 
-  // Handle OAuth session redirect (when redirected back from Google OAuth)
-  useEffect(() => {
-    if (!isOpen || adminToken) return;
-
-    try {
-      const client = createClient(supabaseConfig.url, supabaseConfig.key);
-
-      // Check existing session from hash/cookies
-      client.auth.getSession().then(async ({ data: { session } }) => {
-        if (session?.user?.email) {
-          const userEmail = session.user.email.toLowerCase().trim();
-          const fullName = session.user.user_metadata?.full_name || session.user.email;
-          await handleGoogleSignIn(userEmail, fullName, session.access_token);
-        }
-      });
-
-      // Listen for active OAuth state transition
-      const { data: authListener } = client.auth.onAuthStateChange(async (event, session) => {
-        if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session?.user?.email) {
-          const userEmail = session.user.email.toLowerCase().trim();
-          const fullName = session.user.user_metadata?.full_name || session.user.email;
-          await handleGoogleSignIn(userEmail, fullName, session.access_token);
-        }
-      });
-
-      return () => {
-        authListener?.subscription?.unsubscribe();
-      };
-    } catch (_) {}
-  }, [isOpen, adminToken, supabaseConfig]);
-
-  // Check persisted session when modal opens
+  // Check persisted session once when modal opens
   useEffect(() => {
     if (isOpen) {
       const savedToken = sessionStorage.getItem("scamradar_admin_token");
@@ -126,6 +87,46 @@ export default function AdminQueueModal({
     }
   }, [isOpen]);
 
+  // Handle Google OAuth hash redirect once on mount (no polling / no loops)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const hash = window.location.hash;
+    if (hash && hash.includes("access_token")) {
+      const params = new URLSearchParams(hash.substring(1));
+      const accessToken = params.get("access_token");
+      if (accessToken) {
+        // Clear hash from URL immediately to prevent re-triggering
+        window.history.replaceState(null, "", window.location.pathname);
+        setLoggingIn(true);
+
+        fetch(`${defaultSupabaseUrl}/auth/v1/user`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            apikey: defaultSupabaseKey,
+          },
+        })
+          .then((r) => r.json())
+          .then((user) => {
+            if (user?.email) {
+              handleGoogleSignIn(
+                user.email,
+                user.user_metadata?.full_name || user.email,
+                accessToken
+              );
+            } else {
+              setLoggingIn(false);
+              setLoginError("Could not retrieve email from Google session.");
+            }
+          })
+          .catch((err) => {
+            setLoggingIn(false);
+            setLoginError(err.message || "Failed to retrieve Google user profile.");
+          });
+      }
+    }
+  }, []);
+
   // Reset GST confirmation state when selection changes
   useEffect(() => {
     setGstConfirmed(false);
@@ -140,32 +141,16 @@ export default function AdminQueueModal({
   }, [isOpen, adminToken, statusFilter]);
 
   // ── Launch Connected Live Google OAuth Redirect ──────────────────────────
-  const handleLaunchLiveGoogleOAuth = async () => {
+  const handleLaunchLiveGoogleOAuth = () => {
     setLoggingIn(true);
     setLoginError("");
 
-    try {
-      const client = createClient(supabaseConfig.url, supabaseConfig.key);
-      const redirectUrl = typeof window !== "undefined"
-        ? `${window.location.origin}/admin`
-        : "http://localhost:3000/admin";
+    const redirectUrl = typeof window !== "undefined"
+      ? `${window.location.origin}/admin`
+      : "http://localhost:3000/admin";
 
-      const { data, error } = await client.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: redirectUrl,
-          queryParams: {
-            access_type: "offline",
-            prompt: "select_account",
-          },
-        },
-      });
-
-      if (error) throw error;
-    } catch (err) {
-      setLoggingIn(false);
-      setLoginError(err.message || "Failed to launch Google OAuth.");
-    }
+    // Direct OAuth redirect to Google provider via connected Supabase instance
+    window.location.href = `${defaultSupabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}`;
   };
 
   // ── Google OAuth Sign-In (Verified against .env ADMIN_ALLOWED_EMAILS) ─────
@@ -192,11 +177,6 @@ export default function AdminQueueModal({
 
       const data = await res.json();
       if (!res.ok) {
-        // Sign out of Supabase if an unauthorized account was picked
-        try {
-          const client = createClient(supabaseConfig.url, supabaseConfig.key);
-          await client.auth.signOut();
-        } catch (_) {}
         throw new Error(data.error || data.detail || `Access Denied: ${targetEmail} is not authorized.`);
       }
 
