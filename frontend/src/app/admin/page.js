@@ -1,6 +1,6 @@
 "use client";
 
-import AdminQueueModal from "../components/AdminQueueModal";
+import AdminQueueModal from "@/components/AdminQueueModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
