@@ -482,3 +482,4 @@ npm run dev
    curl -X POST http://localhost:8000/license -H "Content-Type: application/json" -d @licenses/license_long.json
    ```
 6. Verify `/map` immediately responds with `HTTP 200` and all previous data intact.
+
