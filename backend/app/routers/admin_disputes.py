@@ -15,6 +15,7 @@ import json
 from datetime import datetime
 from typing import Optional, List, Dict
 from fastapi import APIRouter, Depends, HTTPException, Request, status, Query
+from fastapi.responses import JSONResponse
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
@@ -36,7 +37,16 @@ def get_allowed_admin_emails() -> set[str]:
     """
     Parse ADMIN_ALLOWED_EMAILS from environment variables.
     Returns normalized lowercase set of authorized officer email addresses.
+    Dynamically re-reads .env so edits take effect immediately.
     """
+    try:
+        from dotenv import load_dotenv
+        env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
+        if os.path.exists(env_path):
+            load_dotenv(dotenv_path=env_path, override=True)
+    except Exception:
+        pass
+
     raw = os.getenv(
         "ADMIN_ALLOWED_EMAILS",
         "officer.grievance@cybercrime.gov.in,admin@scamradar.in,jagadeshwar2014@gmail.com"
@@ -302,9 +312,10 @@ async def admin_google_auth(payload: GoogleLoginRequest):
     # Verify against ADMIN_ALLOWED_EMAILS whitelist
     allowed_emails = get_allowed_admin_emails()
     if allowed_emails and email not in allowed_emails:
-        raise HTTPException(
+        err_msg = f"Access denied: '{email}' is not in the authorized officer whitelist. Add this email to ADMIN_ALLOWED_EMAILS in .env to grant portal access. You are not authorized to access the Grievance Officer Portal."
+        return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Access denied: '{email}' is not authorized to access the Grievance Officer Portal."
+            content={"error": err_msg, "detail": err_msg}
         )
 
     token = f"sr_admin_g_{uuid.uuid4().hex}"
