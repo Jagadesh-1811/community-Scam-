@@ -825,8 +825,8 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
     }
 
     // 2. Classify Scam Pattern with High Accuracy Keyword Weights
-    let detectedType = "general-fraud";
-    let baseScore = 30;
+    let detectedType = null;
+    let baseScore = 15;
     const detectedTactics = [];
 
     if (
@@ -939,6 +939,23 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
     }
 
     // 3. Dynamic Score Modulation via Behavioral Heuristics
+    if (!detectedType) {
+      // Safe / Routine communication text (Score <= 5.0 / 10)
+      let dynamicScore = 15;
+      if (phoneMatch || upiMatch || urlMatch) {
+        dynamicScore = 28; // Slight notice for unknown identifier
+      }
+      return {
+        identType,
+        identVal,
+        detectedType: "safe-inquiry",
+        dynamicScore,
+        riskBand: "Low",
+        detectedTactics: ["Routine Communication", "No Threat Detected"],
+        explanation: "No high-risk scam patterns, urgency traps, or unauthorized payment requests detected. This message appears to be safe or routine.",
+      };
+    }
+
     let dynamicScore = baseScore;
 
     // A. Extreme Urgency Indicator (+12 pts)
@@ -1561,41 +1578,92 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
       }
     } catch (e) {}
 
+    const isThreat = finalRiskScore > 50; // Severity Score > 5.0 / 10
+    const scoreOutOfTen = (finalRiskScore / 10).toFixed(1);
+
     setReportData((prev) => ({
       ...prev,
       note: text,
       identifier_type: finalIdentType,
       identifier_value: finalIdentVal,
-      scam_type: finalScamType,
+      scam_type: isThreat ? finalScamType : "safe-inquiry",
       predicted_risk: finalRiskScore,
       predicted_band: finalRiskBand,
       predicted_tactics: finalTactics,
+      is_threat: isThreat,
+      score_out_of_ten: scoreOutOfTen,
     }));
 
-    // Output Prediction Card
-    addBotMessage(
-      "",
-      null,
-      {
-        type: "prediction_card",
-        scam_type: finalScamType.toUpperCase(),
-        risk_score: finalRiskScore,
-        risk_band: finalRiskBand,
-        explanation: finalExplanation,
-        masked_message: scrubPII(text),
-      }
-    );
+    if (isThreat) {
+      // ── THREAT DETECTED (Score > 5.0 / 10) ──
+      // Eligible for community radar map submission & follow-up investigation
+      addBotMessage(
+        "",
+        null,
+        {
+          type: "prediction_card",
+          is_threat: true,
+          scam_type: finalScamType.toUpperCase(),
+          risk_score: finalRiskScore,
+          score_out_of_ten: scoreOutOfTen,
+          risk_band: finalRiskBand,
+          explanation: finalExplanation,
+          masked_message: scrubPII(text),
+        }
+      );
 
-    // Follow-up investigative questions & suggestions
-    const config = SCAM_INVESTIGATION_QUESTIONS[finalScamType] || SCAM_INVESTIGATION_QUESTIONS["general-fraud"];
-    addBotMessage(
-      `${config.question}\n\n${config.prompt}`,
-      config.replies
-    );
-    setStep("investigation_question");
+      const config = SCAM_INVESTIGATION_QUESTIONS[finalScamType] || SCAM_INVESTIGATION_QUESTIONS["general-fraud"];
+      addBotMessage(
+        `🚨 **Threat Identified (Severity Score: ${scoreOutOfTen} / 10)**\n\n${config.question}\n\n${config.prompt}`,
+        config.replies
+      );
+      setStep("investigation_question");
+    } else {
+      // ── SAFE / ADVISORY ONLY (Score <= 5.0 / 10) ──
+      // DO NOT POST TO MAP. Only tell the user what it is.
+      addBotMessage(
+        "",
+        null,
+        {
+          type: "prediction_card",
+          is_threat: false,
+          scam_type: "LIKELY SAFE / ADVISORY",
+          risk_score: finalRiskScore,
+          score_out_of_ten: scoreOutOfTen,
+          risk_band: "Low",
+          explanation: finalExplanation || "No extortion tactics, phishing links, or unauthorized payment requests detected.",
+          masked_message: scrubPII(text),
+        }
+      );
+
+      addBotMessage(
+        `🛡️ **Message Analysis: Likely Safe (Score: ${scoreOutOfTen} / 10)**\n\n` +
+        `**What is this?**\n` +
+        `Our pattern analysis verified your message and found no active fraud tactics, coercive deadlines, or malicious links.\n\n` +
+        `📌 *Notice:* Because the threat severity is **≤ 5.0 / 10**, this query will **not** be posted to the public community scam map, keeping our telemetry clean and accurate.\n\n` +
+        `How else can I assist you?`,
+        [
+          { label: "🔍 Check Another Message", value: "ask_check_another" },
+          { label: "💬 Ask a Safety Question", value: "ask_question" },
+          { label: "📞 Helpline 1930 Info", value: "ask_1930" },
+        ]
+      );
+      setStep("advisory");
+    }
   };
 
   const submitReportToDB = async (finalData) => {
+    if ((finalData.predicted_risk || 0) <= 50) {
+      addBotMessage(
+        "ℹ️ Map Broadcast Restricted: Only confirmed fraud threats with a Severity Score > 5.0 / 10 can be posted to the community scam map. This inquiry remains safely as an advisory check.",
+        [
+          { label: "🔍 Check Another Message", value: "ask_check_another" },
+          { label: "💬 Ask a Safety Question", value: "ask_question" },
+        ]
+      );
+      setSubmitting(false);
+      return;
+    }
     setSubmitting(true);
     setUiError("");
 
@@ -1785,12 +1853,26 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
 
                   {/* Dynamic Scam Pattern Verification Card */}
                   {m.card && m.card.type === "prediction_card" && (() => {
-                    const badge = getBandBadge(m.card.risk_band, m.card.risk_score);
+                    const isThreat = m.card.is_threat ?? (m.card.risk_score > 50);
+                    const scoreOutOfTen = m.card.score_out_of_ten || (m.card.risk_score / 10).toFixed(1);
+                    const badge = isThreat
+                      ? getBandBadge(m.card.risk_band, m.card.risk_score)
+                      : { label: "SAFE // NO MAP POST", bg: "bg-[#23E000] text-[#0A0A0A] font-bold font-mono" };
                     return (
                       <div className="rounded-[12px] border border-[#0A0A0A] bg-[#F7F7F2] overflow-hidden shadow-sm">
                         <div className="px-4 py-2.5 bg-[#0A0A0A] text-[#F7F7F2] flex items-center justify-between">
-                          <span className="text-xs font-bold uppercase tracking-wider">
-                            Scam Pattern Verification
+                          <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                            {isThreat ? (
+                              <>
+                                <AlertTriangle className="w-3.5 h-3.5 text-[#E5201B]" />
+                                Threat Detected // Score &gt; 5/10
+                              </>
+                            ) : (
+                              <>
+                                <ShieldCheck className="w-3.5 h-3.5 text-[#23E000]" />
+                                Likely Safe // Score &le; 5/10
+                              </>
+                            )}
                           </span>
                           <span className={`px-2.5 py-0.5 rounded-[4px] text-[10px] ${badge.bg}`}>
                             {badge.label}
@@ -1801,9 +1883,9 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
                           <div className="grid grid-cols-2 gap-2 text-xs">
                             <div className="p-2.5 rounded-[8px] border border-[#0A0A0A] bg-[rgba(10,10,10,0.04)]">
                               <span className="opacity-70 text-[10px] uppercase font-bold block">
-                                Detected Pattern:
+                                Pattern Category:
                               </span>
-                              <div className="font-black text-sm text-[#E5201B] mt-0.5 tracking-tight">
+                              <div className={`font-black text-sm mt-0.5 tracking-tight ${isThreat ? "text-[#E5201B]" : "text-[#23E000]"}`}>
                                 {m.card.scam_type}
                               </div>
                             </div>
@@ -1811,14 +1893,17 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
                               <span className="opacity-70 text-[10px] uppercase font-bold block">
                                 Severity Score:
                               </span>
-                              <div className="font-black text-sm text-[#0A0A0A] mt-0.5">
-                                {m.card.risk_score} / 100
+                              <div className={`font-black text-sm mt-0.5 ${isThreat ? "text-[#E5201B]" : "text-[#23E000]"}`}>
+                                {scoreOutOfTen} / 10
+                                <span className="text-[10px] font-normal text-[#0A0A0A]/60 ml-1.5 font-mono">
+                                  ({m.card.risk_score}/100)
+                                </span>
                               </div>
                             </div>
                           </div>
 
-                          <div className="text-xs p-2.5 rounded-[8px] border border-[#0A0A0A] bg-[rgba(229,32,27,0.06)] leading-relaxed">
-                            <strong>Finding:</strong> {m.card.explanation}
+                          <div className={`text-xs p-2.5 rounded-[8px] border border-[#0A0A0A] leading-relaxed ${isThreat ? "bg-[rgba(229,32,27,0.06)]" : "bg-[rgba(35,224,0,0.08)]"}`}>
+                            <strong>Assessment:</strong> {m.card.explanation}
                           </div>
 
                           {/* Exact Reported Incident Message with Personal Info Masked */}
