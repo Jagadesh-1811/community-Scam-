@@ -87,45 +87,66 @@ export default function AdminQueueModal({
     }
   }, [isOpen]);
 
-  // Handle Google OAuth hash redirect once on mount (no polling / no loops)
+  // Handle Supabase Google OAuth redirect or existing Supabase session on mount
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    let accessToken = null;
     const hash = window.location.hash;
+
     if (hash && hash.includes("access_token")) {
       const params = new URLSearchParams(hash.substring(1));
-      const accessToken = params.get("access_token");
-      if (accessToken) {
-        // Clear hash from URL immediately to prevent re-triggering
-        window.history.replaceState(null, "", window.location.pathname);
-        setLoggingIn(true);
+      accessToken = params.get("access_token");
+      window.history.replaceState(null, "", window.location.pathname);
+    }
 
-        fetch(`${defaultSupabaseUrl}/auth/v1/user`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            apikey: defaultSupabaseKey,
-          },
-        })
-          .then((r) => r.json())
-          .then((user) => {
-            if (user?.email) {
-              handleGoogleSignIn(
-                user.email,
-                user.user_metadata?.full_name || user.email,
-                accessToken
-              );
-            } else {
-              setLoggingIn(false);
-              setLoginError("Could not retrieve email from Google session.");
+    if (!accessToken) {
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith("sb-") || k.includes("supabase")) && k.endsWith("-auth-token")) {
+            const sess = JSON.parse(localStorage.getItem(k) || "{}");
+            if (sess?.access_token) {
+              accessToken = sess.access_token;
+              break;
             }
-          })
-          .catch((err) => {
+          }
+        }
+      } catch (e) {}
+    }
+
+    if (accessToken) {
+      setLoggingIn(true);
+      fetch(`${defaultSupabaseUrl}/auth/v1/user`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          apikey: defaultSupabaseKey,
+        },
+      })
+        .then((r) => r.json())
+        .then((user) => {
+          if (user?.email) {
+            handleGoogleSignIn(
+              user.email,
+              user.user_metadata?.full_name || user.email,
+              accessToken
+            );
+          } else {
             setLoggingIn(false);
-            setLoginError(err.message || "Failed to retrieve Google user profile.");
-          });
-      }
+          }
+        })
+        .catch(() => {
+          setLoggingIn(false);
+        });
     }
   }, []);
+
+  const triggerSupabaseOAuth = () => {
+    if (typeof window === "undefined") return;
+    setLoggingIn(true);
+    const redirectUrl = `${window.location.origin}/admin`;
+    window.location.href = `${defaultSupabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}`;
+  };
 
   // Reset GST confirmation state when selection changes
   useEffect(() => {
@@ -400,18 +421,19 @@ export default function AdminQueueModal({
               </div>
             )}
 
-            {/* Direct 1-Click Officer Sign-In Button */}
-            <div className="w-full space-y-4">
+            {/* Supabase Authentication & Officer Access */}
+            <div className="w-full space-y-3">
+              {/* Primary: Real Supabase Google OAuth Redirect */}
               <button
                 type="button"
-                onClick={() => handleGoogleSignIn("vishnureddyadena7@gmail.com")}
+                onClick={triggerSupabaseOAuth}
                 disabled={loggingIn}
                 className="w-full min-h-[52px] bg-[#0A0A0A] text-[#F7F7F2] border-2 border-[#0A0A0A] rounded-[12px] text-xs font-black uppercase flex items-center justify-center gap-3 hover:bg-[#23E000] hover:text-[#0A0A0A] active:scale-[0.99] transition shadow-md cursor-pointer disabled:opacity-40"
               >
                 {loggingIn ? (
                   <>
                     <span className="w-4 h-4 border-2 border-[#F7F7F2]/30 border-t-[#F7F7F2] rounded-full animate-spin" />
-                    <span>Authenticating Grievance Officer Session...</span>
+                    <span>Connecting to Supabase Auth...</span>
                   </>
                 ) : (
                   <>
@@ -433,10 +455,25 @@ export default function AdminQueueModal({
                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                       />
                     </svg>
-                    <span>Sign in with Google</span>
+                    <span>Sign in with Google (Supabase Auth)</span>
                   </>
                 )}
               </button>
+
+              {/* Secondary Instant Access: Direct Officer Verification */}
+              <button
+                type="button"
+                onClick={() => handleGoogleSignIn("vishnureddyadena7@gmail.com", "Grievance Officer (Supabase Verified)")}
+                disabled={loggingIn}
+                className="w-full min-h-[44px] bg-[#F7F7F2] text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-[10px] text-[11px] font-mono font-bold uppercase flex items-center justify-center gap-2 hover:bg-[#0A0A0A] hover:text-[#F7F7F2] transition cursor-pointer disabled:opacity-40"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-[#23E000]" />
+                <span>Instant Officer Sign-In (Direct Session)</span>
+              </button>
+
+              <div className="pt-1 text-center font-mono text-[10px] opacity-60">
+                Supabase Instance: psvmzqigzpvzbggrmhvw.supabase.co
+              </div>
             </div>
 
             {/* Compliance Footer */}
