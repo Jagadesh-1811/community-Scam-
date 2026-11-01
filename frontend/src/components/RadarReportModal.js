@@ -54,39 +54,54 @@ function VoiceWaveIcon({ className = "w-5 h-5", isListening = false }) {
   );
 }
 
-// Real-time language auto-detection for Telugu, Tamil, Kannada, and Hindi
+// Intelligent multi-lingual language detection and scoring engine (Telugu, Tamil, Kannada, Hindi, English)
 const detectLanguageFromText = (text) => {
-  if (!text) return null;
-  // Telugu Unicode: 0C00–0C7F
+  if (!text || !text.trim()) return { code: "en-IN", lang: "en", label: "English", native: "English" };
+
+  // 1. Direct Native Unicode Script Check
   if (/[\u0C00-\u0C7F]/.test(text)) {
-    return { code: "te-IN", label: "Telugu", native: "తెలుగు" };
+    return { code: "te-IN", lang: "te", label: "Telugu", native: "తెలుగు", isNative: true };
   }
-  // Tamil Unicode: 0B80–0BFF
   if (/[\u0B80-\u0BFF]/.test(text)) {
-    return { code: "ta-IN", label: "Tamil", native: "தமிழ்" };
+    return { code: "ta-IN", lang: "ta", label: "Tamil", native: "தமிழ்", isNative: true };
   }
-  // Kannada Unicode: 0C80–0CFF
   if (/[\u0C80-\u0CFF]/.test(text)) {
-    return { code: "kn-IN", label: "Kannada", native: "ಕನ್ನಡ" };
+    return { code: "kn-IN", lang: "kn", label: "Kannada", native: "ಕನ್ನಡ", isNative: true };
   }
-  // Hindi / Devanagari Unicode: 0900–097F
   if (/[\u0900-\u097F]/.test(text)) {
-    return { code: "hi-IN", label: "Hindi", native: "हिन्दी" };
+    return { code: "hi-IN", lang: "hi", label: "Hindi", native: "हिन्दी", isNative: true };
   }
-  // Common phonetic / Romanized keywords for Indian regional fraud reports
-  if (/\b(cheppu|dabbu|kavalli|chudu|mosam|ravali|unnara|chesaru|kallu|entha|pampandi|khata|aadhaar)\b/i.test(text)) {
-    return { code: "te-IN", label: "Telugu", native: "తెలుగు" };
+
+  // 2. Phonetic & Lexical Keyword Scoring
+  const tePat = /\b(cheppu|cheppandi|edo|okati|naku|vachindi|vachadu|adugutunnaru|dabbu|dabbulu|mosam|chesaru|unnaru|katha|khata|pampandi|pampincharu|kallu|entha|emi|enti|undi|ledu|avunu|kadu|meeru|nenu|manishi|billu|kattandi)\b/gi;
+  const taPat = /\b(solunga|solranga|panam|kaasu|enaku|vanthathu|vanthar|ketanga|pesunga|pesinar|mosadi|iruku|illa|ama|neenga|naan|evvalavu|enna|ethu|anupunga|anupinar|kavalthurai|kattunga)\b/gi;
+  const knPat = /\b(heli|helidaru|hana|duddu|nanage|banthu|bandaru|kelidaru|keluttiddare|vanchane|ide|illa|howdu|neevu|naanu|eshtu|enu|yaru|kalsi|kalsidaru|kathege|katti)\b/gi;
+  const hiPat = /\b(bolo|bol|boliye|paise|rupaye|mujhe|aaya|aaye|maang|maanga|dhokha|hai|hain|tha|thi|the|nahi|haan|aap|tum|main|kitna|kya|kaun|bhejo|bheja|bijli)\b/gi;
+  const enPat = /\b(the|is|are|was|were|have|has|had|this|that|from|with|for|about|they|said|told|called|asking|demanded|threat|arrest|digital|fraud|scam|officer|number|please|received|payment|link|otp|message|help|warning|someone|money|bank|account|police)\b/gi;
+
+  const teMatches = (text.match(tePat) || []).length;
+  const taMatches = (text.match(taPat) || []).length;
+  const knMatches = (text.match(knPat) || []).length;
+  const hiMatches = (text.match(hiPat) || []).length;
+  const enMatches = (text.match(enPat) || []).length;
+
+  const scores = [
+    { code: "te-IN", lang: "te", label: "Telugu", native: "తెలుగు", score: teMatches },
+    { code: "ta-IN", lang: "ta", label: "Tamil", native: "தமிழ்", score: taMatches },
+    { code: "kn-IN", lang: "kn", label: "Kannada", native: "ಕನ್ನಡ", score: knMatches },
+    { code: "hi-IN", lang: "hi", label: "Hindi", native: "हिन्दी", score: hiMatches },
+  ];
+
+  scores.sort((a, b) => b.score - a.score);
+  const bestIndian = scores[0];
+
+  // If Indian vocabulary is detected and strong enough relative to English
+  if (bestIndian.score > 0 && bestIndian.score >= enMatches) {
+    return { ...bestIndian, isNative: false };
   }
-  if (/\b(solunga|panam|venum|mosadi|paarunga|vanthathu|ketaanga|pesunga|evvalavu|anupunga|kaavalthurai)\b/i.test(text)) {
-    return { code: "ta-IN", label: "Tamil", native: "தமிழ்" };
-  }
-  if (/\b(heli|hana|beku|vanchane|nodi|banthu|kelidaru|mathadi|eshtu|kalsi|nanna)\b/i.test(text)) {
-    return { code: "kn-IN", label: "Kannada", native: "ಕನ್ನಡ" };
-  }
-  if (/\b(bolo|paise|chahiye|dhokha|dekho|aaya|maanga|baat|kitna|bhejo|mera|khata|bijli)\b/i.test(text)) {
-    return { code: "hi-IN", label: "Hindi", native: "हिन्दी" };
-  }
-  return null;
+
+  // Default to English
+  return { code: "en-IN", lang: "en", label: "English", native: "English", isNative: true };
 };
 
 const INITIAL_MESSAGES = [
@@ -268,8 +283,8 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
   const isRecordingRef = useRef(false);
   const recognitionRef = useRef(null);
   const fullTranscriptRef = useRef("");
-  const currentLangRef = useRef("te-IN");
   const restartTimerRef = useRef(null);
+  const transliterateDebounceRef = useRef(null);
 
   // Stop listening when modal closes
   useEffect(() => {
@@ -285,12 +300,37 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
       clearTimeout(restartTimerRef.current);
       restartTimerRef.current = null;
     }
+    if (transliterateDebounceRef.current) {
+      clearTimeout(transliterateDebounceRef.current);
+      transliterateDebounceRef.current = null;
+    }
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
       } catch (e) {}
     }
     setVoiceNotice("");
+  };
+
+  // Convert Indian phonetic speech into its authentic native script via API
+  const applyTransliteration = async (rawText, langCode) => {
+    if (!rawText || !langCode || langCode === "en") return rawText;
+    try {
+      const res = await fetch("/api/transliterate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: rawText, lang: langCode }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.text && data.text.trim()) {
+          return data.text.trim();
+        }
+      }
+    } catch (e) {
+      console.warn("Transliteration fetch error:", e);
+    }
+    return rawText;
   };
 
   const startRecognitionSession = () => {
@@ -308,7 +348,8 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
 
     try {
       const recognition = new SpeechRecognition();
-      recognition.lang = currentLangRef.current;
+      // en-IN accurately recognizes English words as English AND captures Indian speech phonetically without forcing Telugu
+      recognition.lang = "en-IN";
       recognition.continuous = true;
       recognition.interimResults = true;
       recognition.maxAlternatives = 3;
@@ -339,23 +380,30 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
             : newFinalText;
         }
 
-        const combined = (fullTranscriptRef.current + " " + interimText).trim();
-        if (combined) {
-          setInput(combined);
+        const rawCombined = (fullTranscriptRef.current + " " + interimText).trim();
+        if (!rawCombined) return;
 
-          // Real-time automatic language detection across Telugu, Tamil, Kannada, Hindi
-          const detected = detectLanguageFromText(combined);
-          if (detected) {
-            setDetectedLangInfo(detected);
-            if (detected.code !== currentLangRef.current) {
-              currentLangRef.current = detected.code;
-            }
-          }
+        // Auto-detect whether user is speaking English, Telugu, Hindi, Tamil, or Kannada
+        const langInfo = detectLanguageFromText(rawCombined);
+        setDetectedLangInfo(langInfo);
+
+        // If English or already in native script: display directly
+        if (langInfo.lang === "en" || langInfo.isNative) {
+          setInput(rawCombined);
+        } else {
+          // Temporarily show phonetics while speaking
+          setInput(rawCombined);
+
+          // Debounced transliteration into authentic native script
+          if (transliterateDebounceRef.current) clearTimeout(transliterateDebounceRef.current);
+          transliterateDebounceRef.current = setTimeout(async () => {
+            const converted = await applyTransliteration(rawCombined, langInfo.lang);
+            setInput(converted);
+          }, 400);
         }
       };
 
       recognition.onerror = (event) => {
-        // Silently tolerate pauses and transient no-speech without stopping recording
         if (event.error === "no-speech") {
           return;
         }
@@ -403,14 +451,6 @@ export default function ReportModal({ isOpen, onClose, onSuccess, onHighlightLoc
     if (isListening || isRecordingRef.current) {
       stopVoiceRecording();
     } else {
-      // Prioritize existing input if it already contains Telugu, Tamil, Kannada, Hindi
-      if (input.trim()) {
-        const detected = detectLanguageFromText(input.trim());
-        if (detected) {
-          currentLangRef.current = detected.code;
-          setDetectedLangInfo(detected);
-        }
-      }
       fullTranscriptRef.current = input.trim();
       isRecordingRef.current = true;
       setIsListening(true);
