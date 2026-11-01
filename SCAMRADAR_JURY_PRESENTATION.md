@@ -483,3 +483,4 @@ backend/tests/test_qa_endpoints.py::test_dispute_workflow_cycle PASSED   [ 48%]
 > "To conclude: Fraudsters in India win because they act together while citizens defend themselves alone. **ScamRadar India turns the tables.** By uniting neighborhood communities with real-time geospatial intelligence, deterministic NLP verification, and zero-knowledge privacy, we give 1.4 billion citizens the power to protect each other. 
 > 
 > Thank you, and we welcome your questions."
+
