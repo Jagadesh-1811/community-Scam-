@@ -24,14 +24,24 @@ import {
   FileCheck2,
   ExternalLink,
   Download,
+  ArrowLeft,
 } from "lucide-react";
 
-export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDisputeDecided }) {
+export default function AdminQueueModal({
+  isOpen,
+  onClose,
+  apiBaseUrl,
+  onDisputeDecided,
+  fullScreen = false,
+}) {
   // Authentication State
   const [adminToken, setAdminToken] = useState("");
   const [officerInfo, setOfficerInfo] = useState(null);
   const [loggingIn, setLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState("");
+  const [allowedEmails, setAllowedEmails] = useState([]);
+  const [selectedEmail, setSelectedEmail] = useState("");
+  const [customEmail, setCustomEmail] = useState("");
 
   // Queue State
   const [disputes, setDisputes] = useState([]);
@@ -45,6 +55,21 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
   const [feedback, setFeedback] = useState(null);
 
   const baseUrl = apiBaseUrl || "http://localhost:8000";
+
+  // Fetch allowed email whitelist from .env via backend auth config
+  useEffect(() => {
+    fetch(`${baseUrl}/admin/auth/config`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.allowed_emails && Array.isArray(d.allowed_emails)) {
+          setAllowedEmails(d.allowed_emails);
+          if (d.allowed_emails.length > 0) {
+            setSelectedEmail(d.allowed_emails[0]);
+          }
+        }
+      })
+      .catch(() => {});
+  }, [baseUrl]);
 
   // Check persisted session when modal opens
   useEffect(() => {
@@ -78,30 +103,38 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
   }, [isOpen, adminToken, statusFilter]);
 
   // ── Google OAuth Sign-In (Exclusive Authentication Method) ───────────────
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = async (emailOverride) => {
     setLoggingIn(true);
     setLoginError("");
 
+    const targetEmail = (
+      emailOverride ||
+      customEmail ||
+      selectedEmail ||
+      (allowedEmails.length > 0 ? allowedEmails[0] : "officer.grievance@cybercrime.gov.in")
+    ).trim().toLowerCase();
+
     try {
-      // Authenticate with Google endpoint
+      // Authenticate with Google endpoint (checked against ADMIN_ALLOWED_EMAILS in .env)
       const res = await fetch(`${baseUrl}/admin/auth/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: "officer.grievance@cybercrime.gov.in",
-          name: "Senior Grievance Officer (Google Verified)",
+          email: targetEmail,
+          name: targetEmail.split("@")[0].replace(/[._]/g, " ").toUpperCase() + " (Officer)",
         }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.detail || "Google authentication failed.");
+        throw new Error(data.error || data.detail || "Google authentication failed.");
       }
 
       setAdminToken(data.token);
       const officer = {
         officer_name: data.officer_name,
         badge_id: data.badge_id,
+        email: targetEmail,
         auth_provider: "google",
       };
       setOfficerInfo(officer);
@@ -207,14 +240,38 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
   return (
     <div
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget && !fullScreen) onClose();
       }}
-      className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs animate-fadeIn"
+      className={
+        fullScreen
+          ? "w-screen h-screen min-h-screen flex flex-col bg-[#F7F7F2] text-[#0A0A0A] overflow-hidden select-none"
+          : "fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs animate-fadeIn"
+      }
     >
-      <div className="relative w-full max-w-5xl max-h-[94vh] flex flex-col bg-[#F7F7F2] border border-[#0A0A0A] rounded-[16px] p-5 text-[#0A0A0A] shadow-2xl">
+      <div
+        className={
+          fullScreen
+            ? "w-full h-full flex flex-col bg-[#F7F7F2] text-[#0A0A0A] overflow-hidden"
+            : "relative w-full max-w-5xl max-h-[94vh] flex flex-col bg-[#F7F7F2] border border-[#0A0A0A] rounded-[16px] p-5 text-[#0A0A0A] shadow-2xl"
+        }
+      >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3.5 border-b border-[#0A0A0A] shrink-0">
-          <div className="flex items-center gap-2.5">
+        <div
+          className={`flex items-center justify-between border-b border-[#0A0A0A] shrink-0 ${
+            fullScreen ? "px-6 py-4 bg-[#F7F7F2]" : "pb-3.5"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            {fullScreen && (
+              <button
+                onClick={onClose}
+                title="Return to Public Scam Map"
+                className="h-10 px-3.5 rounded-[10px] border border-[#0A0A0A] bg-[#F7F7F2] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] flex items-center gap-2 text-xs font-bold uppercase transition cursor-pointer mr-2 shadow-xs"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Public Radar</span>
+              </button>
+            )}
             <div className="w-10 h-10 rounded-[10px] bg-[#0A0A0A] text-[#23E000] flex items-center justify-center shrink-0">
               <ShieldCheck className="w-5 h-5 text-[#23E000]" />
             </div>
@@ -226,6 +283,11 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
                 <span className="px-2 py-0.5 rounded-[4px] bg-[#0A0A0A] text-[#23E000] text-[10px] font-mono font-bold">
                   {adminToken ? "OFFICER AUTHENTICATED" : "PROTECTED ROUTE"}
                 </span>
+                {fullScreen && (
+                  <span className="hidden md:inline px-2 py-0.5 rounded-[4px] border border-[#0A0A0A] bg-[#23E000]/10 text-[#0A0A0A] text-[10px] font-mono font-bold">
+                    FULL WORKBENCH
+                  </span>
+                )}
               </div>
               <p className="text-[11px] opacity-70">
                 Official dispute resolution portal for certified grievance cell officers
@@ -239,9 +301,10 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
                 <button
                   onClick={fetchDisputes}
                   title="Refresh queue"
-                  className="w-9 h-9 flex items-center justify-center rounded-[8px] border border-[#0A0A0A] bg-[#F7F7F2] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] transition cursor-pointer"
+                  className="h-9 px-3 flex items-center gap-1.5 rounded-[8px] border border-[#0A0A0A] bg-[#F7F7F2] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] transition cursor-pointer text-xs font-bold uppercase"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+                  <span className="hidden sm:inline">Refresh</span>
                 </button>
                 <button
                   onClick={handleLogout}
@@ -253,13 +316,15 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
                 </button>
               </>
             )}
-            <button
-              onClick={onClose}
-              title="Close (Esc)"
-              className="w-9 h-9 flex items-center justify-center rounded-[8px] border border-[#0A0A0A] bg-[#F7F7F2] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] transition cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            {!fullScreen && (
+              <button
+                onClick={onClose}
+                title="Close (Esc)"
+                className="w-9 h-9 flex items-center justify-center rounded-[8px] border border-[#0A0A0A] bg-[#F7F7F2] hover:bg-[#0A0A0A] hover:text-[#F7F7F2] transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -267,7 +332,11 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
             SCREEN A: ADMIN LOGIN GATE (EXCLUSIVE GOOGLE WORKSPACE AUTH)
            ══════════════════════════════════════════════════════════════════════ */}
         {!adminToken ? (
-          <div className="py-12 px-6 flex flex-col items-center justify-center max-w-md mx-auto w-full space-y-6 animate-fadeIn">
+          <div
+            className={`flex flex-col items-center justify-center max-w-lg mx-auto w-full space-y-6 animate-fadeIn ${
+              fullScreen ? "flex-1 py-16 px-6 overflow-y-auto" : "py-12 px-6"
+            }`}
+          >
             <div className="w-16 h-16 rounded-[16px] bg-[#0A0A0A] text-[#23E000] flex items-center justify-center border-2 border-[#23E000]/40 shadow-lg">
               <Lock className="w-8 h-8 text-[#23E000]" />
             </div>
@@ -280,30 +349,80 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
               <h3 className="text-lg font-black uppercase tracking-wide text-[#0A0A0A]">
                 Officer Single Sign-On
               </h3>
-              <p className="text-xs opacity-75 leading-relaxed max-w-xs mx-auto">
-                Protected administration zone. Authentication is exclusively restricted to authorized Google Workspace accounts.
+              <p className="text-xs opacity-75 leading-relaxed max-w-sm mx-auto">
+                Protected administration zone. Authentication is restricted to authorized Google Workspace emails configured in <code className="font-mono bg-[#0A0A0A]/10 px-1 rounded">.env</code>.
               </p>
             </div>
 
             {loginError && (
-              <div className="w-full p-3 rounded-[8px] bg-[rgba(229,32,27,0.1)] border border-[#E5201B] text-xs font-bold text-[#E5201B] flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 shrink-0" />
-                <span>{loginError}</span>
+              <div className="w-full p-3.5 rounded-[10px] bg-[rgba(229,32,27,0.1)] border-2 border-[#E5201B] text-xs font-bold text-[#E5201B] flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                <div className="leading-snug">{loginError}</div>
               </div>
             )}
 
             {/* Exclusive Google OAuth Sign-In Card */}
-            <div className="w-full space-y-3">
+            <div className="w-full space-y-4">
+              {/* Whitelist Email Selector */}
+              <div className="p-3.5 bg-[#FFFFFF] border-2 border-[#0A0A0A] rounded-[10px] space-y-2.5 shadow-sm">
+                <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
+                  <span className="opacity-75">Select Authorized Officer Account:</span>
+                  <span className="font-mono text-[9px] px-1.5 py-0.5 bg-[#23E000]/20 text-[#0A0A0A] rounded border border-[#23E000]">
+                    .env Configured
+                  </span>
+                </div>
+
+                {/* Email quick-select pills */}
+                <div className="flex flex-wrap gap-1.5">
+                  {(allowedEmails.length > 0 ? allowedEmails : [
+                    "officer.grievance@cybercrime.gov.in",
+                    "jagadeshwar2014@gmail.com",
+                    "admin@scamradar.in"
+                  ]).map((em) => (
+                    <button
+                      key={em}
+                      type="button"
+                      onClick={() => {
+                        setSelectedEmail(em);
+                        setCustomEmail("");
+                      }}
+                      className={`px-2.5 py-1 rounded-[6px] text-[11px] font-mono font-bold transition cursor-pointer border ${
+                        (customEmail ? false : selectedEmail === em)
+                          ? "bg-[#0A0A0A] text-[#23E000] border-[#0A0A0A]"
+                          : "bg-[#F7F7F2] text-[#0A0A0A] border-[#0A0A0A]/40 hover:border-[#0A0A0A]"
+                      }`}
+                    >
+                      {em}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom email input for manual or custom .env verification */}
+                <div className="pt-1">
+                  <label className="text-[10px] uppercase font-bold opacity-60 block mb-1">
+                    Or Enter Google Email to Verify Against .env Whitelist:
+                  </label>
+                  <input
+                    type="email"
+                    value={customEmail}
+                    onChange={(e) => setCustomEmail(e.target.value)}
+                    placeholder="officer@cybercrime.gov.in"
+                    className="w-full h-9 bg-[#F7F7F2] border border-[#0A0A0A] rounded-[6px] px-3 text-xs font-mono font-bold focus:outline-none focus:ring-1 focus:ring-[#0A0A0A]"
+                  />
+                </div>
+              </div>
+
+              {/* Main Google SSO Button */}
               <button
                 type="button"
-                onClick={handleGoogleSignIn}
+                onClick={() => handleGoogleSignIn()}
                 disabled={loggingIn}
                 className="w-full min-h-[50px] bg-[#FFFFFF] text-[#0A0A0A] border-2 border-[#0A0A0A] rounded-[10px] text-xs font-black uppercase flex items-center justify-center gap-3 hover:bg-[#F0F0ED] active:scale-[0.99] transition shadow-md cursor-pointer disabled:opacity-40"
               >
                 {loggingIn ? (
                   <>
                     <span className="w-4 h-4 border-2 border-[#0A0A0A]/30 border-t-[#0A0A0A] rounded-full animate-spin" />
-                    <span>Connecting to Google Identity...</span>
+                    <span>Verifying with Google Identity...</span>
                   </>
                 ) : (
                   <>
@@ -325,18 +444,23 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                       />
                     </svg>
-                    <span>Sign in with Google Workspace</span>
+                    <span>
+                      Sign in with Google as{" "}
+                      <span className="font-mono text-[#0A0A0A]">
+                        {(customEmail || selectedEmail || "Google Officer").split("@")[0]}
+                      </span>
+                    </span>
                   </>
                 )}
               </button>
 
-              <div className="p-3 bg-[#0A0A0A]/5 border border-[#0A0A0A]/20 rounded-[8px] space-y-1.5 text-center">
+              <div className="p-3 bg-[#0A0A0A]/5 border border-[#0A0A0A]/20 rounded-[8px] space-y-1 text-center">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-[#0A0A0A] flex items-center justify-center gap-1">
                   <UserCheck className="w-3 h-3 text-[#23E000]" />
-                  <span>Google Verified Grievance Authority</span>
+                  <span>Strict Whitelist Enforced by Backend</span>
                 </div>
                 <p className="text-[10px] opacity-70 leading-relaxed">
-                  Authorized for designated officers with government-certified Google Workspace credentials (@cybercrime.gov.in / @nic.in).
+                  Only emails listed under <code className="font-mono font-bold">ADMIN_ALLOWED_EMAILS</code> in backend <code className="font-mono">.env</code> are granted entrance.
                 </p>
               </div>
             </div>
@@ -353,12 +477,21 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
              ══════════════════════════════════════════════════════════════════════ */
           <>
             {/* Officer Profile & Filter Bar */}
-            <div className="flex flex-wrap items-center justify-between py-2.5 border-b border-[#0A0A0A]/20 shrink-0 gap-2">
+            <div
+              className={`flex flex-wrap items-center justify-between border-b border-[#0A0A0A]/20 shrink-0 gap-2 ${
+                fullScreen ? "px-6 py-3 bg-[#F7F7F2]" : "py-2.5"
+              }`}
+            >
               <div className="flex items-center gap-2 text-xs">
                 <span className="px-2.5 py-1 rounded-[6px] bg-[#0A0A0A] text-[#23E000] font-mono text-[11px] font-bold flex items-center gap-1.5">
                   <UserCheck className="w-3.5 h-3.5" />
                   <span>{officerInfo?.officer_name || "Senior Officer"}</span>
                   <span className="opacity-60 text-[9px]">({officerInfo?.badge_id || "CYBER-GOV-01"})</span>
+                  {officerInfo?.email && (
+                    <span className="text-[9px] opacity-75 font-mono">
+                      &bull; {officerInfo.email}
+                    </span>
+                  )}
                   {officerInfo?.auth_provider === "google" && (
                     <span className="ml-1 px-1 bg-[#23E000] text-[#0A0A0A] text-[9px] font-black rounded-[3px]">
                       GOOGLE AUTH
@@ -395,6 +528,8 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
             {feedback && (
               <div
                 className={`my-2 p-2.5 rounded-[8px] text-xs font-bold flex items-center gap-2 border ${
+                  fullScreen ? "mx-6 my-2" : ""
+                } ${
                   feedback.type === "success"
                     ? "bg-[#23E000]/15 border-[#23E000] text-[#0A0A0A]"
                     : "bg-[#E5201B]/10 border-[#E5201B] text-[#E5201B]"
@@ -410,9 +545,21 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
             )}
 
             {/* Content Split: List on Left, Detail & Actions on Right */}
-            <div className="flex flex-1 overflow-hidden gap-3 py-3">
+            <div
+              className={
+                fullScreen
+                  ? "flex flex-1 overflow-hidden h-full w-full"
+                  : "flex flex-1 overflow-hidden gap-3 py-3"
+              }
+            >
               {/* Dispute List (Left) */}
-              <div className="w-5/12 border border-[#0A0A0A] rounded-[10px] overflow-y-auto divide-y divide-[#0A0A0A]/20 bg-[#F7F7F2]">
+              <div
+                className={
+                  fullScreen
+                    ? "w-96 md:w-[420px] lg:w-[460px] shrink-0 border-r border-[#0A0A0A] overflow-y-auto divide-y divide-[#0A0A0A]/20 bg-[#F7F7F2] h-full"
+                    : "w-5/12 border border-[#0A0A0A] rounded-[10px] overflow-y-auto divide-y divide-[#0A0A0A]/20 bg-[#F7F7F2]"
+                }
+              >
                 {loading ? (
                   <div className="p-8 text-center text-xs font-bold opacity-60">
                     Loading dispute challenges...
@@ -469,7 +616,13 @@ export default function AdminQueueModal({ isOpen, onClose, apiBaseUrl, onDispute
               </div>
 
               {/* Dispute Detail & GST Certificate Inspection (Right) */}
-              <div className="w-7/12 border border-[#0A0A0A] rounded-[10px] p-4 bg-[#F7F7F2] overflow-y-auto flex flex-col justify-between space-y-4">
+              <div
+                className={
+                  fullScreen
+                    ? "flex-1 p-6 md:p-8 bg-[#F7F7F2] overflow-y-auto flex flex-col justify-between space-y-5"
+                    : "w-7/12 border border-[#0A0A0A] rounded-[10px] p-4 bg-[#F7F7F2] overflow-y-auto flex flex-col justify-between space-y-4"
+                }
+              >
                 {selectedDispute ? (
                   <div className="space-y-3.5">
                     {/* Reference & Status */}

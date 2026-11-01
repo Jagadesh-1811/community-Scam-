@@ -31,6 +31,18 @@ ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "scamradar-admin-2026")
 ADMIN_KEY = os.getenv("ADMIN_KEY", "scamradar-admin-2026")
 
+
+def get_allowed_admin_emails() -> set[str]:
+    """
+    Parse ADMIN_ALLOWED_EMAILS from environment variables.
+    Returns normalized lowercase set of authorized officer email addresses.
+    """
+    raw = os.getenv(
+        "ADMIN_ALLOWED_EMAILS",
+        "officer.grievance@cybercrime.gov.in,admin@scamradar.in,jagadeshwar2014@gmail.com"
+    )
+    return {e.strip().lower() for e in raw.split(",") if e.strip()}
+
 GST_STATES = {
     "01": "Jammu & Kashmir",
     "02": "Himachal Pradesh",
@@ -264,7 +276,7 @@ async def admin_login(payload: AdminLoginRequest):
 async def admin_google_auth(payload: GoogleLoginRequest):
     """
     Authenticate officer using Google OAuth / Google ID Token.
-    Accepts verified Google token or decoded officer identity.
+    Validates officer email against ADMIN_ALLOWED_EMAILS whitelist configured in .env.
     """
     email = (payload.email or "").strip().lower()
     name = (payload.name or "").strip()
@@ -277,7 +289,7 @@ async def admin_google_auth(payload: GoogleLoginRequest):
                 padded = parts[1] + "=" * ((4 - len(parts[1]) % 4) % 4)
                 decoded = base64.b64decode(padded).decode("utf-8")
                 token_data = json.loads(decoded)
-                email = token_data.get("email", "").lower()
+                email = token_data.get("email", "").lower().strip()
                 name = token_data.get("name") or token_data.get("given_name", "Google Officer")
         except Exception:
             pass
@@ -286,6 +298,14 @@ async def admin_google_auth(payload: GoogleLoginRequest):
         email = "officer.grievance@cybercrime.gov.in"
     if not name:
         name = "Grievance Officer (Google Verified)"
+
+    # Verify against ADMIN_ALLOWED_EMAILS whitelist
+    allowed_emails = get_allowed_admin_emails()
+    if allowed_emails and email not in allowed_emails:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Access denied: '{email}' is not in the authorized officer whitelist. Add this email to ADMIN_ALLOWED_EMAILS in .env to grant portal access."
+        )
 
     token = f"sr_admin_g_{uuid.uuid4().hex}"
     officer = {
@@ -305,6 +325,19 @@ async def admin_google_auth(payload: GoogleLoginRequest):
         badge_id=officer["badge_id"],
         expires_in_hours=12
     )
+
+
+@router.get("/auth/config")
+async def get_admin_auth_config():
+    """
+    Return non-sensitive auth configuration info (whitelisted emails for UI helper).
+    """
+    allowed = get_allowed_admin_emails()
+    return {
+        "ok": True,
+        "auth_provider": "google",
+        "allowed_emails": sorted(list(allowed)),
+    }
 
 
 @router.get("/me")

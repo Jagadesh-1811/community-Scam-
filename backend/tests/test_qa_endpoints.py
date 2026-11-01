@@ -228,10 +228,29 @@ async def test_qa_admin_login_and_protection(qa_client: AsyncClient):
     assert auth_res.status_code == 200
     assert "items" in auth_res.json()
 
-    # 11. QA for Google Workspace Admin Authentication
+    # 11. QA for Google Workspace Admin Authentication & Whitelist Enforced by .env
+    # A. Auth config endpoint returns allowed emails from .env
+    cfg_res = await qa_client.get("/admin/auth/config")
+    assert cfg_res.status_code == 200
+    cfg_data = cfg_res.json()
+    assert cfg_data["ok"] is True
+    assert "allowed_emails" in cfg_data
+    assert "jagadeshwar2014@gmail.com" in cfg_data["allowed_emails"]
+
+    # B. Unauthorized email must be rejected with 403 Forbidden
+    unauth_google = await qa_client.post("/admin/auth/google", json={
+        "email": "unauthorized.intruder@randomdomain.com",
+        "name": "Intruder"
+    })
+    assert unauth_google.status_code == 403
+    unauth_json = unauth_google.json()
+    err_text = unauth_json.get("error") or unauth_json.get("detail", "")
+    assert "not in the authorized officer whitelist" in err_text
+
+    # C. Whitelisted email in .env must succeed
     google_res = await qa_client.post("/admin/auth/google", json={
-        "email": "officer.grievance@cybercrime.gov.in",
-        "name": "Senior Grievance Officer (Google Verified)"
+        "email": "jagadeshwar2014@gmail.com",
+        "name": "Senior Officer Jagadesh"
     })
     assert google_res.status_code == 200
     g_data = google_res.json()
